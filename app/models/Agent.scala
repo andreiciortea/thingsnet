@@ -17,7 +17,7 @@ case class Person(override val uri: String) extends Agent(uri)
 case class SmartThing(override val uri: String) extends Agent(uri)
 
 
-
+// TODO: Refactor binders.
 trait RDFAgentBinder extends RDFResourceBinder {
   
   val stn = STNPrefix[Rdf]

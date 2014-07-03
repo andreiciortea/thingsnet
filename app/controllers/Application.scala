@@ -9,10 +9,8 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax.functionalCanBuildApplicative
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 
-import models.{Person, PersonBinder}
-import models.{UserAccount, UserAccountBinder}
-
-import org.w3.banana.jena._
+import models.SmartThing
+import models.UserAccount
 
 
 object Application extends Controller {
@@ -29,7 +27,7 @@ object Application extends Controller {
   def createUserAccount = Action(parse.json) { request =>
     request.body.validate[(String, String, Option[String])].map {
       case (holderUri, displayedName, description) => {
-        val account = UserAccount(Person(holderUri), displayedName, description)
+        val account = UserAccount(SmartThing(holderUri), displayedName, description)
 
         // TODO: store user account
         
