@@ -1,6 +1,9 @@
 package models
 
+
 trait Resource {
   
-  val uri = "<some_random_uri>"
+  def getContainer: String
+  
+  def getURI: String
 }

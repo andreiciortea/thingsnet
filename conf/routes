@@ -5,7 +5,7 @@
 # Home page
 GET     /                           controllers.Application.index
 
-GET     /users/:id               controllers.Application.getUserAccount(id: String)
+GET     /users/:id                  controllers.Application.getUserAccount(id: String)
 POST    /users/create               controllers.Application.createUserAccount
 POST    /users/delete               controllers.Application.deleteUserAccount
 

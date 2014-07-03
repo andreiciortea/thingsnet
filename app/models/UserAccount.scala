@@ -10,9 +10,12 @@ import repos.RDFRepositoryFactory.RDFResourceBinder
 
 
 // TODO: generalize holder to Agent.
-case class UserAccount(holder: SmartThing, displayedName: String, description: Option[String]) extends Resource {
+case class UserAccount(holder: Person, displayedName: String, description: Option[String]) extends Resource {
+
+  def getContainer = "/users"
   
-  override val uri = NodeService.makeUserAccountURI(displayedName)
+  def getURI: String = 
+    NodeService.genResourceURI(container = getContainer, id = displayedName)
 }
 
 object UserAccountBinder extends RDFResourceBinder {
@@ -27,13 +30,13 @@ object UserAccountBinder extends RDFResourceBinder {
 //  import PersonBinder._
 //  val personHolder = property[Person](stn.heldBy)
   
-  import SmartThingBinder._
-  val smartThingHolder = property[SmartThing](stn.heldBy)
+  import PersonBinder._
+  val personHolder = property[Person](stn.heldBy)
   
   val displayedName = property[String](stn.name)
   val description = property[Option[String]](stn.description)
 
   implicit val userAccountBinder = 
-    pgbWithId[UserAccount](t => URI(t.uri))
-      .apply(smartThingHolder, displayedName, description)(UserAccount.apply, UserAccount.unapply) withClasses classUris
+    pgbWithId[UserAccount](t => URI(t.getURI))
+      .apply(personHolder, displayedName, description)(UserAccount.apply, UserAccount.unapply) withClasses classUris
 }

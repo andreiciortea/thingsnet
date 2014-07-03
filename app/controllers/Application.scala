@@ -11,7 +11,7 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax.functionalCanBuildApplicative
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 
-import models.SmartThing
+import models.Person
 import models.UserAccount
 import services.{NodeService, ResourceService}
 
@@ -30,7 +30,7 @@ object Application extends Controller {
   def createUserAccount = Action(parse.json) { request =>
     request.body.validate[(String, String, Option[String])].map {
       case (holderUri, displayedName, description) => {
-        val account = UserAccount(SmartThing(holderUri), displayedName, description)
+        val account = UserAccount(Person(holderUri), displayedName, description)
 
         ResourceService.createResource(account)
         
@@ -42,7 +42,7 @@ object Application extends Controller {
   }
   
   def getUserAccount(id: String) = Action.async {
-    val futureGraph = ResourceService.getResource(NodeService.makeUserAccountURI(id))
+    val futureGraph = ResourceService.getResource(NodeService.genResourceURI(container = "/users", id = id))
     futureGraph.map{ s => Ok(s)}
   }
   

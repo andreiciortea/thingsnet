@@ -5,16 +5,18 @@ import scala.util._
 import org.w3.banana._
 import org.w3.banana.binder._
 
-import reflect.ClassTag
-
 import repos.RDFRepositoryFactory.RDFResourceBinder
 
 
-sealed class Agent(override val uri: String) extends Resource
+sealed class Agent(uri: String) extends Resource {
+  
+  def getContainer = ""
+  def getURI = ""
+}
 
-case class Person(override val uri: String) extends Agent(uri)
+case class Person(uri: String) extends Agent(uri)
 
-case class SmartThing(override val uri: String) extends Agent(uri)
+case class SmartThing(uri: String) extends Agent(uri)
 
 
 // TODO: Refactor binders.
@@ -40,7 +42,7 @@ object AgentBinder extends RDFAgentBinder {
   implicit val agentBinder: PGBinder[Rdf, Agent] = new PGBinder[Rdf, Agent] {
     
     def toPG(agent: Agent): PointedGraph[Rdf] = {
-      PointedGraph[Rdf](URI(agent.uri), Graph.empty)
+      PointedGraph[Rdf](URI(agent.getURI), Graph.empty)
     }
     
     def fromPG(pointed: PointedGraph[Rdf]): Try[Agent] = {

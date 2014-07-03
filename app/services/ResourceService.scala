@@ -15,7 +15,7 @@ object ResourceService {
   def createResource(account: Resource) = {
     account match {
       case a: UserAccount => {
-          repo.createRDFResource(a.uri, UserAccountBinder.userAccountBinder.toPG(a))
+          repo.createRDFResource(a.getURI, UserAccountBinder.userAccountBinder.toPG(a))
         }
       case _ => throw new ClassCastException
     }

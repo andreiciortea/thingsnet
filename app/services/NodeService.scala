@@ -1,8 +1,14 @@
 package services
 
+import java.util.UUID
+
 object NodeService {
   
-  val baseURL = "http://www.thingsnet.com"
+  val baseURI: String = "http://www.thingsnet.com"
+  val defaultContainer: String = "/resources"
   
-  def makeUserAccountURI(id: String) = baseURL + "/users/" + id
+  def genUUID: UUID = UUID.randomUUID()
+    
+  def genResourceURI(base: String = baseURI, container: String = defaultContainer, 
+          id: String = genUUID.toString()): String = base + container + "/" + id
 }
