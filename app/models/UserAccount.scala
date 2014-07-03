@@ -5,11 +5,15 @@ import org.w3.banana.binder._
 
 import scala.util._
 
+import services.NodeService
 import repos.RDFRepositoryFactory.RDFResourceBinder
 
 
 // TODO: generalize holder to Agent.
-case class UserAccount(holder: SmartThing, displayedName: String, description: Option[String]) extends Resource
+case class UserAccount(holder: SmartThing, displayedName: String, description: Option[String]) extends Resource {
+  
+  override val uri = NodeService.makeUserAccountURI(displayedName)
+}
 
 object UserAccountBinder extends RDFResourceBinder {
   import Ops._
@@ -29,7 +33,7 @@ object UserAccountBinder extends RDFResourceBinder {
   val displayedName = property[String](stn.name)
   val description = property[Option[String]](stn.description)
 
-  implicit val userAccountbinder = 
+  implicit val userAccountBinder = 
     pgbWithId[UserAccount](t => URI(t.uri))
       .apply(smartThingHolder, displayedName, description)(UserAccount.apply, UserAccount.unapply) withClasses classUris
 }

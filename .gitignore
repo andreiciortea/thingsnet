@@ -1,5 +1,7 @@
 activator*
 logs
+.DS_Store
+store/
 project/project
 project/target
 target

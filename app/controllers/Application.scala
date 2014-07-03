@@ -1,6 +1,8 @@
 package controllers
 
 import scala.util._
+import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import play.api._
 import play.api.mvc._
@@ -11,6 +13,7 @@ import play.api.libs.functional.syntax.toFunctionalBuilderOps
 
 import models.SmartThing
 import models.UserAccount
+import services.{NodeService, ResourceService}
 
 
 object Application extends Controller {
@@ -29,7 +32,27 @@ object Application extends Controller {
       case (holderUri, displayedName, description) => {
         val account = UserAccount(SmartThing(holderUri), displayedName, description)
 
-        // TODO: store user account
+        ResourceService.createResource(account)
+        
+        Ok("Ok")
+      }
+    }.recoverTotal {
+      e => BadRequest("Detected error:" + JsError.toFlatJson(e))
+    }
+  }
+  
+  def getUserAccount(id: String) = Action.async {
+    val futureGraph = ResourceService.getResource(NodeService.makeUserAccountURI(id))
+    futureGraph.map{ s => Ok(s)}
+  }
+  
+  implicit val deleteUserAccountReads = (
+    (__ \ 'accountUri).read[String])
+  
+  def deleteUserAccount = Action(parse.json) { request =>
+    request.body.validate[String].map {
+      case (accountUri) => {
+        ResourceService.deleteResource(accountUri)
         
         Ok("Ok")
       }
