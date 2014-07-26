@@ -12,10 +12,10 @@ object ResourceService {
   
   val repo = RDFRepositoryFactory.makeRDFRepository
   
-  def createResource(account: Resource) = {
-    account match {
-      case a: UserAccount => {
-          repo.createRDFResource(a.getURI, UserAccountBinder.userAccountBinder.toPG(a))
+  def createResource(resource: Resource) = {
+    resource match {
+      case account: UserAccount => {
+          repo.createRDFResource(account.getURI, UserAccountBinder.userAccountBinder.toPG(account))
         }
       case _ => throw new ClassCastException
     }

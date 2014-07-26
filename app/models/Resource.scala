@@ -1,7 +1,7 @@
 package models
 
 
-trait Resource {
+abstract class Resource {
   
   def getContainer: String
   

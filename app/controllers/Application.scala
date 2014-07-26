@@ -11,7 +11,7 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax.functionalCanBuildApplicative
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 
-import models.Person
+import models.Agent
 import models.UserAccount
 import services.{NodeService, ResourceService}
 
@@ -30,7 +30,7 @@ object Application extends Controller {
   def createUserAccount = Action(parse.json) { request =>
     request.body.validate[(String, String, Option[String])].map {
       case (holderUri, displayedName, description) => {
-        val account = UserAccount(Person(holderUri), displayedName, description)
+        val account = UserAccount(Agent(holderUri), displayedName, description)
 
         ResourceService.createResource(account)
         
