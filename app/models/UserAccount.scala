@@ -49,4 +49,11 @@ object UserAccountBinder extends RDFResourceBinder {
   implicit val userAccountBinder = 
     pgbWithId[UserAccount](t => Ops.URI(t.getURI))
       .apply(holder, displayedName, description, connections)(UserAccount.apply, UserAccount.unapply) withClasses classUris
+  
+  
+  def addConnection(fromUri: String, toUri: String): Patch[Rdf] = 
+    Patch(Graph.empty, Graph(Triple(makeUri(fromUri), stn.connectedTo, makeUri(toUri))))
+  
+  def removeConnection(fromUri: String, toUri: String): Patch[Rdf] = 
+    Patch(Graph(Triple(makeUri(fromUri), stn.connectedTo, makeUri(toUri))), Graph.empty)
 }

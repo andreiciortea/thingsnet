@@ -41,8 +41,16 @@ abstract class RDFRepository extends RDFRepositoryDependencies {
     turtleString
   }
   
+  def patchRDFResource(uri: String, delete: Rdf#Graph, insert: Rdf#Graph) = {
+    val store = makeRDFStore
+    val op = store.patchGraph(makeUri(uri), delete.toIterable, insert)
+    
+    op onSuccess{ case _ => println("Successfully patched graph") }
+  }
+  
   def deleteRDFResource(uri: String) = {
     val store = makeRDFStore
     store.removeGraph(makeUri(uri))
   }
+  
 }
