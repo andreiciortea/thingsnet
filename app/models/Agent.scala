@@ -27,7 +27,6 @@ case class SmartThing(uri: String) extends Agent(uri)
 
 object AgentBinder extends RDFResourceBinder {
   import Ops._
-  import RecordBinder._
 
   val stn = STNPrefix[Rdf]
   

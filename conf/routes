@@ -9,5 +9,8 @@ GET     /users/:id                  controllers.Application.getUserAccount(id: S
 POST    /users/create               controllers.Application.createUserAccount
 POST    /users/delete               controllers.Application.deleteUserAccount
 
+POST    /connections/create         controllers.Application.createConnection
+POST    /connections/delete         controllers.Application.deleteConnection
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
