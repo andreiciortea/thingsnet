@@ -6,6 +6,7 @@ import org.w3.banana.jena._
 import models.Patch
 import models.Resource
 import models.{UserAccount, UserAccountBinder}
+import models.{Message, MessageBinder}
 import models.STNPrefix
 import repos.RDFRepositoryFactory
 
@@ -18,8 +19,11 @@ object ResourceService {
   def createResource(resource: Resource) = {
     resource match {
       case account: UserAccount => {
-          repo.createRDFResource(account.getURI, UserAccountBinder.userAccountBinder.toPG(account))
-        }
+        repo.createRDFResource(account.getURI, UserAccountBinder.userAccountBinder.toPG(account))
+       }
+      case message: Message => {
+        repo.createRDFResource(message.getURI, MessageBinder.messageBinder.toPG(message))
+      }
       case _ => throw new ClassCastException
     }
   }

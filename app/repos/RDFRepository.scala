@@ -25,6 +25,8 @@ abstract class RDFRepository extends RDFRepositoryDependencies {
   
   def createRDFResource(uri: String, graph: PointedGraph[Rdf]) {
     val store = makeRDFStore
+    println(uri)
+    println(graph.graph)
     val op = store.appendToGraph(makeUri(uri), graph.graph)
     
     op onSuccess{ case _ => println("Successfully stored triples in store") }

@@ -12,5 +12,10 @@ POST    /users/delete               controllers.Application.deleteUserAccount
 POST    /connections/create         controllers.Application.createConnection
 POST    /connections/delete         controllers.Application.deleteConnection
 
+GET     /messages                   controllers.Application.getMessages
+GET     /messages/:id               controllers.Application.getMessageById(id: String)
+POST    /messages/create            controllers.Application.createMessage
+POST    /messages/delete            controllers.Application.deleteMessage
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

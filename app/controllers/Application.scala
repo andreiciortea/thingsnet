@@ -13,6 +13,7 @@ import play.api.libs.functional.syntax.toFunctionalBuilderOps
 
 import models.{Agent, Person, SmartThing}
 import models.{UserAccount, UserAccountBinder}
+import models.Message
 import services.{NodeService, ResourceService}
 
 import java.net.URI
@@ -87,7 +88,6 @@ object Application extends Controller {
         case (fromUri, toUri) => {
         
           ResourceService.patchResource(fromUri, UserAccountBinder.addConnection(fromUri, toUri))
-//          ResourceService.patchResource(toUri, UserAccountBinder.addConnection(toUri, fromUri))
         
           Ok("Ok")
         }
@@ -107,7 +107,6 @@ object Application extends Controller {
         case (fromUri, toUri) => {
         
           ResourceService.patchResource(fromUri, UserAccountBinder.removeConnection(fromUri, toUri))
-//          ResourceService.patchResource(toUri, UserAccountBinder.removeConnection(toUri, fromUri))
         
           Ok("Ok")
         }
@@ -116,5 +115,44 @@ object Application extends Controller {
       }
     }
   }
+  
+  /**
+   *   Message handlers.
+   */
+  
+  def createMessage = {
+    implicit val createMessageReads = (
+      (__ \ 'sender).read[String] and
+      (__ \ 'receiver).read[String] and
+      (__ \ 'replyTo).readNullable[String] and
+      (__ \ 'subject).readNullable[String] and
+      (__ \ 'body).readNullable[String]) tupled
+    
+    Action(parse.json) { request =>
+      request.body.validate[(String, String, Option[String], Option[String], Option[String])].map {
+        case (sender, receiver, replyTo, subject, body) => {
+          val optReplyTo: Option[URI] = if (replyTo.isEmpty) None else Some(new URI(replyTo.get)) 
+          val message = Message(new URI(sender), new URI(receiver), optReplyTo, subject, body)
+          
+          ResourceService.createResource(message)
+        
+          Ok("Ok")
+        }
+      }.recoverTotal {
+        e => BadRequest("Detected error:" + JsError.toFlatJson(e))
+      }
+    }
+  }
+
+  def getMessages = TODO
+  
+  def getMessageById(id: String) = Action.async {
+    println("id = " + id)
+    println(NodeService.genResourceURI(container = "/messages", id = id))
+    val futureGraph = ResourceService.getResource(NodeService.genResourceURI(container = "/messages", id = id))
+    futureGraph.map{ s => Ok(s)}
+  }
+  
+  def deleteMessage = TODO
 
 }
