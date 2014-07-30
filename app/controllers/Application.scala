@@ -13,7 +13,7 @@ import play.api.libs.functional.syntax.toFunctionalBuilderOps
 
 import models.{Agent, Person, SmartThing}
 import models.{UserAccount, UserAccountBinder}
-import models.Message
+import models.{Message, MessageBinder}
 import services.{NodeService, ResourceService}
 
 import java.net.URI
@@ -52,8 +52,8 @@ object Application extends Controller {
   }
   
   def getUserAccount(id: String) = Action.async {
-    val futureGraph = ResourceService.getResource(NodeService.genResourceURI(container = "/users", id = id))
-    futureGraph.map{ s => Ok(s)}
+    val futureGraphString = ResourceService.getResource(NodeService.genResourceURI(container = "/users", id = id))
+    futureGraphString.map{ s => Ok(s)}
   }
   
   def deleteUserAccount = {
@@ -144,8 +144,12 @@ object Application extends Controller {
     }
   }
 
-  def getMessages = TODO
-  
+  def getMessages = Action.async {
+    // TODO: remove test string and use the id of the authenticated user
+    val resultString = ResourceService.runQuery(MessageBinder.qGetMessagesForUser("http://www.janedoe.ro"))
+    resultString.map{ s => Ok(s) }
+  }
+
   def getMessageById(id: String) = Action.async {
     println("id = " + id)
     println(NodeService.genResourceURI(container = "/messages", id = id))

@@ -34,4 +34,23 @@ object MessageBinder extends RDFResourceBinder {
   implicit val messageBinder = 
     pgbWithId[Message](t => Ops.URI(t.getURI))
       .apply(sender, receiver, replyTo, subject, body)(Message.apply, Message.unapply) withClasses classUris
+  
+  
+  def qGetMessagesForUser(receiverUri: String) = {
+    val query = """
+                |prefix : <http://purl.org/stn/core#>
+                |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                |
+                |SELECT ?messageUri
+                |WHERE {
+                |    ?messageUri rdf:type :Message .
+                |    ?messageUri :hasReceiver ?receiverUri .
+                |}""".stripMargin
+
+    val bindings = Map(
+        "receiverUri" -> Ops.URI(receiverUri)
+      )
+    
+    (query, bindings)
+  }
 }
