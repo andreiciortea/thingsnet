@@ -1,6 +1,7 @@
 package repos
 
 import org.w3.banana._
+import com.hp.hpl.jena.tdb.TDB
 import com.hp.hpl.jena.tdb.TDBFactory
 
 
@@ -19,6 +20,7 @@ trait JenaBinder extends RDFResourceDependencies with JenaModule
 class JenaRepository extends RDFRepository with JenaModule {
   
   def makeRDFStore(implicit file: String): RDFStore[Rdf] = {
+    TDB.getContext().set(TDB.symUnionDefaultGraph, true)
     JenaStore(TDBFactory.createDataset(file).asDatasetGraph())
   }
 }
