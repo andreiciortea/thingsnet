@@ -11,7 +11,7 @@ case class Message(sender: URI, recevier: URI, replyTo: Option[URI], subject: Op
   def getContainer = "/messages"
   
   def getURI: String = 
-    NodeService.genResourceURI(container = getContainer)
+    NodeService.genResourceURI(container = getContainer, id = uuid)
 }
 
 object MessageBinder extends RDFResourceBinder {
