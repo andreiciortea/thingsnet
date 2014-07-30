@@ -1,8 +1,5 @@
 package services
 
-import org.w3.banana._
-import org.w3.banana.jena._
-
 import models.Patch
 import models.Resource
 import models.{UserAccount, UserAccountBinder}
@@ -10,10 +7,14 @@ import models.{Message, MessageBinder}
 import models.STNPrefix
 import repos.RDFRepositoryFactory
 
+import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
+
 
 object ResourceService {
   
   val repo = RDFRepositoryFactory.makeRDFRepository
+
   import repo._
   
   def createResource(resource: Resource) = {
@@ -38,5 +39,9 @@ object ResourceService {
   
   def deleteResource(uri: String) = {
     repo.deleteRDFResource(uri)
+  }
+  
+  def runQuery(query: (String, Map[String, Rdf#URI])) = {
+    repo.runQuery(query)
   }
 }

@@ -2,9 +2,7 @@ package repos
 
 import org.w3.banana._
 
-import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util._
 
 
 trait RDFResourceDependencies
@@ -15,13 +13,17 @@ with RecordBinderModule
 trait RDFRepositoryDependencies
 extends RDFModule
 with RDFOpsModule
-with TurtleWriterModule { implicit val file = "store/jena-tdb/" }
+with SparqlOpsModule
+with TurtleWriterModule
+with JsonSolutionsWriterModule { implicit val file = "store/jena-tdb/" }
 
 
 abstract class RDFRepository extends RDFRepositoryDependencies {
   import Ops._
   
   def makeRDFStore(implicit file: String): RDFStore[Rdf]
+  
+  def makeSparqlEngine: SparqlEngine[Rdf] = SparqlEngine[Rdf](makeRDFStore)
   
   def createRDFResource(uri: String, graph: PointedGraph[Rdf]) {
     val store = makeRDFStore
@@ -55,4 +57,15 @@ abstract class RDFRepository extends RDFRepositoryDependencies {
     store.removeGraph(makeUri(uri))
   }
   
+  
+  import SparqlOps._
+  
+  def runQuery(query: (String, Map[String, Rdf#URI])) = {
+    
+    val jsonString = makeSparqlEngine.executeSelect(SelectQuery(query._1), query._2).map { results =>
+      JsonSolutionsWriter.asString(results, "")  getOrElse sys.error("coudn't serialize the query results")
+    }
+    
+    jsonString
+  }
 }
