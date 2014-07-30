@@ -153,6 +153,21 @@ object Application extends Controller {
     futureGraph.map{ s => Ok(s)}
   }
   
-  def deleteMessage = TODO
+  def deleteMessage = {
+    implicit val deleteMessageReads = (
+      (__ \ 'messageUri).read[String])
+    
+    Action(parse.json) { request =>
+      request.body.validate[String].map {
+        case (messageUri) => {
+          ResourceService.deleteResource(messageUri)
+        
+          Ok("Ok")
+        }
+      }.recoverTotal {
+        e => BadRequest("Detected error:" + JsError.toFlatJson(e))
+      }
+    }
+  }
 
 }
