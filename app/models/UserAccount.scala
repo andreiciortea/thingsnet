@@ -6,7 +6,7 @@ import org.w3.banana.binder._
 import scala.util._
 
 import services.NodeService
-import repos.RDFRepositoryFactory.RDFResourceBinder
+import repos.RDFRepositoryFactory.RDFResourceDependencies
 
 import java.net.URI
 
@@ -25,10 +25,12 @@ case class UserAccount(holder: Agent, displayedName: String, description: Option
   
   def getURI: String = 
     NodeService.genResourceURI(container = getContainer, id = displayedName)
+
+  def toGraph = UserAccount.userAccountBinder.toPG(this)
 }
 
 
-object UserAccountBinder extends RDFResourceBinder {
+object UserAccount extends RDFResourceDependencies {
   import Ops._
   import RecordBinder._
   
@@ -37,7 +39,7 @@ object UserAccountBinder extends RDFResourceBinder {
   val clazz = stn.UserAccount
   implicit val classUris = classUrisFor[UserAccount](clazz)
   
-  import AgentBinder._
+  import Agent._
   val holder = property[Agent](stn.heldBy)
   
   val displayedName = property[String](stn.name)

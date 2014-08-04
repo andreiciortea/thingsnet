@@ -5,14 +5,12 @@ import org.w3.banana._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
-trait RDFResourceDependencies
+trait RDFDependencies
 extends RDFModule
 with RDFOpsModule
-with RecordBinderModule
 
 trait RDFRepositoryDependencies
-extends RDFModule
-with RDFOpsModule
+extends RDFDependencies
 with SparqlOpsModule
 with TurtleWriterModule
 with JsonSolutionsWriterModule { implicit val file = "store/jena-tdb/" }

@@ -2,8 +2,6 @@ package services
 
 import models.Patch
 import models.Resource
-import models.{UserAccount, UserAccountBinder}
-import models.{Message, MessageBinder}
 import models.STNPrefix
 import repos.RDFRepositoryFactory
 
@@ -14,19 +12,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object ResourceService {
   
   val repo = RDFRepositoryFactory.makeRDFRepository
-
   import repo._
   
   def createResource(resource: Resource) = {
-    resource match {
-      case account: UserAccount => {
-        repo.createRDFResource(account.getURI, UserAccountBinder.userAccountBinder.toPG(account))
-       }
-      case message: Message => {
-        repo.createRDFResource(message.getURI, MessageBinder.messageBinder.toPG(message))
-      }
-      case _ => throw new ClassCastException
-    }
+    repo.createRDFResource(resource.getURI, resource.toGraph)
   }
   
   def getResource(uri: String) = {

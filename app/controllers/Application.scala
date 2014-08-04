@@ -12,8 +12,8 @@ import play.api.libs.functional.syntax.functionalCanBuildApplicative
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 
 import models.{Agent, Person, SmartThing}
-import models.{UserAccount, UserAccountBinder}
-import models.{Message, MessageBinder}
+import models.UserAccount
+import models.Message
 import services.{NodeService, ResourceService}
 
 import java.net.URI
@@ -39,7 +39,7 @@ object Application extends Controller {
     Action(parse.json) { request =>
       request.body.validate[(String, String, Option[String])].map {
         case (holderUri, displayedName, description) => {
-          val account = UserAccount(Person(holderUri), displayedName, description, Set(new URI("http://www.johndoe.ro#me"), new URI("http://www.janedoe.ro/laptop#thing")))
+          val account = UserAccount(Person(holderUri), displayedName, description)
 
           ResourceService.createResource(account)
         
@@ -87,7 +87,7 @@ object Application extends Controller {
       request.body.validate[(String, String)].map {
         case (fromUri, toUri) => {
         
-          ResourceService.patchResource(fromUri, UserAccountBinder.addConnection(fromUri, toUri))
+          ResourceService.patchResource(fromUri, UserAccount.addConnection(fromUri, toUri))
         
           Ok("Ok")
         }
@@ -106,7 +106,7 @@ object Application extends Controller {
       request.body.validate[(String, String)].map {
         case (fromUri, toUri) => {
         
-          ResourceService.patchResource(fromUri, UserAccountBinder.removeConnection(fromUri, toUri))
+          ResourceService.patchResource(fromUri, UserAccount.removeConnection(fromUri, toUri))
         
           Ok("Ok")
         }
@@ -151,7 +151,7 @@ object Application extends Controller {
     Action.async(parse.json) { request =>
       request.body.validate[String].map {
         case (accountUri) => {
-          val resultString = ResourceService.runQuery(MessageBinder.qGetMessagesForUser(accountUri))
+          val resultString = ResourceService.runQuery(Message.qGetMessagesForUser(accountUri))
           resultString.map{ s => Ok(s) }
         }
       }.recoverTotal {

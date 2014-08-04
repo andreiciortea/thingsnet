@@ -6,17 +6,16 @@ import org.w3.banana._
 import org.w3.banana.binder._
 import org.w3.banana.diesel._
 
-import repos.RDFRepositoryFactory.RDFResourceBinder
+import repos.RDFRepositoryFactory.RDFResourceDependencies
 
-
-object Agent {
-  def apply(uri: String) = new Agent(uri)
-}
 
 sealed class Agent(uri: String) extends Resource {
   
   def getContainer = ""
+  
   def getURI = uri
+  
+  def toGraph = Agent.agentBinder.toPG(this)
 }
 
 case class Person(uri: String) extends Agent(uri)
@@ -25,9 +24,11 @@ case class SmartThing(uri: String) extends Agent(uri)
 
 
 
-object AgentBinder extends RDFResourceBinder {
+object Agent extends RDFResourceDependencies {
+  
+  def apply(uri: String) = new Agent(uri)
+  
   import Ops._
-
   val stn = STNPrefix[Rdf]
   
   implicit val from: FromURI[Rdf, Rdf#URI] = new FromURI[Rdf, Rdf#URI] {

@@ -1,6 +1,6 @@
 package models
 
-import repos.RDFRepositoryFactory.RDFResourceBinder
+import repos.RDFRepositoryFactory.RDFResourceDependencies
 import services.NodeService
 
 import java.net.URI
@@ -12,9 +12,12 @@ case class Message(sender: URI, recevier: URI, replyTo: Option[URI], subject: Op
   
   def getURI: String = 
     NodeService.genResourceURI(container = getContainer, id = uuid)
+  
+  def toGraph = Message.messageBinder.toPG(this)
 }
 
-object MessageBinder extends RDFResourceBinder {
+object Message extends RDFResourceDependencies {
+  
   import Ops._
   import RecordBinder._
   
