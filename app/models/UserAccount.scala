@@ -24,7 +24,7 @@ case class UserAccount(holder: Agent, displayedName: String, description: Option
   def getContainer = "/users"
   
   def getURI: String = 
-    NodeService.genResourceURI(container = getContainer, id = displayedName)
+    NodeService.genResourceURI(container = getContainer, id = uuid)
 
   def toGraph = UserAccount.userAccountBinder.toPG(this)
 }
@@ -53,6 +53,51 @@ object UserAccount extends RDFResourceDependencies {
       .apply(holder, displayedName, description, connections)(UserAccount.apply, UserAccount.unapply) withClasses classUris
   
   
+  def queryAccountExists(accountUri: String) = {
+    val query = """
+                |prefix : <http://purl.org/stn/core#>
+                |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                |ASK { ?accountUri rdf:type :UserAccount }
+                |""".stripMargin
+    
+    val bindings = Map(
+        "accountUri" -> Ops.URI(accountUri)
+      )
+    
+    (query, bindings)
+  }
+  
+  def queryHolderExists(holderUri: String) = {
+    val query = """
+                |prefix : <http://purl.org/stn/core#>
+                |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                |ASK {
+                |  ?accountUri rdf:type :UserAccount .
+                |  ?accountUri :heldBy ?holderUri .
+                |}""".stripMargin
+    
+    val bindings = Map(
+        "holderUri" -> Ops.URI(holderUri)
+      )
+    
+    (query, bindings)
+  }
+  
+  def queryConnectionExists(fromUri: String, toUri: String) = {
+    val query = """
+                |prefix : <http://purl.org/stn/core#>
+                |ASK { ?fromUri :connectedTo ?toUri }
+                |""".stripMargin
+    
+    val bindings = Map(
+        "fromUri" -> Ops.URI(fromUri),
+        "toUri" -> Ops.URI(toUri)
+      )
+    
+    (query, bindings)
+  }
+
+
   def addConnection(fromUri: String, toUri: String): Patch[Rdf] = 
     Patch(Graph.empty, Graph(Triple(makeUri(fromUri), stn.connectedTo, makeUri(toUri))))
   

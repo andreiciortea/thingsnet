@@ -39,21 +39,32 @@ object Application extends Controller {
     Action(parse.json) { request =>
       request.body.validate[(String, String, Option[String])].map {
         case (holderUri, displayedName, description) => {
+          
           val account = UserAccount(Person(holderUri), displayedName, description)
-
-          ResourceService.createResource(account)
-        
-          Ok("Ok")
+          
+          if (!ResourceService.ask(UserAccount.queryHolderExists(holderUri))) {
+            ResourceService.createResource(account)
+            Created(account.toTurtle).withHeaders( (CONTENT_TYPE, "text/turtle") )
+          } else {
+            BadRequest("There already exists an account held by " + holderUri + ".\n")
+          }
+          
         }
       }.recoverTotal {
-        e => BadRequest("Detected error:" + JsError.toFlatJson(e))
+        e => BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
       }
     }
   }
   
   def getUserAccount(id: String) = Action.async {
     val futureGraphString = ResourceService.getResource(NodeService.genResourceURI(container = "/users", id = id))
-    futureGraphString.map{ s => Ok(s)}
+    futureGraphString.map{ s =>
+      if (!s.isEmpty) {
+          Ok(s.get).withHeaders( (CONTENT_TYPE, "text/turtle") )
+      } else {
+        NotFound
+      }
+    }
   }
   
   def deleteUserAccount = {
@@ -63,12 +74,15 @@ object Application extends Controller {
     Action(parse.json) { request =>
       request.body.validate[String].map {
         case (accountUri) => {
-          ResourceService.deleteResource(accountUri)
-        
-          Ok("Ok")
+          if (ResourceService.ask(UserAccount.queryAccountExists(accountUri))) {
+            ResourceService.deleteResource(accountUri)
+            Ok
+          } else {
+            NotFound
+          }
         }
       }.recoverTotal {
-        e => BadRequest("Detected error:" + JsError.toFlatJson(e))
+        e => BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
       }
     }
   }
@@ -86,13 +100,16 @@ object Application extends Controller {
     Action(parse.json) { request =>
       request.body.validate[(String, String)].map {
         case (fromUri, toUri) => {
-        
-          ResourceService.patchResource(fromUri, UserAccount.addConnection(fromUri, toUri))
-        
-          Ok("Ok")
+          if (ResourceService.ask(UserAccount.queryAccountExists(fromUri)) && 
+              ResourceService.ask(UserAccount.queryAccountExists(toUri))) {
+            ResourceService.patchResource(fromUri, UserAccount.addConnection(fromUri, toUri))
+            Created
+          } else {
+            BadRequest("Either the source or the target of the connection is not a registered account.\n")
+          }
         }
       }.recoverTotal {
-        e => BadRequest("Detected error:" + JsError.toFlatJson(e))
+        e => BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
       }
     }
   }
@@ -105,13 +122,15 @@ object Application extends Controller {
     Action(parse.json) { request =>
       request.body.validate[(String, String)].map {
         case (fromUri, toUri) => {
-        
-          ResourceService.patchResource(fromUri, UserAccount.removeConnection(fromUri, toUri))
-        
-          Ok("Ok")
+          if (ResourceService.ask(UserAccount.queryConnectionExists(fromUri, toUri))) {
+            ResourceService.patchResource(fromUri, UserAccount.removeConnection(fromUri, toUri))
+            Ok
+          } else {
+            NotFound
+          }
         }
       }.recoverTotal {
-        e => BadRequest("Detected error:" + JsError.toFlatJson(e))
+        e => BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
       }
     }
   }
@@ -131,15 +150,22 @@ object Application extends Controller {
     Action(parse.json) { request =>
       request.body.validate[(String, String, Option[String], Option[String], Option[String])].map {
         case (sender, receiver, replyTo, subject, body) => {
-          val optReplyTo: Option[URI] = if (replyTo.isEmpty) None else Some(new URI(replyTo.get)) 
+          
+          val optReplyTo: Option[URI] = if (replyTo.isEmpty) None else Some(new URI(replyTo.get))
+          
           val message = Message(new URI(sender), new URI(receiver), optReplyTo, subject, body)
           
-          ResourceService.createResource(message)
-        
-          Ok("Ok")
+          if (ResourceService.ask(UserAccount.queryAccountExists(sender)) && 
+              ResourceService.ask(UserAccount.queryAccountExists(receiver))) {
+            ResourceService.createResource(message)
+            Created(message.toTurtle).withHeaders( (CONTENT_TYPE, "text/turtle") )
+          } else {
+            BadRequest("Either the sender or the receiver of the message is not a registered account.\n")
+          }
+          
         }
       }.recoverTotal {
-        e => BadRequest("Detected error:" + JsError.toFlatJson(e))
+        e => BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
       }
     }
   }
@@ -152,11 +178,13 @@ object Application extends Controller {
       request.body.validate[String].map {
         case (accountUri) => {
           val resultString = ResourceService.queryForGraphs(Message.queryMessagesForUser(accountUri))
-          resultString.map{ s => Ok(s) }
+          resultString.map{ s => 
+            Ok(s).withHeaders( (CONTENT_TYPE, "text/turtle") )
+          }
         }
       }.recoverTotal {
         e => future {
-          BadRequest("Detected error:" + JsError.toFlatJson(e))
+          BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
         }
       }
     }
@@ -166,7 +194,13 @@ object Application extends Controller {
     println("id = " + id)
     println(NodeService.genResourceURI(container = "/messages", id = id))
     val futureGraph = ResourceService.getResource(NodeService.genResourceURI(container = "/messages", id = id))
-    futureGraph.map{ s => Ok(s)}
+    futureGraph.map{ s => 
+      if (!s.isEmpty) {
+        Ok(s.get).withHeaders( (CONTENT_TYPE, "text/turtle") )
+      } else {
+        NotFound
+      }
+    }
   }
   
   def deleteMessage = {
@@ -178,10 +212,10 @@ object Application extends Controller {
         case (messageUri) => {
           ResourceService.deleteResource(messageUri)
         
-          Ok("Ok")
+          Ok
         }
       }.recoverTotal {
-        e => BadRequest("Detected error:" + JsError.toFlatJson(e))
+        e => BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
       }
     }
   }

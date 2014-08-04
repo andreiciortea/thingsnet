@@ -30,6 +30,9 @@ object ResourceService {
     repo.deleteRDFResource(uri)
   }
   
+  
+  def ask(query: (String, Map[String, Rdf#URI])) = repo.runAskQuery(query)
+  
   def queryForResults(query: (String, Map[String, Rdf#URI])) = {
     repo.runSelectQuery(query)
   }

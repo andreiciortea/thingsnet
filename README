@@ -13,12 +13,19 @@ curl -i -H "Content-Type: application/json" \
   "displayedName": "johndoe"
 }'
 
-curl -i -X GET http://localhost:9000/users/johndoe
+curl -i -H "Content-Type: application/json" \
+-X POST http://localhost:9000/users/create \
+-d '{
+  "holderUri": "http://www.janedoe.com#me",
+  "displayedName": "janedoe"
+}'
+
+curl -i -X GET http://localhost:9000/users/<account_id>
 
 curl -i -H "Content-Type: application/json" \
 -X POST http://localhost:9000/users/delete \
 -d '{
-  "accountUri": "http://www.thingsnet.com/users/johndoe"
+  "accountUri": "http://www.thingsnet.com/users/<account_id>"
 }'
 
 
@@ -27,15 +34,15 @@ Connection requests:
 curl -i -H "Content-Type: application/json" \
 -X POST http://localhost:9000/connections/create \
 -d '{
-  "fromUri": "http://www.thingsnet.com/users/johndoe",
-  "toUri": "http://www.janedoe.com#me"
+  "fromUri": "http://www.thingsnet.com/users/<account_id>",
+  "toUri": "http://www.thingsnet.com/users/<account_id>"
 }'
 
 curl -i -H "Content-Type: application/json" \
 -X POST http://localhost:9000/connections/delete \
 -d '{
-  "fromUri": "http://www.thingsnet.com/users/johndoe",
-  "toUri": "http://www.janedoe.com#me"
+  "fromUri": "http://www.thingsnet.com/users/<account_id>",
+  "toUri": "http://www.thingsnet.com/users/<account_id>"
 }'
 
 
@@ -44,8 +51,8 @@ Message requests:
 curl -i -H "Content-Type: application/json" \
 -X POST http://localhost:9000/messages/create \
 -d '{
-  "sender": "http://www.janedoe.com#me",
-  "receiver": "http://www.thingsnet.com/users/johndoe",
+  "sender": "http://www.thingsnet.com/users/<account_id>",
+  "receiver": "http://www.thingsnet.com/users/<account_id>",
   "subject": "First message",
   "body": "This is the body of my first message"
 }'
@@ -53,7 +60,7 @@ curl -i -H "Content-Type: application/json" \
 curl -i -H "Content-Type: application/json" \
 -X POST http://localhost:9000/messages/create \
 -d '{
-  "sender": "http://www.thingsnet.com/users/johndoe",
+  "sender": "http://www.thingsnet.com/users/<account_id>",
   "receiver": "http://www.janedoe.com#me",
   "subject": "First message",
   "body": "This is the body of my first message"
@@ -63,7 +70,7 @@ curl -i -X GET http://localhost:9000/messages/<message_id>
 
 curl -i -H "Content-Type: application/json" \
 -X POST http://localhost:9000/messages/list \
--d '{"accountUri": "http://www.thingsnet.com/users/johndoe"}'
+-d '{"accountUri": "http://www.thingsnet.com/users/<account_id>"}'
 
 curl -i -H "Content-Type: application/json" \
 -X POST http://localhost:9000/messages/delete \
