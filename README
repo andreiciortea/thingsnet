@@ -2,3 +2,71 @@ This is your new Play application
 =================================
 
 This file will be packaged with your application, when using `activator dist`.
+
+
+Account requests:
+
+curl -i -H "Content-Type: application/json" \
+-X POST http://localhost:9000/users/create \
+-d '{
+  "holderUri": "http://www.johndoe.com#me",
+  "displayedName": "johndoe"
+}'
+
+curl -i -X GET http://localhost:9000/users/johndoe
+
+curl -i -H "Content-Type: application/json" \
+-X POST http://localhost:9000/users/delete \
+-d '{
+  "accountUri": "http://www.thingsnet.com/users/johndoe"
+}'
+
+
+Connection requests:
+
+curl -i -H "Content-Type: application/json" \
+-X POST http://localhost:9000/connections/create \
+-d '{
+  "fromUri": "http://www.thingsnet.com/users/johndoe",
+  "toUri": "http://www.janedoe.com#me"
+}'
+
+curl -i -H "Content-Type: application/json" \
+-X POST http://localhost:9000/connections/delete \
+-d '{
+  "fromUri": "http://www.thingsnet.com/users/johndoe",
+  "toUri": "http://www.janedoe.com#me"
+}'
+
+
+Message requests:
+
+curl -i -H "Content-Type: application/json" \
+-X POST http://localhost:9000/messages/create \
+-d '{
+  "sender": "http://www.thingsnet.com/users/johndoe",
+  "receiver": "http://www.janedoe.com#me",
+  "subject": "First message",
+  "body": "This is the body of my first message"
+}'
+
+curl -i -H "Content-Type: application/json" \
+-X POST http://localhost:9000/messages/create \
+-d '{
+  "sender": "http://www.janedoe.com#me",
+  "receiver": "http://www.thingsnet.com/users/johndoe",
+  "subject": "First message",
+  "body": "This is the body of my first message"
+}'
+
+curl -i -X GET http://localhost:9000/messages/<message_id>
+
+curl -i -H "Content-Type: application/json" \
+-X POST http://localhost:9000/messages/list \
+-d '{"accountUri": "http://www.thingsnet.com/users/johndoe"}'
+
+curl -i -H "Content-Type: application/json" \
+-X POST http://localhost:9000/messages/delete \
+-d '{
+  "messageUri": "<message_uri>"
+}'
