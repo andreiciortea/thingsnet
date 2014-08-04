@@ -58,10 +58,19 @@ abstract class RDFRepository extends RDFRepositoryDependencies {
   
   import SparqlOps._
   
-  def runQuery(query: (String, Map[String, Rdf#URI])) = {
+  def runSelectQuery(query: (String, Map[String, Rdf#URI])) = {
     
     val jsonString = makeSparqlEngine.executeSelect(SelectQuery(query._1), query._2).map { results =>
       JsonSolutionsWriter.asString(results, "")  getOrElse sys.error("coudn't serialize the query results")
+    }
+    
+    jsonString
+  }
+  
+  def runConstructQuery(query: (String, Map[String, Rdf#URI])) = {
+    
+    val jsonString = makeSparqlEngine.executeConstruct(ConstructQuery(query._1), query._2).map { graph =>
+      TurtleWriter.asString(graph, "")  getOrElse sys.error("coudn't serialize the query result graph")
     }
     
     jsonString

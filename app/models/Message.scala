@@ -39,15 +39,26 @@ object Message extends RDFResourceDependencies {
       .apply(sender, receiver, replyTo, subject, body)(Message.apply, Message.unapply) withClasses classUris
   
   
-  def qGetMessagesForUser(receiverUri: String) = {
+  def queryMessagesForUser(receiverUri: String) = {
     val query = """
                 |prefix : <http://purl.org/stn/core#>
                 |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 |
-                |SELECT ?messageUri
+                |CONSTRUCT {
+                |  ?messageUri rdf:type :Message .
+                |  ?messageUri :hasSender ?senderUri .
+                |  ?messageUri :hasReceiver ?receiverUri .
+                |  ?messageUri :replyTo ?parentUri .
+                |  ?messageUri :name ?subject .
+                |  ?messageUri :description ?body .
+                |}
                 |WHERE {
-                |    ?messageUri rdf:type :Message .
-                |    ?messageUri :hasReceiver ?receiverUri .
+                |  ?messageUri rdf:type :Message .
+                |  ?messageUri :hasSender ?senderUri .
+                |  ?messageUri :hasReceiver ?receiverUri .
+                |  OPTIONAL { ?messageUri :replyTo [ rdf:first ?parentUri ] . }
+                |  OPTIONAL { ?messageUri :name [ rdf:first ?subject ] . }
+                |  OPTIONAL { ?messageUri :description [ rdf:first ?body ] . }
                 |}""".stripMargin
 
     val bindings = Map(

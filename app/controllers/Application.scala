@@ -151,7 +151,7 @@ object Application extends Controller {
     Action.async(parse.json) { request =>
       request.body.validate[String].map {
         case (accountUri) => {
-          val resultString = ResourceService.runQuery(Message.qGetMessagesForUser(accountUri))
+          val resultString = ResourceService.queryForGraphs(Message.queryMessagesForUser(accountUri))
           resultString.map{ s => Ok(s) }
         }
       }.recoverTotal {
