@@ -144,10 +144,22 @@ object Application extends Controller {
     }
   }
 
-  def getMessages = Action.async {
-    // TODO: remove test string and use the id of the authenticated user
-    val resultString = ResourceService.runQuery(MessageBinder.qGetMessagesForUser("http://www.janedoe.ro"))
-    resultString.map{ s => Ok(s) }
+  def getMessages = {
+    implicit val getMessagesReads = (
+      (__ \ 'accountUri).read[String])
+    
+    Action.async(parse.json) { request =>
+      request.body.validate[String].map {
+        case (accountUri) => {
+          val resultString = ResourceService.runQuery(MessageBinder.qGetMessagesForUser(accountUri))
+          resultString.map{ s => Ok(s) }
+        }
+      }.recoverTotal {
+        e => future {
+          BadRequest("Detected error:" + JsError.toFlatJson(e))
+        }
+      }
+    }
   }
 
   def getMessageById(id: String) = Action.async {
