@@ -31,6 +31,8 @@ object ResourceService {
   }
   
   
+  def getSTNSpec = repo.getSTNSpec
+  
   def ask(query: (String, Map[String, Rdf#URI])) = repo.runAskQuery(query)
   
   def queryForResults(query: (String, Map[String, Rdf#URI])) = {

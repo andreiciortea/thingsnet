@@ -1,5 +1,7 @@
 package repos
 
+import services.NodeService
+
 import org.w3.banana._
 
 import scala.concurrent.Future
@@ -14,6 +16,7 @@ with TurtleWriterModule
 trait RDFRepositoryDependencies
 extends RDFDependencies
 with SparqlOpsModule
+with TurtleReaderModule
 with JsonSolutionsWriterModule { implicit val file = "store/jena-tdb/" }
 
 
@@ -81,5 +84,12 @@ abstract class RDFRepository extends RDFRepositoryDependencies {
     }
     
     turtleString
+  }
+  
+  def getSTNSpec = {
+    val from = new java.net.URL(NodeService.getAsset("spec.ttl")).openStream()
+    val graph: Rdf#Graph = TurtleReader.read(from, base = "") getOrElse sys.error("Couldn't read STN spec")
+    
+    TurtleWriter.asString(graph, "") getOrElse sys.error("Couldn't serialize the STN spec.")
   }
 }

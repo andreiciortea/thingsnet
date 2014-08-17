@@ -1,16 +1,17 @@
-prefix stn: <http://purl.org/stn/core#>
-prefix stn-ops: <http://purl.org/stn/operations#>
-prefix stn-http: <http://purl.org/stn/http#>
-prefix http: <http://www.w3.org/2011/http#>
+@base <http://www.thingsnet.com/> .
+@prefix stn: <http://purl.org/stn/core#> .
+@prefix stn-ops: <http://purl.org/stn/operations#> .
+@prefix stn-http: <http://purl.org/stn/http#> .
+@prefix http: <http://www.w3.org/2011/http#> .
 
-<http://www.thingsnet.com>
+<#platform>
 	a stn:Platform ;
-	stn-http:baseURL <http://127.0.0.1:9000> ;
+	stn-http:baseURL <http://localhost:9000> ;
 	stn-ops:supports <#createAccount> ,
 			<#getAccount> ,
 			<#deleteAccount> ,
 			<#createConnection> ,
-			<#getConnections>
+			<#getConnections> ,
 			<#deleteConnection> ,
 			<#sendMessage> ,
 			<#getMessages> ,
@@ -21,12 +22,12 @@ prefix http: <http://www.w3.org/2011/http#>
 	stn-ops:implementedAs
 		[ a stn-http:STNRequest ;
 		  http:methodName "POST" ;
-		  http:requestURI </users/create> ;
+		  http:requestURI "/users/create" ;
 		  http:headers (
 		    [ a http:RequestHeader ;
 		      http:fieldName "Content-Type" ;
 		      http:fieldValue "application/json" ;
-		    ] ;
+		    ]
 		  ) ;
 		  stn-ops:requiresInput
 		    [ a stn-ops:OwnerID ;
@@ -47,7 +48,7 @@ prefix http: <http://www.w3.org/2011/http#>
 	stn-ops:implementedAs
 		[ a stn-http:STNRequest ;
 		  http:methodName "GET" ;
-		  http:requestURI </users/:id> ;
+		  http:requestURI "/users/:id" ;
 		] .
 
 <#deleteAccount>
@@ -55,12 +56,12 @@ prefix http: <http://www.w3.org/2011/http#>
 	stn-ops:implementedAs
 		[ a stn-http:STNRequest ;
 		  http:methodName "POST" ;
-		  http:requestURI </users/delete> ;
+		  http:requestURI "/users/delete" ;
 		  http:headers (
 		    [ a http:RequestHeader ;
 		      http:fieldName "Content-Type" ;
 		      http:fieldValue "application/json" ;
-		    ] ;
+		    ]
 		  ) ;
 		  stn-ops:requiresInput
 		    [ a stn-ops:UserID ;
@@ -73,12 +74,12 @@ prefix http: <http://www.w3.org/2011/http#>
 	stn-ops:implementedAs
 		[ a stn-http:STNRequest ;
 		  http:methodName "POST" ;
-		  http:requestURI </connections/create> ;
+		  http:requestURI "/connections/create" ;
 		  http:headers (
 		    [ a http:RequestHeader ;
 		      http:fieldName "Content-Type" ;
 		      http:fieldValue "application/json" ;
-		    ] ;
+		    ]
 		  ) ;
 		  stn-ops:requiresInput
 		    [ a stn-ops:UserID ;
@@ -91,7 +92,7 @@ prefix http: <http://www.w3.org/2011/http#>
 	stn-ops:implementedAs
 		[ a stn-http:STNRequest ;
 		  http:methodName "GET" ;
-		  http:requestURI </users/:id> ;
+		  http:requestURI "/users/:id" ;
 		  stn-ops:requiresInput
 		    [ a stn-ops:UserID ;
 		      stn-ops:paramName "accountUri" ;
@@ -104,12 +105,12 @@ prefix http: <http://www.w3.org/2011/http#>
 	stn-ops:implementedAs
 		[ a stn-http:STNRequest ;
 		  http:methodName "POST" ;
-		  http:requestURI </users/delete> ;
+		  http:requestURI "/users/delete" ;
 		  http:headers (
 		    [ a http:RequestHeader ;
 		      http:fieldName "Content-Type" ;
 		      http:fieldValue "application/json" ;
-		    ] ;
+		    ]
 		  ) ;
 		  stn-ops:requiresInput
 		    [ a stn-ops:UserID ;
@@ -122,12 +123,12 @@ prefix http: <http://www.w3.org/2011/http#>
 	stn-ops:implementedAs
 		[ a stn-http:STNRequest ;
 		  http:methodName "POST" ;
-		  http:requestURI </messages/create> ;
+		  http:requestURI "/messages/create" ;
 		  http:headers (
 		    [ a http:RequestHeader ;
 		      http:fieldName "Content-Type" ;
 		      http:fieldValue "application/json" ;
-		    ] ;
+		    ]
 		  ) ;
 		  stn-ops:requiresInput
 		    [ a stn-ops:UserID ;
@@ -148,12 +149,12 @@ prefix http: <http://www.w3.org/2011/http#>
 	stn-ops:implementedAs
 		[ a stn-http:STNRequest ;
 		  http:methodName "POST" ;
-		  http:requestURI </messages/delete> ;
+		  http:requestURI "/messages/delete" ;
 		  http:headers (
 		    [ a http:RequestHeader ;
 		      http:fieldName "Content-Type" ;
 		      http:fieldValue "application/json" ;
-		    ] ;
+		    ]
 		  ) ;
 		  stn-ops:requiresInput
 		    [ a stn-ops:EntityID ;
@@ -166,6 +167,6 @@ prefix http: <http://www.w3.org/2011/http#>
 	stn-ops:implementedAs
 		[ a stn-http:STNRequest ;
 		  http:methodName "GET" ;
-		  http:requestURI </messages/> ;
+		  http:requestURI "/messages/" ;
 		] .
 

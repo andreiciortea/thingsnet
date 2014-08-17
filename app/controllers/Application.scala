@@ -25,6 +25,10 @@ object Application extends Controller {
     Ok(views.html.index("Your new application is ready."))
   }
   
+  def spec = Action {
+    Ok(ResourceService.getSTNSpec)
+  }
+  
   
   /**
    *   User Account handlers.

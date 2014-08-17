@@ -4,6 +4,7 @@
 
 # Home page
 GET     /                           controllers.Application.index
+GET     /spec                       controllers.Application.spec
 
 GET     /users/:id                  controllers.Application.getUserAccount(id: String)
 POST    /users/create               controllers.Application.createUserAccount
