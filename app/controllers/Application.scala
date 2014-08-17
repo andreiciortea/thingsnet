@@ -14,9 +14,16 @@ import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import models.{Agent, Person, SmartThing}
 import models.UserAccount
 import models.Message
+import models.PlatformSpecParser
 import services.{NodeService, ResourceService}
 
 import java.net.URI
+
+import play.api.data._
+import play.api.data.Forms._
+
+import play.api.Play.current
+import play.api.libs.ws._
 
 
 object Application extends Controller {
@@ -27,6 +34,46 @@ object Application extends Controller {
   
   def spec = Action {
     Ok(ResourceService.getSTNSpec)
+  }
+  
+  
+  val stnForm = Form(
+    single(
+      "uri" -> nonEmptyText
+    )
+  )
+  
+  val opForm = Form(
+    tuple(
+      "method" -> nonEmptyText,
+      "uri" -> nonEmptyText,
+      "params" -> text
+    )
+  )
+  
+  def demoClient = Action {
+    Ok(views.html.client(stnForm, opForm))
+  }
+  
+  def getSTNSpec = Action.async { implicit request =>
+    stnForm.bindFromRequest.fold(
+      formWithErrors =>
+        future {
+          BadRequest(views.html.client(formWithErrors, opForm))
+        },
+      result => {
+        WS.url(result).get().map {
+          response => {
+            val parser = new PlatformSpecParser(response.body)
+            Ok(views.html.client(stnForm, opForm, Some(parser.extractPlatformDetails), response.body))
+          }
+        }
+      })
+  }
+  
+  def runOperation = Action {
+    // TODO
+    Ok(views.html.index("bla"))
   }
   
   

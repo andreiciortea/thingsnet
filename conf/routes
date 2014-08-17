@@ -20,3 +20,8 @@ POST    /messages/delete            controllers.Application.deleteMessage
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
+
+# Test client
+GET     /client                     controllers.Application.demoClient
+POST    /client                     controllers.Application.getSTNSpec
+POST    /client/run                 controllers.Application.runOperation

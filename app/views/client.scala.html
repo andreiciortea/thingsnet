@@ -1,0 +1,73 @@
+@(stnForm: Form[String], opForm: Form[(String, String, String)], platform: Option[PlatformSpec] = None, spec: String = "")
+
+@import helper._
+@import play.api.libs.json.Json
+
+<html>
+    <head>
+        <title>STN Demo Client</title>
+    </head>
+    
+    <body>
+        <p><strong>STN Specifications:</strong></p>
+        @form(action = routes.Application.getSTNSpec()) {
+          @inputText(stnForm("uri"), '_label -> "Spec URL:", 'size -> 30)
+          <input type="submit" value="Get spec!" />
+        }
+        
+        @if(platform != None) {
+          <p><strong>STN Platform Details:</strong></p>
+          <p>Platform: @platform.get.uri</p>
+          <p>Base URL: @platform.get.baseUrl</p>
+        
+          @if(!platform.get.operations.isEmpty) {
+            <p><strong>Available operations:</strong></p>
+
+            @form(action = routes.Application.runOperation()) {
+              <select id="opSelect" onchange="showOperationDetails()">
+              @for((op, index) <- platform.get.operations.zipWithIndex) {
+                <option value="@index">@op.cls</option>
+              }
+              </select>
+              @textarea(opForm("params"), '_label -> "Params:")
+  
+              <input type="submit" value="Run operation!" />
+            
+              <p><strong>Operation details:</strong></p>
+              <p id="opUri" />
+              <p id="opMethod" />
+              <p id="opRequestUri" />
+              <p id="opParams" />
+            }
+          }
+        
+        }
+        
+        <p>@spec</p>
+
+    @if(platform != None) {    
+      <script>
+        function showOperationDetails() {
+          var opIndex = document.getElementById("opSelect").value;
+          var opArray = @Html(Json.stringify(Json.toJson(platform.get.operations)));
+        
+          document.getElementById("opUri").innerHTML = "Operation: " + opArray[opIndex]["id"];
+          document.getElementById("opMethod").innerHTML = "Method: " + opArray[opIndex]["method"];
+          document.getElementById("opRequestUri").innerHTML = "Request URI: " + opArray[opIndex]["requestUri"];
+        
+          var params = opArray[opIndex]["params"];
+          var paramContent = "<p>Required params:</p><table>";
+        
+          for (i = 0; i < params.length; i ++) {
+            paramContent += "<tr><td>" + params[i]["cls"] + "</td><td>" + params[i]["name"] + "</td></tr>"
+          }
+        
+          paramContent += "</table>";
+        
+          document.getElementById("opParams").innerHTML = paramContent;
+        }
+      </script>
+    }
+    
+    </body>
+</html>
