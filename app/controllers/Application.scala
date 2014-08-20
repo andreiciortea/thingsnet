@@ -83,21 +83,21 @@ object Application extends Controller {
   
   def createUserAccount = {
     implicit val createUserAccountReads = (
-      (__ \ 'holderUri).read[String] and
+      (__ \ 'mywebid).read[String] and
       (__ \ 'displayedName).read[String] and
       (__ \ 'description).readNullable[String]) tupled
     
     Action(parse.json) { request =>
       request.body.validate[(String, String, Option[String])].map {
-        case (holderUri, displayedName, description) => {
+        case (mywebid, displayedName, description) => {
           
-          val account = UserAccount(Person(holderUri), displayedName, description)
+          val account = UserAccount(Person(mywebid), displayedName, description)
           
-          if (!ResourceService.ask(UserAccount.queryHolderExists(holderUri))) {
+          if (!ResourceService.ask(UserAccount.queryHolderExists(mywebid))) {
             ResourceService.createResource(account)
             Created(account.toTurtle).withHeaders( (CONTENT_TYPE, "text/turtle") )
           } else {
-            BadRequest("There already exists an account held by " + holderUri + ".\n")
+            BadRequest("There already exists an account held by " + mywebid + ".\n")
           }
           
         }
@@ -120,13 +120,13 @@ object Application extends Controller {
   
   def deleteUserAccount = {
     implicit val deleteUserAccountReads = (
-      (__ \ 'accountUri).read[String])
+      (__ \ 'mywebid).read[String])
     
     Action(parse.json) { request =>
       request.body.validate[String].map {
-        case (accountUri) => {
-          if (ResourceService.ask(UserAccount.queryAccountExists(accountUri))) {
-            ResourceService.deleteResource(accountUri)
+        case (mywebid) => {
+          if (ResourceService.ask(UserAccount.queryAccountExists(mywebid))) {
+            ResourceService.deleteResource(mywebid)
             Ok
           } else {
             NotFound
@@ -145,15 +145,15 @@ object Application extends Controller {
   
   def createConnection = {
     implicit val connectionReads = (
-      (__ \ 'fromUri).read[String] and
-      (__ \ 'toUri).read[String]) tupled
+      (__ \ 'mywebid).read[String] and
+      (__ \ 'accountUri).read[String]) tupled
     
     Action(parse.json) { request =>
       request.body.validate[(String, String)].map {
-        case (fromUri, toUri) => {
-          if (ResourceService.ask(UserAccount.queryAccountExists(fromUri)) && 
-              ResourceService.ask(UserAccount.queryAccountExists(toUri))) {
-            ResourceService.patchResource(fromUri, UserAccount.addConnection(fromUri, toUri))
+        case (mywebid, accountUri) => {
+          if (ResourceService.ask(UserAccount.queryAccountExists(mywebid)) && 
+              ResourceService.ask(UserAccount.queryAccountExists(accountUri))) {
+            ResourceService.patchResource(mywebid, UserAccount.addConnection(mywebid, accountUri))
             Created
           } else {
             BadRequest("Either the source or the target of the connection is not a registered account.\n")
@@ -167,14 +167,14 @@ object Application extends Controller {
   
   def deleteConnection = {
     implicit val connectionReads = (
-      (__ \ 'fromUri).read[String] and
-      (__ \ 'toUri).read[String]) tupled
+      (__ \ 'mywebid).read[String] and
+      (__ \ 'accountUri).read[String]) tupled
     
     Action(parse.json) { request =>
       request.body.validate[(String, String)].map {
-        case (fromUri, toUri) => {
-          if (ResourceService.ask(UserAccount.queryConnectionExists(fromUri, toUri))) {
-            ResourceService.patchResource(fromUri, UserAccount.removeConnection(fromUri, toUri))
+        case (mywebid, accountUri) => {
+          if (ResourceService.ask(UserAccount.queryConnectionExists(mywebid, accountUri))) {
+            ResourceService.patchResource(mywebid, UserAccount.removeConnection(mywebid, accountUri))
             Ok
           } else {
             NotFound
@@ -189,10 +189,10 @@ object Application extends Controller {
   /**
    *   Message handlers.
    */
-  
+  // TODO: body param should be required
   def createMessage = {
     implicit val createMessageReads = (
-      (__ \ 'sender).read[String] and
+      (__ \ 'mywebid).read[String] and
       (__ \ 'receiver).read[String] and
       (__ \ 'replyTo).readNullable[String] and
       (__ \ 'subject).readNullable[String] and
@@ -200,13 +200,13 @@ object Application extends Controller {
     
     Action(parse.json) { request =>
       request.body.validate[(String, String, Option[String], Option[String], Option[String])].map {
-        case (sender, receiver, replyTo, subject, body) => {
+        case (mywebid, receiver, replyTo, subject, body) => {
           
           val optReplyTo: Option[URI] = if (replyTo.isEmpty) None else Some(new URI(replyTo.get))
           
-          val message = Message(new URI(sender), new URI(receiver), optReplyTo, subject, body)
+          val message = Message(new URI(mywebid), new URI(receiver), optReplyTo, subject, body)
           
-          if (ResourceService.ask(UserAccount.queryAccountExists(sender)) && 
+          if (ResourceService.ask(UserAccount.queryAccountExists(mywebid)) && 
               ResourceService.ask(UserAccount.queryAccountExists(receiver))) {
             ResourceService.createResource(message)
             Created(message.toTurtle).withHeaders( (CONTENT_TYPE, "text/turtle") )
@@ -223,12 +223,12 @@ object Application extends Controller {
 
   def getMessages = {
     implicit val getMessagesReads = (
-      (__ \ 'accountUri).read[String])
+      (__ \ 'mywebid).read[String])
     
     Action.async(parse.json) { request =>
       request.body.validate[String].map {
-        case (accountUri) => {
-          val resultString = ResourceService.queryForGraphs(Message.queryMessagesForUser(accountUri))
+        case (mywebid) => {
+          val resultString = ResourceService.queryForGraphs(Message.queryMessagesForUser(mywebid))
           resultString.map{ s => 
             Ok(s).withHeaders( (CONTENT_TYPE, "text/turtle") )
           }
