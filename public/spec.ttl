@@ -31,11 +31,6 @@
                 ]
             ) ;
             stn-ops:hasInput
-                [ a stn-ops:OwnerID ;
-                    stn-ops:paramName "holderUri" ;
-                    stn-ops:required true ;
-                ] ;
-            stn-ops:hasInput
                 [ a stn-ops:DisplayedName ;
                     stn-ops:paramName "displayedName" ;
                     stn-ops:required true ;
@@ -87,7 +82,7 @@
             ) ;
             stn-ops:hasInput
             [ a stn-ops:UserID ;
-                stn-ops:paramName "toUri" ;
+                stn-ops:paramName "accountUri" ;
                 stn-ops:required true ;
             ] ;
         ] .
@@ -106,7 +101,7 @@
             ) ;
             stn-ops:hasInput
                 [ a stn-ops:UserID ;
-                    stn-ops:paramName "toUri" ;
+                    stn-ops:paramName "accountUri" ;
                     stn-ops:required true ;
                 ] ;
         ] .
