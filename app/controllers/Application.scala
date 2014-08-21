@@ -8,8 +8,9 @@ import play.api._
 import play.api.mvc._
 
 import play.api.libs.json._
-import play.api.libs.functional.syntax.functionalCanBuildApplicative
-import play.api.libs.functional.syntax.toFunctionalBuilderOps
+import play.api.libs.functional.syntax._
+//import play.api.libs.functional.syntax.functionalCanBuildApplicative
+//import play.api.libs.functional.syntax.toFunctionalBuilderOps
 
 import models.{Agent, Person, SmartThing}
 import models.UserAccount
@@ -44,7 +45,7 @@ object Application extends Controller {
       request.body.validate[(String, String, Option[String])].map {
         case (mywebid, displayedName, description) => {
           
-          val account = UserAccount(Person(mywebid), displayedName, description)
+          val account = UserAccount(SmartThing(mywebid), displayedName, description)
           
           if (!ResourceService.ask(UserAccount.queryHolderExists(mywebid))) {
             ResourceService.createResource(account)
@@ -71,22 +72,40 @@ object Application extends Controller {
     }
   }
   
+  // TODO: proper results parsing
+  def getAccountByWebID(webId: String): Future[String] = {
+      ResourceService.queryForResults(UserAccount.queryAccountByHolder(webId)).map {
+        resultsJson => {
+          val results = (Json.parse(resultsJson) \\ "value")
+            if (results.isEmpty) {
+              throw new Exception("No account registered for this WebID.")
+          } else {
+            results(0).as[String]
+          }
+        }
+      }
+  }
+  
   def deleteUserAccount = {
     implicit val deleteUserAccountReads = (
       (__ \ 'mywebid).read[String])
     
-    Action(parse.json) { request =>
+    Action.async(parse.json) { request =>
       request.body.validate[String].map {
         case (mywebid) => {
-          if (ResourceService.ask(UserAccount.queryAccountExists(mywebid))) {
-            ResourceService.deleteResource(mywebid)
-            Ok
-          } else {
-            NotFound
+          getAccountByWebID(mywebid).map {
+            accountUri => {
+              ResourceService.deleteResource(accountUri)
+              Ok
+            }
+          }.recover {
+            case e: Exception => BadRequest(e.getMessage)
           }
         }
       }.recoverTotal {
-        e => BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
+        e => future {
+          BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
+        }
       }
     }
   }
@@ -101,19 +120,26 @@ object Application extends Controller {
       (__ \ 'mywebid).read[String] and
       (__ \ 'accountUri).read[String]) tupled
     
-    Action(parse.json) { request =>
+    Action.async(parse.json) { request =>
       request.body.validate[(String, String)].map {
         case (mywebid, accountUri) => {
-          if (ResourceService.ask(UserAccount.queryAccountExists(mywebid)) && 
-              ResourceService.ask(UserAccount.queryAccountExists(accountUri))) {
-            ResourceService.patchResource(mywebid, UserAccount.addConnection(mywebid, accountUri))
-            Created
-          } else {
-            BadRequest("Either the source or the target of the connection is not a registered account.\n")
+          getAccountByWebID(mywebid).map {
+            myAccountUri => {
+              if (ResourceService.ask(UserAccount.queryAccountExists(accountUri))) {
+                ResourceService.patchResource(accountUri, UserAccount.addConnection(myAccountUri, accountUri))
+                Created
+              } else {
+                BadRequest("The target of the connection is not a registered account.\n")
+              }
+            }
+          }.recover {
+            case e: Exception => BadRequest(e.getMessage)
           }
         }
       }.recoverTotal {
-        e => BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
+        e => future {
+          BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
+        }
       }
     }
   }
@@ -123,18 +149,25 @@ object Application extends Controller {
       (__ \ 'mywebid).read[String] and
       (__ \ 'accountUri).read[String]) tupled
     
-    Action(parse.json) { request =>
+    Action.async(parse.json) { request =>
       request.body.validate[(String, String)].map {
         case (mywebid, accountUri) => {
-          if (ResourceService.ask(UserAccount.queryConnectionExists(mywebid, accountUri))) {
-            ResourceService.patchResource(mywebid, UserAccount.removeConnection(mywebid, accountUri))
-            Ok
-          } else {
-            NotFound
+          getAccountByWebID(mywebid).map {
+            myAccountUri =>
+              if (ResourceService.ask(UserAccount.queryConnectionExists(myAccountUri, accountUri))) {
+                ResourceService.patchResource(mywebid, UserAccount.removeConnection(mywebid, accountUri))
+                Ok
+              } else {
+                NotFound
+              }
+          }.recover {
+            case e: Exception => BadRequest(e.getMessage)
           }
         }
       }.recoverTotal {
-        e => BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
+        e => future {
+          BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
+        }
       }
     }
   }
@@ -151,25 +184,31 @@ object Application extends Controller {
       (__ \ 'subject).readNullable[String] and
       (__ \ 'body).readNullable[String]) tupled
     
-    Action(parse.json) { request =>
+    Action.async(parse.json) { request =>
       request.body.validate[(String, String, Option[String], Option[String], Option[String])].map {
         case (mywebid, receiver, replyTo, subject, body) => {
-          
-          val optReplyTo: Option[URI] = if (replyTo.isEmpty) None else Some(new URI(replyTo.get))
-          
-          val message = Message(new URI(mywebid), new URI(receiver), optReplyTo, subject, body)
-          
-          if (ResourceService.ask(UserAccount.queryAccountExists(mywebid)) && 
-              ResourceService.ask(UserAccount.queryAccountExists(receiver))) {
-            ResourceService.createResource(message)
-            Created(message.toTurtle).withHeaders( (CONTENT_TYPE, "text/turtle") )
-          } else {
-            BadRequest("Either the sender or the receiver of the message is not a registered account.\n")
+          getAccountByWebID(mywebid).map {
+            myAccountUri => {  
+              val optReplyTo: Option[URI] = if (replyTo.isEmpty) None else Some(new URI(replyTo.get))
+              
+              val message = Message(new URI(myAccountUri), new URI(receiver), optReplyTo, subject, body)
+              
+              if (ResourceService.ask(UserAccount.queryAccountExists(receiver))) {
+                ResourceService.createResource(message)
+                Created(message.toTurtle).withHeaders( (CONTENT_TYPE, "text/turtle") )
+              } else {
+                BadRequest("The receiver of the message is not a registered account.\n")
+              }
+            }
+          }.recover {
+            case e: Exception => BadRequest(e.getMessage)
           }
           
         }
       }.recoverTotal {
-        e => BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
+        e => future {
+          BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
+        }
       }
     }
   }
@@ -181,9 +220,14 @@ object Application extends Controller {
     Action.async(parse.json) { request =>
       request.body.validate[String].map {
         case (mywebid) => {
-          val resultString = ResourceService.queryForGraphs(Message.queryMessagesForUser(mywebid))
-          resultString.map{ s => 
-            Ok(s).withHeaders( (CONTENT_TYPE, "text/turtle") )
+          getAccountByWebID(mywebid).flatMap {
+            myAccountUri =>
+              ResourceService.queryForGraphs(Message.queryMessagesForUser(myAccountUri)) map {
+                s =>
+                  Ok(s).withHeaders( (CONTENT_TYPE, "text/turtle") )
+              }
+          }.recover {
+            case e: Exception => BadRequest(e.getMessage)
           }
         }
       }.recoverTotal {
@@ -195,8 +239,8 @@ object Application extends Controller {
   }
 
   def getMessageById(id: String) = Action.async {
-    println("id = " + id)
-    println(NodeService.genResourceURI(container = "/messages", id = id))
+//    println("id = " + id)
+//    println(NodeService.genResourceURI(container = "/messages", id = id))
     val futureGraph = ResourceService.getResource(NodeService.genResourceURI(container = "/messages", id = id))
     futureGraph.map{ s => 
       if (!s.isEmpty) {
@@ -215,7 +259,6 @@ object Application extends Controller {
       request.body.validate[String].map {
         case (messageUri) => {
           ResourceService.deleteResource(messageUri)
-        
           Ok
         }
       }.recoverTotal {

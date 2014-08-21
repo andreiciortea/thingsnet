@@ -158,7 +158,7 @@
             http:methodName "GET" ;
             http:requestURI ":messageUri" ;
             stn-ops:hasInput
-                [ a stn-ops:UserID ;
+                [ a stn-ops:EntityID ;
                     stn-ops:paramName "messageUri" ;
                     stn-ops:required true ;
                     stn-ops:inline true ;

@@ -83,6 +83,24 @@ object UserAccount extends RDFResourceDependencies {
     (query, bindings)
   }
   
+  def queryAccountByHolder(holderUri: String) = {
+    val query = """
+                |prefix : <http://purl.org/stn/core#>
+                |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                |
+                |SELECT ?accountUri
+                |WHERE {
+                |  ?accountUri rdf:type :UserAccount .
+                |  ?accountUri :heldBy ?holderUri .
+                |}""".stripMargin
+    
+    val bindings = Map(
+        "holderUri" -> Ops.URI(holderUri)
+      )
+    
+    (query, bindings)
+  }
+  
   def queryConnectionExists(fromUri: String, toUri: String) = {
     val query = """
                 |prefix : <http://purl.org/stn/core#>
