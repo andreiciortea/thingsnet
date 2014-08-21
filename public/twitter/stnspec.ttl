@@ -1,0 +1,140 @@
+@base <http://www.twitter.com/> .
+@prefix stn: <http://purl.org/stn/core#> .
+@prefix stn-ops: <http://purl.org/stn/operations#> .
+@prefix stn-http: <http://purl.org/stn/http#> .
+@prefix http: <http://www.w3.org/2011/http#> .
+
+<#platform>
+    a stn:Platform ;
+    stn-http:baseURL <https://api.twitter.com/1.1> ;
+    stn-ops:supports <#getAccount> ,
+        <#createConnection> ,
+        <#getConnections> ,
+        <#deleteConnection> ,
+        <#sendMessage> ,
+        <#getMessages> ,
+        <#deleteMessage> .
+
+<#getAccount>
+    a stn-ops:GetUserAccount ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/users/show.json" ;
+            stn-ops:hasInput
+                [ a stn-ops:DisplayedName ;
+                    stn-ops:paramName "screen_name" ;
+                    stn-ops:required true ;
+                ] ;
+            stn-ops:hasOutput
+                [ a stn:UserAccount ] ;
+        ] .
+
+<#createConnection>
+    a stn-ops:CreateConnectionTo;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/friendships/create.json" ;
+            http:headers (
+                [ a http:RequestHeader ;
+                    http:fieldName "Content-Type" ;
+                    http:fieldValue "application/json" ;
+                ]
+            ) ;
+            stn-ops:hasInput
+            [ a stn-ops:DisplayedName ;
+                stn-ops:paramName "screen_name" ;
+                stn-ops:required true ;
+            ] ;
+        ] .
+
+<#deleteConnection>
+    a stn-ops:DeleteConnectionTo ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/friendships/destroy.json" ;
+            http:headers (
+                [ a http:RequestHeader ;
+                    http:fieldName "Content-Type" ;
+                    http:fieldValue "application/json" ;
+                ]
+            ) ;
+            stn-ops:hasInput
+                [ a stn-ops:DisplayedName ;
+                    stn-ops:paramName "screen_name" ;
+                    stn-ops:required true ;
+                ] ;
+        ] .
+
+<#sendMessage>
+    a stn-ops:SendPrivateMessage;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/direct_messages/new.json" ;
+            http:headers (
+                [ a http:RequestHeader ;
+                    http:fieldName "Content-Type" ;
+                    http:fieldValue "application/json" ;
+                ]
+            ) ;
+            stn-ops:hasInput
+                [ a stn-ops:DisplayedName ;
+                    stn-ops:paramName "screen_name" ;
+                    stn-ops:required true ;
+                ] ;
+            stn-ops:hasInput
+                [ a stn-ops:Description ;
+                    stn-ops:paramName "text" ;
+                    stn-ops:required true ;
+                ] ;
+           stn-ops:hasOutput
+                [ a stn:Message ] ;
+        ] .
+
+<#deleteMessage>
+    a stn-ops:DeletePrivateMessage ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/direct_messages/destroy.json" ;
+            http:headers (
+                [ a http:RequestHeader ;
+                    http:fieldName "Content-Type" ;
+                    http:fieldValue "application/json" ;
+                ]
+            ) ;
+            stn-ops:hasInput
+                [ a stn-ops:EntityID ;
+                    stn-ops:paramName "id" ;
+                    stn-ops:required true;
+                ] ;
+        ] .
+
+<#getMessage>
+    a stn-ops:GetMessage ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/direct_messages/show.json" ;
+            stn-ops:hasInput
+                [ a stn-ops:EntityID ;
+                    stn-ops:paramName "id" ;
+                    stn-ops:required true ;
+                    stn-ops:inline true ;
+                ] ;
+            stn-ops:hasOutput
+                [ a stn:Message ] ;
+        ] .
+
+<#getMessages>
+    a stn-ops:GetMessages ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/direct_messages.json" ;
+            stn-ops:hasOutputCollection
+                [ a stn:Message ] ;
+        ] .
