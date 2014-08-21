@@ -1,4 +1,4 @@
-package models
+package democlient
 
 import org.w3.banana._
 import org.w3.banana.diesel._
@@ -6,15 +6,22 @@ import org.w3.banana.jena._
 import org.w3.banana.syntax._
 import play.api.libs.json._
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
+import play.api.libs.functional.syntax.functionalCanBuildApplicative
 
 
 case class PlatformSpec(uri: String, baseUrl: String, operations: List[OperationSpec])
+
+object PlatformSpec {
+  implicit val writes: Writes[PlatformSpec] = Json.writes[PlatformSpec]
+  implicit val reads: Reads[PlatformSpec] = Json.reads[PlatformSpec]
+}
 
 
 case class OperationSpec(id: String, cls: String, method: String, requestUri: String, params: List[ParameterSpec])
 
 object OperationSpec {
   implicit val writes: Writes[OperationSpec] = Json.writes[OperationSpec]
+  implicit val reads: Reads[OperationSpec] = Json.reads[OperationSpec]
 }
 
 
@@ -22,6 +29,7 @@ case class ParameterSpec(cls: String, name: String, required: Boolean)
 
 object ParameterSpec {
   implicit val writes: Writes[ParameterSpec] = Json.writes[ParameterSpec]
+  implicit val reads: Reads[ParameterSpec] = Json.reads[ParameterSpec]
 }
 
 
@@ -99,8 +107,9 @@ class PlatformSpecParser(ttlSpec: String) extends RDFModule with SparqlGraphModu
                         |WHERE {
                         |  ?opUri :implementedAs [
                         |    a stn-http:STNRequest ;
-                        |    :requiresInput [
+                        |    :hasInput [
                         |      a ?paramClass ;
+                        |      :required true ;
                         |      :paramName ?paramName ;
                         |    ] ;
                         |  ] .

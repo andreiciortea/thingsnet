@@ -22,6 +22,6 @@ POST    /messages/delete            controllers.Application.deleteMessage
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 # Test client
-GET     /client                     controllers.Application.demoClient
-POST    /client                     controllers.Application.getSTNSpec
-POST    /client/run                 controllers.Application.runOperation
+GET     /client                     democlient.DemoClientApplication.demoClient
+POST    /client                     democlient.DemoClientApplication.getSTNSpec
+POST    /client/run                 democlient.DemoClientApplication.runOperation
