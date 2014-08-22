@@ -12,6 +12,7 @@
         <#getConnections> ,
         <#deleteConnection> ,
         <#sendMessage> ,
+        <#postPublicMessage> ,
         <#getMessages> ,
         <#deleteMessage> .
 
@@ -92,6 +93,25 @@
                 ] ;
            stn-ops:hasOutput
                 [ a stn:Message ] ;
+        ] .
+
+<#postPublicMessage>
+    a stn-ops:PostPublicMessage;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/statuses/update.json" ;
+            http:headers (
+                [ a http:RequestHeader ;
+                    http:fieldName "Content-Type" ;
+                    http:fieldValue "application/json" ;
+                ]
+            ) ;
+            stn-ops:hasInput
+                [ a stn-ops:Description ;
+                    stn-ops:paramName "status" ;
+                    stn-ops:required true ;
+                ] ;
         ] .
 
 <#deleteMessage>
