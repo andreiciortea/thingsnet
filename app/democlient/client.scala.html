@@ -17,9 +17,9 @@
         <div id="client_displayedName"></div>
         <div id="client_description"></div>
         
-        <p><strong>STN Specifications:</strong></p>
+        <h2>STN Platform:</h2>
         @form(action = democlient.routes.DemoClientApplication.getSTNSpec()) {
-          @inputText(stnForm("uri"), '_label -> "Spec URL:", 'size -> 30)
+          @inputText(stnForm("uri"), '_label -> "Description document URL:", 'size -> 50)
           <input type="submit" value="Get spec!" />
         }
         
@@ -56,22 +56,24 @@
 
 
     <script>
-        var STN = {"webId": "http://purl.org/stn/operations#WebID",
-                "ownerId": "http://purl.org/stn/operations#OwnerID",
-                "displayedName": "http://purl.org/stn/operations#DisplayedName",
-                "description": "http://purl.org/stn/operations#Description"};
+        var STN = {"myWebId": "http://purl.org/stn/operations#MyWebID",
+                "myOwnerId": "http://purl.org/stn/operations#MyOwnerID",
+                "myDisplayedName": "http://purl.org/stn/operations#MyDisplayedName",
+                "myDescription": "http://purl.org/stn/operations#MyDescription"};
     
         function initClient() {
           if (typeof(Storage) != "undefined") {
-            localStorage.setItem(STN.webId, "http://www.example.com/#thing");
-            localStorage.setItem(STN.ownerId, "http://www.andreiciortea.ro/#me");
-            localStorage.setItem(STN.displayedName, "Demo Client");
-            localStorage.setItem(STN.description, "I am a demo client for the WoT 2014 workshop.");
+            localStorage.clear()
+          
+            localStorage.setItem(STN.myWebId, "http://www.example.com/#thing");
+            localStorage.setItem(STN.myOwnerId, "http://www.andreiciortea.ro/#me");
+            localStorage.setItem(STN.myDisplayedName, "STN Client");
+            localStorage.setItem(STN.myDescription, "I am a demo client for the WoT 2014 workshop.");
             
-            document.getElementById("client_webid").innerHTML = "Owner: " + localStorage.getItem(STN.webId);
-            document.getElementById("client_owner").innerHTML = "Owner: " + localStorage.getItem(STN.ownerId);
-            document.getElementById("client_displayedName").innerHTML = "Displayed name: " + localStorage.getItem(STN.displayedName);
-            document.getElementById("client_description").innerHTML = "Description: " + localStorage.getItem(STN.description);
+            document.getElementById("client_webid").innerHTML = "<strong>WebID</strong>: " + localStorage.getItem(STN.myWebId);
+            document.getElementById("client_owner").innerHTML = "<strong>Owner's WebID</strong>: " + localStorage.getItem(STN.myOwnerId);
+            document.getElementById("client_displayedName").innerHTML = "<strong>Displayed name</strong>: " + localStorage.getItem(STN.myDisplayedName);
+            document.getElementById("client_description").innerHTML = "<strong>Description</strong>: " + localStorage.getItem(STN.myDescription);
           }
         }
     </script>
@@ -93,7 +95,7 @@
           $.extend(params, packJsonParams(op["params"]));
           
           var clientParams = [
-            {name: "mywebid", value: localStorage.getItem(STN.webId)},
+            {name: "mywebid", value: localStorage.getItem(STN.myWebId)},
             {name: "method", value: op["method"]},
             {name: "requestUri", value: requestUri},
             {name: "jsonData", value: JSON.stringify(params)},
