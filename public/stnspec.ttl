@@ -15,6 +15,7 @@
         <#getConnections> ,
         <#deleteConnection> ,
         <#sendMessage> ,
+        <#getMessage> ,
         <#getMessages> ,
         <#deleteMessage> .
 
@@ -31,12 +32,12 @@
                 ]
             ) ;
             stn-ops:hasInput
-                [ a stn-ops:DisplayedName ;
+                [ a stn-ops:MyDisplayedName ;
                     stn-ops:paramName "displayedName" ;
                     stn-ops:required true ;
                 ] ;
             stn-ops:hasInput
-                [ a stn-ops:Description ;
+                [ a stn-ops:MyDescription ;
                     stn-ops:paramName "description" ;
                 ] ;
             stn-ops:hasOutput
