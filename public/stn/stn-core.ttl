@@ -1,0 +1,724 @@
+@prefix : <http://purl.org/stn/core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://purl.org/stn/core> .
+
+<http://purl.org/stn/core> rdf:type owl:Ontology ;
+                           
+                           rdfs:label "STN-Core"@en ;
+                           
+                           rdfs:comment """Socio-technical networks (STNs) are networks of people and social things (i.e. autonomous physical or virtual objects). An STN mirrors the physical world by creating digital counterparts of physical and abstract entities and relating them to one another. In the same time, applications running in the digital world may reflect back into the physical world (e.g. through actuators).
+
+An STN encodes the different relations among people and smart things, such as friendship, ownership, provenance or colocation. An STN may exist only within the minds of its members, however, in most cases, an STN is reified within an STN platform.
+
+STN-Core provides the core concepts and properties required for describing STNs. Developers may use STN-Core to describe existing STNs, but also to guide the design of new STNs."""@en .
+
+
+#################################################################
+#
+#    Object Properties
+#
+#################################################################
+
+
+###  http://purl.org/stn/core#acceptedConnectionRequest
+
+:acceptedConnectionRequest rdf:type owl:ObjectProperty ;
+                           
+                           rdfs:label "accepted connection request"@en ;
+                           
+                           rdfs:comment "unstable"@en ;
+                           
+                           rdfs:domain [ rdf:type owl:Class ;
+                                         owl:unionOf ( :Agent
+                                                       :UserAccount
+                                                     )
+                                       ] ;
+                           
+                           rdfs:range [ rdf:type owl:Class ;
+                                        owl:unionOf ( :Agent
+                                                      :UserAccount
+                                                    )
+                                      ] .
+
+
+
+###  http://purl.org/stn/core#connectedTo
+
+:connectedTo rdf:type owl:ObjectProperty ;
+             
+             rdfs:label "connected to"@en ;
+             
+             rdfs:comment "An entity (e.g. agent, user account or group) to which this entity (e.g. agent, user account or group) is connected to in an STN."@en ;
+             
+             owl:inverseOf :connectedTo ;
+             
+             rdfs:subPropertyOf owl:topObjectProperty .
+
+
+
+###  http://purl.org/stn/core#hasMember
+
+:hasMember rdf:type owl:ObjectProperty ;
+           
+           rdfs:label "has member"@en ;
+           
+           rdfs:comment "An agent that is member of this group."@en ;
+           
+           rdfs:range :Agent ;
+           
+           rdfs:domain :Group ;
+           
+           owl:inverseOf :memberOf ;
+           
+           rdfs:subPropertyOf owl:topObjectProperty .
+
+
+
+###  http://purl.org/stn/core#hasReceiver
+
+:hasReceiver rdf:type owl:ObjectProperty ;
+             
+             rdfs:label "has receiver"@en ;
+             
+             rdfs:comment "An agent, user account or group that is a receiver of this message."@en ;
+             
+             rdfs:domain :Message ;
+             
+             rdfs:range [ rdf:type owl:Class ;
+                          owl:unionOf ( :Agent
+                                        :Group
+                                        :UserAccount
+                                      )
+                        ] .
+
+
+
+###  http://purl.org/stn/core#hasReply
+
+:hasReply rdf:type owl:AsymmetricProperty ,
+                   owl:IrreflexiveProperty ,
+                   owl:ObjectProperty ;
+          
+          rdfs:label "has reply"@en ;
+          
+          rdfs:comment "A message that is a reply to this message."@en ;
+          
+          rdfs:domain :Message ;
+          
+          rdfs:range :Message .
+
+
+
+###  http://purl.org/stn/core#hasSender
+
+:hasSender rdf:type owl:FunctionalProperty ,
+                    owl:ObjectProperty ;
+           
+           rdfs:label "has sender"@en ;
+           
+           rdfs:comment "An agent or a user account that is the sender of this message. A message has only one sender."@en ;
+           
+           rdfs:domain :Message ;
+           
+           rdfs:range [ rdf:type owl:Class ;
+                        owl:unionOf ( :Agent
+                                      :UserAccount
+                                    )
+                      ] .
+
+
+
+###  http://purl.org/stn/core#heldBy
+
+:heldBy rdf:type owl:FunctionalProperty ,
+                 owl:ObjectProperty ;
+        
+        rdfs:label "held by"@en ;
+        
+        rdfs:comment "The agent that holds this user account."@en ;
+        
+        rdfs:range :Agent ;
+        
+        rdfs:domain :UserAccount ;
+        
+        owl:inverseOf :holds ;
+        
+        rdfs:subPropertyOf :represents .
+
+
+
+###  http://purl.org/stn/core#holds
+
+:holds rdf:type owl:InverseFunctionalProperty ,
+                owl:ObjectProperty ;
+       
+       rdfs:label "holds"@en ;
+       
+       rdfs:comment "A user account held by this agent."@en ;
+       
+       rdfs:domain :Agent ;
+       
+       rdfs:range :UserAccount ;
+       
+       rdfs:subPropertyOf :representedBy .
+
+
+
+###  http://purl.org/stn/core#hostOf
+
+:hostOf rdf:type owl:ObjectProperty ;
+        
+        rdfs:label "host of"@en ;
+        
+        rdfs:comment "An entity (e.g., a user acount, some social media content) that is hosted on this platform."@en ;
+        
+        rdfs:range :DigitalCounterpart ;
+        
+        rdfs:domain :Platform ;
+        
+        owl:inverseOf :hostedOn ;
+        
+        rdfs:subPropertyOf owl:topObjectProperty .
+
+
+
+###  http://purl.org/stn/core#hostedOn
+
+:hostedOn rdf:type owl:ObjectProperty ;
+          
+          rdfs:label "hosted on"@en ;
+          
+          rdfs:comment "The platform that hosts this entity (e.g., a user account, message)."@en ;
+          
+          rdfs:domain :DigitalCounterpart ;
+          
+          rdfs:range :Platform ;
+          
+          rdfs:subPropertyOf owl:topObjectProperty .
+
+
+
+###  http://purl.org/stn/core#isReceiverOf
+
+:isReceiverOf rdf:type owl:ObjectProperty ;
+              
+              rdfs:label "receiver of"@en ;
+              
+              rdfs:comment "A message received by this agent, user account or group."@en ;
+              
+              rdfs:range :Message ;
+              
+              owl:inverseOf :hasReceiver ;
+              
+              rdfs:domain [ rdf:type owl:Class ;
+                            owl:unionOf ( :Agent
+                                          :Group
+                                          :UserAccount
+                                        )
+                          ] .
+
+
+
+###  http://purl.org/stn/core#isReplyOf
+
+:isReplyOf rdf:type owl:AsymmetricProperty ,
+                    owl:IrreflexiveProperty ,
+                    owl:ObjectProperty ;
+           
+           rdfs:label "reply of"@en ;
+           
+           rdfs:comment "A message to which this message is a reply."@en ;
+           
+           rdfs:range :Message ;
+           
+           rdfs:domain :Message ;
+           
+           owl:inverseOf :hasReply .
+
+
+
+###  http://purl.org/stn/core#isSenderOf
+
+:isSenderOf rdf:type owl:InverseFunctionalProperty ,
+                     owl:ObjectProperty ;
+            
+            rdfs:label "sender of"@en ;
+            
+            rdfs:comment "A message sent by this agent or user account."@en ;
+            
+            rdfs:range :Message ;
+            
+            owl:inverseOf :hasSender ;
+            
+            rdfs:domain [ rdf:type owl:Class ;
+                          owl:unionOf ( :Agent
+                                        :UserAccount
+                                      )
+                        ] .
+
+
+
+###  http://purl.org/stn/core#locatedAt
+
+:locatedAt rdf:type owl:ObjectProperty ;
+           
+           rdfs:label "located at"@en ;
+           
+           rdfs:comment "A spatial thing wrt which this entity is located."@en ;
+           
+           rdfs:range :SpatialThing ;
+           
+           rdfs:subPropertyOf owl:topObjectProperty .
+
+
+
+###  http://purl.org/stn/core#locationOf
+
+:locationOf rdf:type owl:ObjectProperty ;
+            
+            rdfs:label "location of"@en ;
+            
+            rdfs:comment "An entity located wrt this spatial thing."@en ;
+            
+            rdfs:domain :SpatialThing ;
+            
+            owl:inverseOf :locatedAt ;
+            
+            rdfs:subPropertyOf owl:topObjectProperty .
+
+
+
+###  http://purl.org/stn/core#memberOf
+
+:memberOf rdf:type owl:ObjectProperty ;
+          
+          rdfs:label "member of"@en ;
+          
+          rdfs:comment "A group this agent is member of."@en ;
+          
+          rdfs:domain :Agent ;
+          
+          rdfs:range :Group ;
+          
+          rdfs:subPropertyOf owl:topObjectProperty .
+
+
+
+###  http://purl.org/stn/core#ownedBy
+
+:ownedBy rdf:type owl:ObjectProperty ;
+         
+         rdfs:label "owned by"@en ;
+         
+         rdfs:comment "An owner (e.g., an agent, a group) of this smart thing."@en ;
+         
+         rdfs:domain :SmartThing ;
+         
+         rdfs:subPropertyOf :connectedTo .
+
+
+
+###  http://purl.org/stn/core#owns
+
+:owns rdf:type owl:ObjectProperty ;
+      
+      rdfs:label "owns"@en ;
+      
+      rdfs:comment "A smart thing being owned by this entity (e.g., an agent, a group)."@en ;
+      
+      rdfs:range :SmartThing ;
+      
+      rdfs:subPropertyOf :connectedTo ;
+      
+      owl:inverseOf :ownedBy .
+
+
+
+###  http://purl.org/stn/core#rejectedConnectionRequest
+
+:rejectedConnectionRequest rdf:type owl:ObjectProperty ;
+                           
+                           rdfs:label "rejected connection request"@en ;
+                           
+                           rdfs:comment "unstable"@en .
+
+
+
+###  http://purl.org/stn/core#representedBy
+
+:representedBy rdf:type owl:ObjectProperty ;
+               
+               rdfs:label "represented by"@en ;
+               
+               rdfs:comment "A digital artifact that represents this abstract or physical entity."@en ;
+               
+               rdfs:range :DigitalCounterpart ;
+               
+               owl:inverseOf :represents .
+
+
+
+###  http://purl.org/stn/core#represents
+
+:represents rdf:type owl:ObjectProperty ;
+            
+            rdfs:label "represents"@en ;
+            
+            rdfs:comment "An abstract or physical entity (e.g. group or person) represented by this digital artifact."@en ;
+            
+            rdfs:domain :DigitalCounterpart .
+
+
+
+###  http://purl.org/stn/core#sentConnectionRequest
+
+:sentConnectionRequest rdf:type owl:ObjectProperty ;
+                       
+                       rdfs:label "sent connection request"@en ;
+                       
+                       rdfs:comment "unstable"@en ;
+                       
+                       rdfs:range [ rdf:type owl:Class ;
+                                    owl:unionOf ( :Agent
+                                                  :UserAccount
+                                                )
+                                  ] ;
+                       
+                       rdfs:domain [ rdf:type owl:Class ;
+                                     owl:unionOf ( :Agent
+                                                   :UserAccount
+                                                 )
+                                   ] .
+
+
+
+
+
+#################################################################
+#
+#    Data properties
+#
+#################################################################
+
+
+###  http://purl.org/stn/core#description
+
+:description rdf:type owl:DatatypeProperty ;
+             
+             rdfs:range xsd:string .
+
+
+
+###  http://purl.org/stn/core#name
+
+:name rdf:type owl:DatatypeProperty ;
+      
+      rdfs:range xsd:string .
+
+
+
+
+
+#################################################################
+#
+#    Classes
+#
+#################################################################
+
+
+###  http://purl.org/stn/core#Agent
+
+:Agent rdf:type owl:Class ;
+       
+       rdfs:label "Agent"@en ;
+       
+       owl:disjointWith :Artifact ,
+                        :DigitalCounterpart ,
+                        :Message ,
+                        :Platform ,
+                        :Role ;
+       
+       rdfs:comment "An agent is an autonomous entity (most commonly a person, organization, physical object or virtual object) that interacts with other agents in the physical-digital space."@en .
+
+
+
+###  http://purl.org/stn/core#Artifact
+
+:Artifact rdf:type owl:Class ;
+          
+          rdfs:label "Artifact"@en ;
+          
+          owl:disjointWith :Group ,
+                           :Platform .
+
+
+
+###  http://purl.org/stn/core#ClosedMessage
+
+:ClosedMessage rdf:type owl:Class ;
+               
+               rdfs:label "Closed Message"@en ;
+               
+               rdfs:subClassOf :Message ;
+               
+               owl:disjointWith :OpenMessage ;
+               
+               rdfs:comment """unstable
+
+A closed message is a message with a fixed set of receivers. However, depending on the features offered by the hosting STN platform, a closed set of receivers may be modified by one of the agents already involved in the communication. Such is the case of a message thread on Facebook, where either the sender or one of the receivers may add new users to the message thread, or they may remove themselves from the message thread to stop receiving new replies."""@en .
+
+
+
+###  http://purl.org/stn/core#DigitalCounterpart
+
+:DigitalCounterpart rdf:type owl:Class ;
+                    
+                    rdfs:label "Digital Artifact"@en ;
+                    
+                    rdfs:subClassOf :Artifact ;
+                    
+                    owl:disjointWith :Role ,
+                                     :SpatialThing ;
+                    
+                    rdfs:comment """Digital artifacts are virtual tools used by agents to participate in STNs. A digital artifact may be a digital counterpart of an abstract or physical entity, such as a digital counterpart of a physical place, or it may exist independently, such as an online message. Digital artifacts exist in the digital world and are hosted on STN platforms.
+
+An entity may have several digital counterparts, and a digital counterpart may have several digital representations. A user account is a kind of digital artifact."""@en .
+
+
+
+###  http://purl.org/stn/core#Group
+
+:Group rdf:type owl:Class ;
+       
+       rdfs:label "Group"@en ;
+       
+       owl:disjointWith :Message ,
+                        :Person ,
+                        :Platform ,
+                        :Role ;
+       
+       rdfs:comment "A group is a collection of agents. A group is an abstract entity that may be associated with one or more digital artifacts, i.e. its digital counterparts. For instance, the AI-MAS research team of University \"Politehnica\" of Bucharest may be associated with a Facebook group and a LinkedIn group."@en .
+
+
+
+###  http://purl.org/stn/core#Message
+
+:Message rdf:type owl:Class ;
+         
+         rdfs:label "Message"@en ;
+         
+         rdfs:subClassOf :DigitalCounterpart ;
+         
+         owl:disjointWith :Platform ,
+                          :Role ,
+                          :SpatialThing ,
+                          :UserAccount ;
+         
+         rdfs:comment """unstable
+
+A message is a piece of information transmitted by an agent, usually through the use of a user account, to a set of receivers. A message may be sent in reply to another message.
+
+A message is currently classified following 2 dichotomies: open vs. closed messages and shared vs. transmitted messages."""@en .
+
+
+
+###  http://purl.org/stn/core#OpenMessage
+
+:OpenMessage rdf:type owl:Class ;
+             
+             rdfs:label "Open Message"@en ;
+             
+             rdfs:subClassOf :Message ;
+             
+             rdfs:comment """unstable
+
+An open message is a message that has an open set of receivers, i.e. the set of receivers may evolve over time without the direct intervention of an agent. For instance, a message made available to anyone on the Web has an open set of receivers. Similarly, on many social platforms users may post a message that is made available, by default, to all (or a subset of) the users they are connected to. However, their connections may evolve over time, and new connected users may have access to older messages."""@en .
+
+
+
+###  http://purl.org/stn/core#Person
+
+:Person rdf:type owl:Class ;
+        
+        rdfs:label "Person"@en ;
+        
+        rdfs:subClassOf :Agent ,
+                        :SpatialThing ;
+        
+        owl:disjointWith :Place ,
+                         :Platform ,
+                         :SmartThing ;
+        
+        rdfs:comment "Persons are human agents, they represent people. A person is also a spatial thing."@en .
+
+
+
+###  http://purl.org/stn/core#PhysicalArtifact
+
+:PhysicalArtifact rdf:type owl:Class ;
+                  
+                  rdfs:label "Physical Artifact"@en ;
+                  
+                  rdfs:subClassOf :Artifact .
+
+
+
+###  http://purl.org/stn/core#PhysicalDigitalArtifact
+
+:PhysicalDigitalArtifact rdf:type owl:Class ;
+                         
+                         rdfs:label "Physical-Digital Artifact"@en ;
+                         
+                         rdfs:subClassOf :DigitalCounterpart ,
+                                         :PhysicalArtifact .
+
+
+
+###  http://purl.org/stn/core#Place
+
+:Place rdf:type owl:Class ;
+       
+       rdfs:label "Place"@en ;
+       
+       rdfs:subClassOf :SpatialThing ;
+       
+       rdfs:comment "Places are all spatial things that are not persons (e.g. geographical regions, cities)."@en .
+
+
+
+###  http://purl.org/stn/core#Platform
+
+:Platform rdf:type owl:Class ;
+          
+          rdfs:label "Platform"@en ;
+          
+          owl:disjointWith :Role ;
+          
+          rdfs:comment "A platform is a system that provides a collection of features enabling agents to participate in an STN. Common features include creating and using user accounts, publishing social media content or interacting with other platform users."@en .
+
+
+
+###  http://purl.org/stn/core#Role
+
+:Role rdf:type owl:Class ;
+      
+      rdfs:label "Role"@en ;
+      
+      owl:disjointWith :SpatialThing ;
+      
+      owl:deprecated "true"^^xsd:boolean ;
+      
+      rdfs:comment "A role is a function that may be enacted by an agent, within the scope of a group, platform, etc."@en .
+
+
+
+###  http://purl.org/stn/core#SharedMessage
+
+:SharedMessage rdf:type owl:Class ;
+               
+               rdfs:label "Shared Message"@en ;
+               
+               rdfs:subClassOf :Message ;
+               
+               owl:disjointWith :TransmittedMessage ;
+               
+               rdfs:comment """unstable
+
+A shared message is made available to a (possibly open) set of receivers, yet the sender of the message may decide at any time to stop sharing the message with some (or possibly all) of its receivers. For instance, a direct message sent on Twitter is actually a shared message, and the sender may decide to delete it at any time."""@en .
+
+
+
+###  http://purl.org/stn/core#SharedOpenMessage
+
+:SharedOpenMessage rdf:type owl:Class ;
+                   
+                   rdfs:label "Shared Open Message"@en ;
+                   
+                   rdfs:subClassOf :OpenMessage ,
+                                   :SharedMessage ;
+                   
+                   rdfs:comment "unstable"@en .
+
+
+
+###  http://purl.org/stn/core#SmartPlace
+
+:SmartPlace rdf:type owl:Class ;
+            
+            rdfs:label "Smart Place"@en ;
+            
+            rdfs:subClassOf :Place ,
+                            :SmartThing ;
+            
+            rdfs:comment "A smart place is a smart thing which is also a place. Most commonly, physical things (e.g. table, room, backyard) fall into this category."@en .
+
+
+
+###  http://purl.org/stn/core#SmartThing
+
+:SmartThing rdf:type owl:Class ;
+            
+            rdfs:label "Smart Thing"@en ;
+            
+            rdfs:subClassOf :Agent ;
+            
+            rdfs:comment "A smart thing is an agent that most commonly embeds the logics of a given physical or virtual object, although it may also represent a composite application (e.g. one built on top of several other smart things)."@en .
+
+
+
+###  http://purl.org/stn/core#SpatialThing
+
+:SpatialThing rdf:type owl:Class ;
+              
+              rdfs:label "Spatial Thing"@en ;
+              
+              rdfs:comment "A spatial thing is an entity with spatial characteristics (e.g. position, surface)."@en .
+
+
+
+###  http://purl.org/stn/core#TransmittedClosedMessage
+
+:TransmittedClosedMessage rdf:type owl:Class ;
+                          
+                          rdfs:label "Transmitted Closed Message"@en ;
+                          
+                          rdfs:subClassOf :ClosedMessage ,
+                                          :TransmittedMessage ;
+                          
+                          rdfs:comment "unstable"@en .
+
+
+
+###  http://purl.org/stn/core#TransmittedMessage
+
+:TransmittedMessage rdf:type owl:Class ;
+                    
+                    rdfs:label "Transmitted Message"@en ;
+                    
+                    rdfs:subClassOf :Message ;
+                    
+                    rdfs:comment """unstable
+
+When a message is transmitted, an actual copy of the message is received and owned by the receiver. Such is the case of a private message sent on Facebook."""@en .
+
+
+
+###  http://purl.org/stn/core#UserAccount
+
+:UserAccount rdf:type owl:Class ;
+             
+             rdfs:label "User Account"@en ;
+             
+             rdfs:subClassOf :DigitalCounterpart ;
+             
+             rdfs:comment "A user account is the digital counterpart of an agent within the scope of a platform. An agent may hold multiple user accounts, usually on different platforms. A user account may be anonymous."@en .
+
+
+
+
+###  Generated by the OWL API (version 3.4.2) http://owlapi.sourceforge.net
+
