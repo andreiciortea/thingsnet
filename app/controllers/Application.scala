@@ -51,7 +51,7 @@ object Application extends Controller {
             ResourceService.createResource(account)
             Created(account.toTurtle).withHeaders( (CONTENT_TYPE, "text/turtle") )
           } else {
-            BadRequest("There already exists an account held by " + mywebid + ".\n")
+            Forbidden("There already exists an account held by " + mywebid + ".\n")
           }
           
         }
@@ -126,7 +126,7 @@ object Application extends Controller {
           getAccountByWebID(mywebid).map {
             myAccountUri => {
               if (ResourceService.ask(UserAccount.queryAccountExists(accountUri))) {
-                ResourceService.patchResource(accountUri, UserAccount.addConnection(myAccountUri, accountUri))
+                ResourceService.patchResource(myAccountUri, UserAccount.addConnection(myAccountUri, accountUri))
                 Created
               } else {
                 BadRequest("The target of the connection is not a registered account.\n")
@@ -155,7 +155,7 @@ object Application extends Controller {
           getAccountByWebID(mywebid).map {
             myAccountUri =>
               if (ResourceService.ask(UserAccount.queryConnectionExists(myAccountUri, accountUri))) {
-                ResourceService.patchResource(mywebid, UserAccount.removeConnection(mywebid, accountUri))
+                ResourceService.patchResource(myAccountUri, UserAccount.removeConnection(myAccountUri, accountUri))
                 Ok
               } else {
                 NotFound
@@ -220,6 +220,7 @@ object Application extends Controller {
     Action.async(parse.json) { request =>
       request.body.validate[String].map {
         case (mywebid) => {
+          println("got request")
           getAccountByWebID(mywebid).flatMap {
             myAccountUri =>
               ResourceService.queryForGraphs(Message.queryMessagesForUser(myAccountUri)) map {

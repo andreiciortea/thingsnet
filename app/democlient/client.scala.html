@@ -7,15 +7,15 @@
     <head>
         <title>STN Demo Client</title>
         
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <script src="/assets/javascripts/jquery-1.11.1.min.js"></script>
     </head>
     
-    <body onload="initClient()">
+    <body>
         <h1>WoT 2014 Demo Client</h1>
-        <div id="client_webid"></div>
-        <div id="client_owner"></div>
-        <div id="client_displayedName"></div>
-        <div id="client_description"></div>
+        <div><strong>Client WebID</strong>: <input id="client_webid" type="text" size="50" value="http://www.example.com/#thing" /></div>
+        <div><strong>Owner's WebID</strong>: <input id="client_owner" type="text" size="50" value="http://www.andreiciortea.ro/#me" /></div>
+        <div><strong>Displayed Name</strong>: <input id="client_displayedName" type="text" size="50" value="STN Client" /></div>
+        <div><strong>Description</strong>: <input id="client_description" type="text" size="50" value = "I am a demo client for the WoT 2014 workshop." /></div>
         
         <h2>STN Platform:</h2>
         @form(action = democlient.routes.DemoClientApplication.getSTNSpec()) {
@@ -60,22 +60,6 @@
                 "myOwnerId": "http://purl.org/stn/operations#MyOwnerID",
                 "myDisplayedName": "http://purl.org/stn/operations#MyDisplayedName",
                 "myDescription": "http://purl.org/stn/operations#MyDescription"};
-    
-        function initClient() {
-          if (typeof(Storage) != "undefined") {
-            localStorage.clear()
-          
-            localStorage.setItem(STN.myWebId, "http://www.example.com/#thing");
-            localStorage.setItem(STN.myOwnerId, "http://www.andreiciortea.ro/#me");
-            localStorage.setItem(STN.myDisplayedName, "STN Client");
-            localStorage.setItem(STN.myDescription, "I am a demo client for the WoT 2014 workshop.");
-            
-            document.getElementById("client_webid").innerHTML = "<strong>WebID</strong>: " + localStorage.getItem(STN.myWebId);
-            document.getElementById("client_owner").innerHTML = "<strong>Owner's WebID</strong>: " + localStorage.getItem(STN.myOwnerId);
-            document.getElementById("client_displayedName").innerHTML = "<strong>Displayed name</strong>: " + localStorage.getItem(STN.myDisplayedName);
-            document.getElementById("client_description").innerHTML = "<strong>Description</strong>: " + localStorage.getItem(STN.myDescription);
-          }
-        }
     </script>
 
     @if(platform != None) {    
@@ -92,21 +76,27 @@
           // TOOD: expand request URI for inline params
           // expandRequestUri(requestUri, op["params"]);
 
+          var KB = { "http://purl.org/stn/operations#MyWebID": $('#client_webid').val(),
+                    "http://purl.org/stn/operations#MyOwnerID": $('#client_owner').val(),
+                    "http://purl.org/stn/operations#MyDisplayedName": $('#client_displayedName').val(),
+                    "http://purl.org/stn/operations#MyDescription": $('#client_description').val()
+                    }
+
           $.extend(params, packJsonParams(op["params"]));
           
           var clientParams = [
-            {name: "mywebid", value: localStorage.getItem(STN.myWebId)},
-            {name: "method", value: op["method"]},
-            {name: "requestUri", value: requestUri},
-            {name: "jsonData", value: JSON.stringify(params)},
+            { name: "mywebid", value: KB[STN.myWebId] },
+            { name: "method", value: op["method"] },
+            { name: "requestUri", value: requestUri },
+            { name: "jsonData", value: JSON.stringify(params) }
           ];
           
           function packJsonParams(params) {
-            var jsonData = {};
+           var jsonData = {};
             
             for (i = 0; i < params.length; i ++) {
-              if (!(localStorage.getItem(params[i].cls) === null)) {
-                jsonData[params[i].name] = localStorage.getItem(params[i].cls);
+              if (!(KB[params[i].cls] == undefined)) {
+                jsonData[params[i].name] = KB[params[i].cls];
               }
             }
             

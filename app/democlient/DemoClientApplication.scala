@@ -19,11 +19,11 @@ import org.scribe.model._
 
 object DemoClientApplication extends Controller {
   
-  def runTwitterRequest(method: String, uri: String, jsonData: String): (Int, String) = {
-    val CONSUMER_KEY = "CONSUMER_KEY"
-    val CONSUMER_SECRET = "CONSUMER_SECRET"
-    val TOKEN = "TOKEN"
-    val TOKEN_SECRET = "TOKEN_SECRET"
+  def runTwitterRequest(method: String, uri: String, jsonData: String): (Int, String, String) = {
+    val CONSUMER_KEY = "LSnVNcrG3lDfYMKrbTPWzw"
+    val CONSUMER_SECRET = "TB1oAwwEqgKrkGZTtSJIu3oQpq8ahLmkokzOxlW7M"
+    val TOKEN = "1691508180-LnKoiF21BuhoHqj88HT8yOOA8gVTxPgtwr21dV4"
+    val TOKEN_SECRET = "Hozhj7arvyvGBuKHLVqU1jBCp2V1CQMVaHfKzYGfzZo"
 
     val service = new ServiceBuilder()
                         .provider(classOf[TwitterApi])
@@ -64,7 +64,7 @@ object DemoClientApplication extends Controller {
     service.signRequest(new Token(TOKEN, TOKEN_SECRET), request)
     val response = request.send
 
-    (response.getCode, response.getBody)
+    (response.getCode, response.getHeader("Content-Type"), response.getBody)
   }
 
   
@@ -123,13 +123,17 @@ object DemoClientApplication extends Controller {
         if (requestUri.startsWith("https://api.twitter.com")) {
           (
               (
-                  response: (Int, String)) =>
-                    future{ Ok("Status code:" + response._1 + "\n" + response._2) }
+                  response: (Int, String, String)) =>
+                    future{ Ok("Status code:" + response._1 + "\n" 
+                        + "Content-Type:" + response._2 + "\n"
+                        + response._3) }
           )(runTwitterRequest(method, requestUri, jsonData))
         } else {
           runHttpRequest(webid, method, requestUri, jsonData).map {
             response =>
-              Ok("Status code:" + response.status + "\n" + response.body)
+              Ok("Status code: " + response.status + "\n" 
+                  + "Content-Type: " + (response.header("Content-Type") getOrElse "") + "\n"
+                  + response.body)
           }
         }
       }
@@ -142,7 +146,10 @@ object DemoClientApplication extends Controller {
     val futureResponse = 
       method match {
         case "GET"  => holder.get()
-        case "POST" => holder.post(Json.parse(jsonData).as[JsObject] + ("mywebid" -> JsString(webid)))
+        case "POST" => {
+          println("posting request with webid: " + webid)
+          holder.post(Json.parse(jsonData).as[JsObject] + ("mywebid" -> JsString(webid)))
+        }
       }
     
     futureResponse

@@ -172,8 +172,8 @@
     a stn-ops:GetMessages ;
     stn-ops:implementedAs
         [ a stn-http:STNRequest ;
-            http:methodName "GET" ;
-            http:requestURI "/messages/" ;
+            http:methodName "POST" ;
+            http:requestURI "/messages/list" ;
             stn-ops:hasOutputCollection
                 [ a stn:Message ] ;
         ] .
