@@ -1,0 +1,52 @@
+.main {
+    width: 1090px;
+    margin-top: 30px;
+}
+
+.list {
+    width: 750px;
+    padding: 10px;
+    background-color: lightgreen;
+    float:left;
+}
+
+.list-header {
+    padding-bottom: 8px;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.list-row {
+    padding: 5px 0px 5px 0px;
+}
+
+.list-left {
+    width: 150px;
+    float: left;
+}
+
+.list-center {
+    width: 300px;
+    float: left;
+}
+
+.list-right {
+    width: 300px;
+    clear: left;
+}
+
+.list-footer {
+    margin-top: 20px;
+    clear: both;
+}
+
+.left {
+    float: left;
+}
+
+.details {
+    width: 300px;
+    padding: 10px;
+    background-color: lightgreen;
+    float: right;
+}

@@ -1,0 +1,81 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="/assets/stylesheets/wwwclient.css">
+        <script src="/assets/javascripts/jquery-1.11.1.min.js"></script>
+        
+        <title>STN Browser</title>
+    </head>
+    
+    <body>
+        <h1>STN Browser</h1>
+        
+        <div><strong>Client WebID</strong>: <input id="client_webid" type="text" size="50" value="http://www.example.com/#thing" /></div>
+        <div><strong>Owner's WebID</strong>: <input id="client_owner" type="text" size="50" value="http://www.andreiciortea.ro/#me" /></div>
+        <div><strong>Displayed Name</strong>: <input id="client_displayedName" type="text" size="50" value="STN Client" /></div>
+        <div><strong>Description</strong>: <input id="client_description" type="text" size="50" value = "I am a demo client for the WoT 2014 workshop." /></div>
+        
+        <div class="main">
+        
+            <div class="list">
+            
+                <div class="list-header">
+                    <div class="list-left">Name:</div>
+                    <div class="list-center">URI:</div>
+                    <div>Available operations:</div>
+                </div>
+                
+                <div id="stnlist" class="list-content">
+                
+                <div class="list-row">
+                    <div id="twitter" class="list-left">Twitter</div>
+                    <div class="list-center">http://www.twitter.com/#platform</div>
+                    <select class="list-right">
+                        <option selected disabled>Select Command</option>
+                        <option>Command #1</option>
+                        <option>Command #2</option>
+                    </select>
+                </div>
+                
+                <div class="list-row">
+                    <div id="foursquare" class="list-left">Foursquare</div>
+                    <div class="list-center">http://www.foursquare.com/#platform</div>
+                    <select class="list-right">
+                        <option selected disabled>Select Command</option>
+                        <option>Command #1</option>
+                        <option>Command #2</option>
+                    </select>
+                </div>
+                
+                </div>
+                
+                <div class="list-footer">
+                    <label for="stndescdoc">STN description document URL:</label>
+                    <input id="stndescdoc" size="50"></input>
+                    <button id="addstn" onclick="addSTN()">Add STN!</button>
+                </div>
+                
+            </div>
+            
+            <div id="details" class="details">
+                <strong>Operation details:</strong>
+            </div>
+            
+        </div>
+        
+        <div id="debug" style="clear: both;">
+        </div>
+
+        <script>
+            function addSTN() {
+                $("#stnlist").append("");
+            }
+            
+            $(document).ready(function(){
+              $("#addstn").click(function(){
+                $("#debug").load("/assets/stnspec.ttl");
+              });
+            });
+        </script>
+        
+    </body>
+</html>
