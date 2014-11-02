@@ -76,7 +76,7 @@ object DemoClientApplication extends Controller {
   
   val opForm = Form(
     tuple(
-      "opSelect" -> nonEmptyText,
+      //"opSelect" -> nonEmptyText,
       "mywebid" -> nonEmptyText,
       "method" -> nonEmptyText,
       "requestUri" -> nonEmptyText,
@@ -115,10 +115,10 @@ object DemoClientApplication extends Controller {
         }
       },
       result => {
-        val webid = result._2
-        val method = result._3
-        val requestUri = result._4
-        val jsonData = result._5
+        val webid = result._1
+        val method = result._2
+        val requestUri = result._3
+        val jsonData = result._4
         
         if (requestUri.startsWith("https://api.twitter.com")) {
           (

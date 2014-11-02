@@ -9,7 +9,7 @@ import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.functional.syntax.functionalCanBuildApplicative
 
 
-case class PlatformSpec(uri: String, baseUrl: String, operations: List[OperationSpec])
+case class PlatformSpec(name: String, uri: String, baseUrl: String, operations: List[OperationSpec])
 
 object PlatformSpec {
   implicit val writes: Writes[PlatformSpec] = Json.writes[PlatformSpec]
@@ -47,18 +47,20 @@ class PlatformSpecParser(ttlSpec: String) extends RDFModule with SparqlGraphModu
                 |prefix stn-http: <http://purl.org/stn/http#>
                 |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 |
-                |SELECT ?platformUri ?baseUrl
+                |SELECT ?platformName ?platformUri ?baseUrl
                 |WHERE {
                 |  ?platformUri rdf:type :Platform .
-                |  ?platformUri stn-http:baseURL ?baseUrl
+                |  ?platformUri :name ?platformName .
+                |  ?platformUri stn-http:baseURL ?baseUrl .
                 |}""".stripMargin
     
     val row = sparqlEngine.executeSelect(SelectQuery(query)).getOrFail().toIterable.toList(0)
     
+    val platformName = row("platformName").flatMap(_.as[String])  getOrElse sys.error("") toString()
     val platformUri = row("platformUri")  getOrElse sys.error("") toString()
     val baseUrl = row("baseUrl")  getOrElse sys.error("") toString()
     
-    PlatformSpec(platformUri, baseUrl, extractOps(platformUri))
+    PlatformSpec(platformName, platformUri, baseUrl, extractOps(platformUri))
   }
   
   def extractOps(platformUri: String): List[OperationSpec] = {

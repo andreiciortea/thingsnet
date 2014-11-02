@@ -31,8 +31,8 @@
                     <div class="list-center">http://www.twitter.com/#platform</div>
                     <select class="list-right">
                         <option selected disabled>Select Command</option>
-                        <option>Command #1</option>
-                        <option>Command #2</option>
+                        <option value="0">Command #1</option>
+                        <option value="1">Command #2</option>
                     </select>
                 </div>
                 
@@ -41,8 +41,8 @@
                     <div class="list-center">http://www.foursquare.com/#platform</div>
                     <select class="list-right">
                         <option selected disabled>Select Command</option>
-                        <option>Command #1</option>
-                        <option>Command #2</option>
+                        <option value="0">Command #1</option>
+                        <option value="1">Command #2</option>
                     </select>
                 </div>
                 
@@ -51,30 +51,145 @@
                 <div class="list-footer">
                     <label for="stndescdoc">STN description document URL:</label>
                     <input id="stndescdoc" size="50"></input>
-                    <button id="addstn" onclick="addSTN()">Add STN!</button>
+                    <button id="addstn">Add STN!</button>
                 </div>
                 
             </div>
             
-            <div id="details" class="details">
-                <strong>Operation details:</strong>
+            <div class="details">
+                <div class="list-header">Operation details:</div>
+                
+                <div id="op-stn-index" style="display: none;"></div>
+                <div id="op-index" style="display: none;"></div>
+                
+                <div><label class="details-left">Operation: </label><div id="op-uri" class="details-right"></div></div>
+                <div style="clear: both;"></div>
+                <div><label class="details-left">Class: </label><div id="op-class" class="details-right"></div></div>
+                <div style="clear: both;"></div>
+                <div><label class="details-left">Base URL: </label><div id="op-base-url" class="details-right"></div></div>
+                <div style="clear: both;"></div>
+                <div><label class="details-left">Method: </label><div id="op-method" class="details-right"></div></div>
+                <div style="clear: both;"></div>
+                <div><label class="details-left">Request URI: </label><div id="op-request-uri" class="details-right"></div></div>
+                <div style="clear: both;"></div>
+                <div>
+                    <label>Parameters:</label>
+                    <div id="op-params"></div>
+                </div>
+                
+                <div class="details-footer">
+                    <button id="runop">Run operation!</button>
+                </div>
             </div>
             
         </div>
         
-        <div id="debug" style="clear: both;">
+        <div id="debug">
         </div>
 
         <script>
-            function addSTN() {
-                $("#stnlist").append("");
+            var STN = [];
+            var stnIndex = 0;
+
+            // Generates the select options from a JSON array of operations.            
+            function inflateOpOptions(jsonData) {
+                var options = "";
+                $.each(jsonData, function(index, op) {
+                  options += '<option value="' + index + '">' + op['cls'] + '</option>';
+                });
+                
+                return options;
             }
             
-            $(document).ready(function(){
-              $("#addstn").click(function(){
-                $("#debug").load("/assets/stnspec.ttl");
+            // Adds an STN from a JSON spec.
+            function addSTN(jsonData) {
+                // Add JSON data to STN index.
+                STN[stnIndex ++] = jsonData;
+                
+                // Add STN to the list of platforms.
+                return '<div class="list-row">' +
+                    '<div class="list-left">' + jsonData['name'] + '</div>' +
+                    '<div class="list-center">' + jsonData['uri'] + '</div>' +
+                    '<select id="' + (stnIndex - 1) + '" class="list-right" onchange="showOpDetails(' + (stnIndex-1) + ')">' +
+                        '<option selected disabled>Select Command</option>' +
+                        inflateOpOptions(jsonData['operations']) +
+                    '</select>' +
+                '</div>' ;
+            }
+            
+            // Display the details of a selected operation.
+            function showOpDetails(index) {
+                opIndex = $("#" + index).val();
+                op = STN[index]['operations'][opIndex]
+                
+                $("#op-stn-index").text( index );
+                $("#op-index").text( opIndex );
+                $("#op-uri").text( op['id'] );
+                $("#op-class").text( op['cls'] );
+                $("#op-base-url").text( STN[index]['baseUrl'] );
+                $("#op-method").text( op['method'] );
+                $("#op-request-uri").text( op['requestUri'] );
+                
+                var paramStr = "<div>";
+                $.each(op['params'], function(i, param) {
+                    paramStr += '<div><div>' + param["cls"] + ' (required)</div>';
+                    paramStr += '<div>Key: ' + param["name"] + '</div>';
+                    paramStr += 'Value: <input id="param-' + i + '" size=40></input>';
+                    paramStr += '</div>';
+                });
+                paramStr += "</div>";
+                
+                $("#op-params").html( paramStr );
+            }
+            
+            // Wraps up all data necessary for running an operation.
+            function getOpData() {
+                var data = {};
+                
+                //index = $("#op-stn-index").val();
+                //opIndex = $("#op-index").val();
+                
+                data['mywebid'] = $("#client_webid").val();
+                data['method'] = $("#op-method").text();
+                data['requestUri'] = $("#op-base-url").text() + $("#op-request-uri").text();
+                data['jsonData'] = packOpParams();
+                
+                return data;
+            }
+            
+            // Returns a json string with all params.
+            function packOpParams() {
+                index = $("#op-stn-index").text();
+                opIndex = $("#op-index").text();
+                
+                op = STN[index]['operations'][opIndex];
+                //alert("Packing for " + index + " " + opIndex + ": " + JSON.stringify(op));
+                
+                var data = {};
+                $.each(op['params'], function(i, param) {
+                    data[param["name"]] = $("#param-" + i).val();
+                });
+                
+                //alert("Params: " + JSON.stringify(data));
+                
+                return JSON.stringify(data);
+            }
+            
+            $(document).ready(function() {
+              $("#addstn").click(function() {
+                $.get("/wwwclient/stn-spec", { uri: encodeURIComponent($("#stndescdoc").val()) }, function(data, status) {
+                    $("#debug").text( JSON.stringify(data) );
+                    $("#stnlist").append(addSTN(data));
+                });
+              });
+              
+              $("#runop").click(function() {
+                $.post("/client/run", getOpData(), function(data, status) {
+                    $("#debug").text( data );
+                });
               });
             });
+            
         </script>
         
     </body>

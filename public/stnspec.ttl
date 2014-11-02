@@ -6,6 +6,7 @@
 
 <#platform>
     a stn:Platform ;
+    stn:name "ThingsNet" ;
     stn-http:baseURL <http://localhost:9000> ;
     stn-http:supportsAuth stn-http:WebID ;
     stn-ops:supports <#createAccount> ,

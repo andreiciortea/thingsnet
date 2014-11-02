@@ -23,6 +23,8 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 # Test client
 GET     /wwwclient                  democlient.WWWClient.index
+GET     /wwwclient/stn-spec         democlient.WWWClient.getPlatformSpec(uri: String ?= "")
+
 GET     /client                     democlient.DemoClientApplication.demoClient
 POST    /client                     democlient.DemoClientApplication.getSTNSpec
 POST    /client/run                 democlient.DemoClientApplication.runOperation

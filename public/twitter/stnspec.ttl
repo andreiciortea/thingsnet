@@ -6,6 +6,7 @@
 
 <#platform>
     a stn:Platform ;
+    stn:name "Twitter" ;
     stn-http:baseURL <https://api.twitter.com/1.1> ;
     stn-ops:supports <#getAccount> ,
         <#createConnection> ,
