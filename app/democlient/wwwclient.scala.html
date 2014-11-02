@@ -129,12 +129,18 @@
                 $("#op-base-url").text( STN[index]['baseUrl'] );
                 $("#op-method").text( op['method'] );
                 $("#op-request-uri").text( op['requestUri'] );
+
+                var kb = { "http://purl.org/stn/operations#MyWebID": $('#client_webid').val(),
+                        "http://purl.org/stn/operations#MyOwnerID": $('#client_owner').val(),
+                        "http://purl.org/stn/operations#MyDisplayedName": $('#client_displayedName').val(),
+                        "http://purl.org/stn/operations#MyDescription": $('#client_description').val()
+                    }
                 
                 var paramStr = "<div>";
                 $.each(op['params'], function(i, param) {
                     paramStr += '<div><div>' + param["cls"] + ' (required)</div>';
-                    paramStr += '<div>Key: ' + param["name"] + '</div>';
-                    paramStr += 'Value: <input id="param-' + i + '" size=40></input>';
+                    paramStr += '<div>Name: ' + param["name"] + '</div>';
+                    paramStr += 'Value: <input id="param-' + i + '" value="' + ((kb[param["cls"]] == undefined) ? "" : kb[param["cls"]]) + '" size="40" />';
                     paramStr += '</div>';
                 });
                 paramStr += "</div>";
