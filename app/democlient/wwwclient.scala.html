@@ -84,7 +84,8 @@
             
         </div>
         
-        <div id="debug">
+        <div id="debug" style="clear: both;">
+            <textarea id="output" readonly="readonly" rows="25"></textarea>
         </div>
 
         <script>
@@ -184,15 +185,18 @@
             $(document).ready(function() {
               $("#addstn").click(function() {
                 $.get("/wwwclient/stn-spec", { uri: encodeURIComponent($("#stndescdoc").val()) }, function(data, status) {
-                    $("#debug").text( JSON.stringify(data) );
+                    $("#debug").append( JSON.stringify(data) );
                     $("#stnlist").append(addSTN(data));
                 });
               });
               
               $("#runop").click(function() {
                 $.post("/client/run", getOpData(), function(data, status) {
-                    $("#debug").text( data );
+                    //$("#debug").text( data );
+                    $("#output").text( data );
+                    $("#output").autoResize();
                 });
+                //$("#debug").load("/client/run", getOpData());
               });
             });
             

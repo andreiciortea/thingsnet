@@ -67,3 +67,10 @@
 label {
     font-weight: bold;
 }
+
+#output {
+    width: 1190px;
+    outline: none;
+    resize: none;
+    clear: both;
+}
