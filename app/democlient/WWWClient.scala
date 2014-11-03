@@ -22,10 +22,8 @@ object WWWClient extends Controller {
     WS.url(java.net.URLDecoder.decode(uri, "UTF-8")).get().map {
       response => {
         val parser = new PlatformSpecParser(response.body)
-//        Ok(html.client(stnForm, opForm, Some(parser.extractPlatformDetails), response.body))
         Ok(Json.toJson(parser.extractPlatformDetails))
       }
     }
-//    Ok("Twitter dummy spec: " + uri)
   }
 }

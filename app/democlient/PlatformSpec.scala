@@ -99,7 +99,7 @@ class PlatformSpecParser(ttlSpec: String) extends RDFModule with SparqlGraphModu
   }
   
   def getOpParams(opUri: String): List[ParameterSpec] = {
-    val requiredParamsQuery = """
+/*    val requiredParamsQuery = """
                         |prefix : <http://purl.org/stn/operations#>
                         |prefix stn-http: <http://purl.org/stn/http#>
                         |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -114,6 +114,20 @@ class PlatformSpecParser(ttlSpec: String) extends RDFModule with SparqlGraphModu
                         |      :required true ;
                         |      :paramName ?paramName ;
                         |    ] ;
+                        |  ] .
+                        |}""".stripMargin*/
+    val requiredParamsQuery = """
+                        |prefix : <http://purl.org/stn/operations#>
+                        |prefix stn-http: <http://purl.org/stn/http#>
+                        |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                        |prefix http: <http://www.w3.org/2011/http#>
+                        |
+                        |SELECT ?paramClass ?paramName
+                        |WHERE {
+                        |  ?opUri :hasInput [
+                        |      a ?paramClass ;
+                        |      :required true ;
+                        |      :paramName ?paramName ;
                         |  ] .
                         |}""".stripMargin
     

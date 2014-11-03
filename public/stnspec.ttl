@@ -32,18 +32,18 @@
                     http:fieldValue "application/json" ;
                 ]
             ) ;
-            stn-ops:hasInput
-                [ a stn-ops:MyDisplayedName ;
-                    stn-ops:paramName "displayedName" ;
-                    stn-ops:required true ;
-                ] ;
-            stn-ops:hasInput
-                [ a stn-ops:MyDescription ;
-                    stn-ops:paramName "description" ;
-                ] ;
-            stn-ops:hasOutput
-                [ a stn:UserAccount ] ;
-        ] .
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:MyDisplayedName ;
+            stn-ops:paramName "displayedName" ;
+            stn-ops:required true ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:MyDescription ;
+            stn-ops:paramName "description" ;
+        ] ;
+    stn-ops:hasOutput
+        [ a stn:UserAccount ] .
 
 <#getAccount>
     a stn-ops:GetUserAccount ;
@@ -52,15 +52,15 @@
             http:methodName "GET" ;
             http:requestURI ":accountUri" ;
             stn-ops:requiresAuth false ;
-            stn-ops:hasInput
-                [ a stn-ops:UserID ;
-                    stn-ops:paramName "accountUri" ;
-                    stn-ops:required true ;
-                    stn-ops:inline true ;
-                ] ;
-            stn-ops:hasOutput
-                [ a stn:UserAccount ] ;
-        ] .
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:UserID ;
+            stn-ops:paramName "accountUri" ;
+            stn-ops:required true ;
+            stn-ops:inline true ;
+        ] ;
+    stn-ops:hasOutput
+        [ a stn:UserAccount ] .
 
 <#deleteAccount>
     a stn-ops:DeleteUserAccount ;
@@ -82,11 +82,11 @@
                     http:fieldValue "application/json" ;
                 ]
             ) ;
-            stn-ops:hasInput
-            [ a stn-ops:UserID ;
-                stn-ops:paramName "accountUri" ;
-                stn-ops:required true ;
-            ] ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:UserID ;
+            stn-ops:paramName "accountUri" ;
+            stn-ops:required true ;
         ] .
 
 <#deleteConnection>
@@ -101,11 +101,11 @@
                     http:fieldValue "application/json" ;
                 ]
             ) ;
-            stn-ops:hasInput
-                [ a stn-ops:UserID ;
-                    stn-ops:paramName "accountUri" ;
-                    stn-ops:required true ;
-                ] ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:UserID ;
+            stn-ops:paramName "accountUri" ;
+            stn-ops:required true ;
         ] .
 
 <#sendMessage>
@@ -120,19 +120,19 @@
                     http:fieldValue "application/json" ;
                 ]
             ) ;
-            stn-ops:hasInput
-                [ a stn-ops:UserID ;
-                    stn-ops:paramName "receiver" ;
-                    stn-ops:required true ;
-                ] ;
-            stn-ops:hasInput
-                [ a stn-ops:Description ;
-                    stn-ops:paramName "body" ;
-                    stn-ops:required true ;
-                ] ;
-           stn-ops:hasOutput
-                [ a stn:Message ] ;
-        ] .
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:UserID ;
+            stn-ops:paramName "receiver" ;
+            stn-ops:required true ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:Description ;
+            stn-ops:paramName "body" ;
+            stn-ops:required true ;
+        ] ;
+   stn-ops:hasOutput
+        [ a stn:Message ] .
 
 <#deleteMessage>
     a stn-ops:DeletePrivateMessage ;
@@ -146,11 +146,11 @@
                     http:fieldValue "application/json" ;
                 ]
             ) ;
-            stn-ops:hasInput
-                [ a stn-ops:EntityID ;
-                    stn-ops:paramName "messageUri" ;
-                    stn-ops:required true;
-                ] ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:EntityID ;
+            stn-ops:paramName "messageUri" ;
+            stn-ops:required true;
         ] .
 
 <#getMessage>
@@ -159,15 +159,15 @@
         [ a stn-http:STNRequest ;
             http:methodName "GET" ;
             http:requestURI ":messageUri" ;
-            stn-ops:hasInput
-                [ a stn-ops:EntityID ;
-                    stn-ops:paramName "messageUri" ;
-                    stn-ops:required true ;
-                    stn-ops:inline true ;
-                ] ;
-            stn-ops:hasOutput
-                [ a stn:Message ] ;
-        ] .
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:EntityID ;
+            stn-ops:paramName "messageUri" ;
+            stn-ops:required true ;
+            stn-ops:inline true ;
+        ] ;
+    stn-ops:hasOutput
+        [ a stn:Message ] .
 
 <#getMessages>
     a stn-ops:GetMessages ;
@@ -175,6 +175,6 @@
         [ a stn-http:STNRequest ;
             http:methodName "POST" ;
             http:requestURI "/messages/list" ;
-            stn-ops:hasOutputCollection
-                [ a stn:Message ] ;
-        ] .
+        ] ;
+    stn-ops:hasOutputCollection
+        [ a stn:Message ] .

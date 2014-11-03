@@ -26,26 +26,6 @@
                 
                 <div id="stnlist" class="list-content">
                 
-                <div class="list-row">
-                    <div id="twitter" class="list-left">Twitter</div>
-                    <div class="list-center">http://www.twitter.com/#platform</div>
-                    <select class="list-right">
-                        <option selected disabled>Select Command</option>
-                        <option value="0">Command #1</option>
-                        <option value="1">Command #2</option>
-                    </select>
-                </div>
-                
-                <div class="list-row">
-                    <div id="foursquare" class="list-left">Foursquare</div>
-                    <div class="list-center">http://www.foursquare.com/#platform</div>
-                    <select class="list-right">
-                        <option selected disabled>Select Command</option>
-                        <option value="0">Command #1</option>
-                        <option value="1">Command #2</option>
-                    </select>
-                </div>
-                
                 </div>
                 
                 <div class="list-footer">
@@ -149,54 +129,68 @@
                 $("#op-params").html( paramStr );
             }
             
+            // Checks an operation URI for inline parameters.
+            function parseOpURI(uri, params) {
+                if (uri.indexOf(':') > -1) {
+                    $.each(params, function(i, param) {
+                        if (param['name'].charAt(0) == ':' && uri.indexOf(param['name']) > -1) {
+                            alert("replacing param!");
+                            uri = uri.replace(new RegExp(param['name'], 'g'), $("#param-" + i).val());
+                        }
+                    });
+                }
+                
+                return uri;
+            }
+            
             // Wraps up all data necessary for running an operation.
             function getOpData() {
                 var data = {};
                 
-                //index = $("#op-stn-index").val();
-                //opIndex = $("#op-index").val();
+                index = $("#op-stn-index").text();
+                opIndex = $("#op-index").text();
+                op = STN[index]['operations'][opIndex];
                 
                 data['mywebid'] = $("#client_webid").val();
                 data['method'] = $("#op-method").text();
-                data['requestUri'] = $("#op-base-url").text() + $("#op-request-uri").text();
-                data['jsonData'] = packOpParams();
+                data['requestUri'] = parseOpURI($("#op-base-url").text() + $("#op-request-uri").text(), op['params']);
+                data['jsonData'] = packOpParams(op['params']);
                 
                 return data;
             }
             
             // Returns a json string with all params.
-            function packOpParams() {
-                index = $("#op-stn-index").text();
-                opIndex = $("#op-index").text();
-                
-                op = STN[index]['operations'][opIndex];
-                //alert("Packing for " + index + " " + opIndex + ": " + JSON.stringify(op));
-                
+            function packOpParams(params) {
                 var data = {};
-                $.each(op['params'], function(i, param) {
-                    data[param["name"]] = $("#param-" + i).val();
+                $.each(params, function(i, param) {
+                    if (param["name"].charAt(0) != ':') {
+                        data[param["name"]] = $("#param-" + i).val();
+                    }
                 });
-                
-                //alert("Params: " + JSON.stringify(data));
                 
                 return JSON.stringify(data);
             }
             
-            $(document).ready(function() {
-              $("#addstn").click(function() {
-                $.get("/wwwclient/stn-spec", { uri: encodeURIComponent($("#stndescdoc").val()) }, function(data, status) {
+            function fetchAddSTN(stnDescURI) {
+                $.get("/wwwclient/stn-spec", { uri: encodeURIComponent(stnDescURI) }, function(data, status) {
                     $("#debug").append( JSON.stringify(data) );
                     $("#stnlist").append(addSTN(data));
                 });
+            }
+            
+            $(document).ready(function() {
+              fetchAddSTN("http://localhost:9000/assets/stnspec.ttl");
+              fetchAddSTN("http://localhost:9000/assets/twitter/stnspec.ttl");
+            
+              $("#addstn").click(function() {
+                fetchAddSTN( $("#stndescdoc").val() );
               });
               
               $("#runop").click(function() {
                 $.post("/client/run", getOpData(), function(data, status) {
                     //$("#debug").text( data );
                     $("#output").text( data );
-                    $("#output").autoResize();
                 });
-                //$("#debug").load("/client/run", getOpData());
               });
             });
             
