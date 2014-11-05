@@ -29,32 +29,39 @@
             stn-ops:paramName "screen_name" ;
             stn-ops:required true ;
         ] ;
-#    stn-ops:hasOutput
-#        [ a stn-http:JSONRepresentation ;
-#            stn-ops:representationOf stn:UserAccount ;
-#            stn-ops:contains
-#                [ a stn-ops:UserID ;
-#                    stn-ops:paramName "id" ;
-#                ] ;
-#            stn-ops:contains
-#                [ a stn-ops:DisplayedName ;
-#                    stn-ops:paramName "name" ;
-#                ] ;
-#        ] .
     stn-ops:hasOutput
         [ a stn-http:JSONRepresentation ;
-            stn-ops:representationOf
-                [ a stn:UserAccount ;
-                    stn-ops:id
-                        [ a stn-ops:UserID ;
-                            stn-ops:paramName "id" ;
-                        ] ;                        
-                    stn:name
-                        [ a stn-ops:DisplayedName ;
-                            stn-ops:paramName "name" ;
-                        ] ;
+            stn-ops:representationOf stn:UserAccount ;
+            stn-ops:contains
+                [ a stn-ops:UserID ;
+                    stn-ops:path "screen_name" ;
+                    stn-ops:reflects stn:id ;
+                ] ;
+            stn-ops:contains
+                [ a stn-ops:DisplayedName ;
+                    stn-ops:path "name" ;
+                    stn-ops:reflects stn:name ;
+                ] ;
+            stn-ops:contains
+                [ a stn-ops:Description ;
+                    stn-ops:path "description" ;
+                    stn-ops:reflects stn:name ;
                 ] ;
         ] .
+#    stn-ops:hasOutput
+#        [ a stn-http:JSONRepresentation ;
+#            stn-ops:representationOf
+#                [ a stn:UserAccount ;
+#                    stn-ops:id
+#                        [ a stn-ops:UserID ;
+#                            stn-ops:paramName "id" ;
+#                        ] ;                        
+#                    stn:name
+#                        [ a stn-ops:DisplayedName ;
+#                            stn-ops:paramName "name" ;
+#                        ] ;
+#                ] ;
+#        ] .
 
 <#getConnectionsTo>
     a stn-ops:GetConnectionsTo ;
@@ -68,26 +75,28 @@
             stn-ops:paramName "screen_name" ;
             stn-ops:required true ;
         ] ;
-    stn-ops:hasOutput
-        [ a stn-http:JSONRepresentation ;
-            stn-ops:representationOf
-                [ a stn:UserAccount ;
-                    stn-ops:id [] ;
-                    stn:connectedTo
-                        [ a stn-http:JSONArray ;
-                            stn-ops:representationOf stn-ops:ParameterCollection ;
-                            stn-ops:memberClass stn:UserID ;
-                        ] ;
-                ] ;
-        ] .
 #    stn-ops:hasOutput
-#        [ a stn-ops:JSONRepresentation ;
-#            stn-ops:contains
-#                [ a stn-ops:JSONArray ;
-#                    stn-ops:paramName "ids" ;
-#                    stn-ops:elementType stn-ops:UserID ;
+#        [ a stn-http:JSONRepresentation ;
+#            stn-ops:representationOf
+#                [ a stn:UserAccount ;
+#                    stn-ops:id [] ;
+#                    stn:connectedTo
+#                        [ a stn-http:JSONArray ;
+#                            stn-ops:representationOf stn-ops:ParameterCollection ;
+#                            stn-ops:memberClass stn:UserID ;
+#                        ] ;
 #                ] ;
 #        ] .
+    stn-ops:hasOutput
+        [ a stn-ops:JSONRepresentation ;
+            stn-ops:representationOf stn:UserAccount ;
+            stn-ops:contains
+                [ a stn-ops:JSONArray ;
+                    stn-ops:path "ids" ;
+                    stn-ops:reflects stn:connectedTo ;
+                    stn-ops:element stn-ops:UserID ;
+                ] ;
+        ] .
 
 <#createConnection>
     a stn-ops:CreateConnectionTo;
