@@ -1,10 +1,12 @@
 .main {
     width: 1190px;
-    margin-top: 30px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .list {
     width: 750px;
+    margin-top: 30px;
     padding: 10px;
     background-color: lightgreen;
     float:left;
@@ -46,6 +48,7 @@
 
 .details {
     width: 400px;
+    margin-top: 30px;
     padding: 10px;
     background-color: lightgreen;
     float: right;
@@ -68,8 +71,8 @@ label {
     font-weight: bold;
 }
 
-#output {
-    width: 1190px;
+#raw-output, #ttl-output {
+    width: 593px;
     outline: none;
     resize: none;
     clear: both;

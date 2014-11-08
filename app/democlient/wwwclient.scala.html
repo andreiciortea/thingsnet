@@ -7,14 +7,14 @@
     </head>
     
     <body>
-        <h1>STN Browser</h1>
-        
-        <div><strong>Client WebID</strong>: <input id="client_webid" type="text" size="50" value="http://www.example.com/#thing" /></div>
-        <div><strong>Owner's WebID</strong>: <input id="client_owner" type="text" size="50" value="http://www.andreiciortea.ro/#me" /></div>
-        <div><strong>Displayed Name</strong>: <input id="client_displayedName" type="text" size="50" value="STN Client" /></div>
-        <div><strong>Description</strong>: <input id="client_description" type="text" size="50" value = "I am a demo client for the WoT 2014 workshop." /></div>
-        
-        <div class="main">
+        <div class="main" >
+
+            <h1>STN Browser</h1>
+            
+            <div><strong>Client WebID</strong>: <input id="client_webid" type="text" size="50" value="http://www.example.com/#thing" /></div>
+            <div><strong>Owner's WebID</strong>: <input id="client_owner" type="text" size="50" value="http://www.andreiciortea.ro/#me" /></div>
+            <div><strong>Displayed Name</strong>: <input id="client_displayedName" type="text" size="50" value="STN Client" /></div>
+            <div><strong>Description</strong>: <input id="client_description" type="text" size="50" value = "I am a demo client for the WoT 2014 workshop." /></div>
         
             <div class="list">
             
@@ -61,11 +61,12 @@
                     <button id="runop">Run operation!</button>
                 </div>
             </div>
+
+            <div id="debug" style="clear: both;">
+                <textarea id="raw-output" readonly="readonly" rows="25"></textarea>
+                <textarea id="ttl-output" readonly="readonly" rows="25"></textarea>
+            </div>
             
-        </div>
-        
-        <div id="debug" style="clear: both;">
-            <textarea id="output" readonly="readonly" rows="25"></textarea>
         </div>
 
         <script>
@@ -134,7 +135,6 @@
                 if (uri.indexOf(':') > -1) {
                     $.each(params, function(i, param) {
                         if (param['name'].charAt(0) == ':' && uri.indexOf(param['name']) > -1) {
-                            alert("replacing param!");
                             uri = uri.replace(new RegExp(param['name'], 'g'), $("#param-" + i).val());
                         }
                     });
@@ -171,6 +171,26 @@
                 return JSON.stringify(data);
             }
             
+            function extractSemanticData(jsonData) {
+                index = $("#op-stn-index").text();
+                opIndex = $("#op-index").text();
+                op = STN[index]['operations'][opIndex];
+                
+                // TODO: write this in Turtle
+                
+                var subject = "[" + jsonData[op['out']['id']] + "]";
+                var out = subject + " a " + op['out']['cls'] + "\n";
+                
+                $.each(op['out']['fields'], function(i, field) {
+                    var jsonPath = field['jsonPath'];
+                    var eqProp = field['prop'];
+                    out += subject + " " + eqProp + " " + jsonData[jsonPath] + "\n";
+                });
+                
+                return out;
+                
+            }
+            
             function fetchAddSTN(stnDescURI) {
                 $.get("/wwwclient/stn-spec", { uri: encodeURIComponent(stnDescURI) }, function(data, status) {
                     $("#debug").append( JSON.stringify(data) );
@@ -189,8 +209,12 @@
               $("#runop").click(function() {
                 $.post("/client/run", getOpData(), function(data, status) {
                     //$("#debug").text( data );
-                    $("#output").text( data );
+                    //$("#raw-output").text( data );
+                    $("#raw-output").text( data );
+                    $("#ttl-output").text( extractSemanticData( JSON.parse(data) ) );
                 });
+                
+                //var testData = { screen_name: "andrei", name: "Andrei C.", description: "A test account." };
               });
             });
             

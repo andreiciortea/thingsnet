@@ -1,0 +1,225 @@
+@base <http://www.facebook.com/> .
+@prefix stn: <http://purl.org/stn/core#> .
+@prefix stn-ops: <http://purl.org/stn/operations#> .
+@prefix stn-http: <http://purl.org/stn/http#> .
+@prefix http: <http://www.w3.org/2011/http#> .
+
+<#platform>
+    a stn:Platform ;
+    stn:name "Facebook" ;
+    stn-http:baseURL <https://graph.facebook.com/v2.2> ;
+    stn-ops:supports <#getAccount> ,
+        <#getConnections> ,
+        <#getGroup> ,
+        <#getGroupMembers> ,
+        <#getGroupsOfUser> ,
+        <#getMessage> ,
+        <#getReceivedMessages> ,
+        <#getSentMessages> ,
+        <#postPublicMessage> ,
+        <#postPublicMessageToGroup> ,
+        <#deletePublicMessage> ,
+        <#getFeed> ,
+        <#getUserFeed> ,
+        <#getGroupFeed> .
+
+<#getAccount>
+    a stn-ops:GetUserAccount ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/:id" ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:UserID ;
+            stn-ops:paramName ":id" ;
+            stn-ops:required true ;
+        ] ;
+    stn-ops:hasOutput
+        [ a stn-http:JSONObject ;
+            stn-ops:representationOf stn:UserAccount ;
+            stn-ops:contains
+                [ a stn-ops:UserID ;
+                    stn-ops:path "id" ;
+                    stn-ops:reflects stn:id ;
+                ] ;
+            stn-ops:contains
+                [ a stn-ops:DisplayedName ;
+                    stn-ops:path "name" ;
+                    stn-ops:reflects stn:name ;
+                ] ;
+        ] .
+
+<#getConnections>
+    a stn-ops:GetConnections ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/:id/friends" ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:UserID ;
+            stn-ops:paramName ":id" ;
+            stn-ops:required true ;
+        ] .
+
+<#getGroup>
+    a stn-ops:GetGroup ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/:id" ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:GroupID ;
+            stn-ops:paramName ":id" ;
+            stn-ops:required true ;
+        ] .
+
+<#getGroupMembers>
+    a stn-ops:GetGroup ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/:id/members" ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:GroupID ;
+            stn-ops:paramName ":id" ;
+            stn-ops:required true ;
+        ] .
+
+<#getGroupsOfUser>
+    a stn-ops:GetGroupsOfUser ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/:id/groups" ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:UserID ;
+            stn-ops:paramName ":id" ;
+            stn-ops:required true ;
+        ] .
+
+<#getMessage>
+    a stn-ops:GetMessage ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/:id" ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:MessageID ;
+            stn-ops:paramName ":id" ;
+            stn-ops:required true ;
+        ] .
+
+<#getReceivedMessages>
+    a stn-ops:GetReceivedMessages ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/:id/inbox" ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:UserID ;
+            stn-ops:paramName ":id" ;
+            stn-ops:required true ;
+        ] .
+
+<#getSentMessages>
+    a stn-ops:GetSentMessages ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/:id/outbox" ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:UserID ;
+            stn-ops:paramName ":id" ;
+            stn-ops:required true ;
+        ] .
+
+<#postPublicMessage>
+    a stn-ops:PostPublicMessage ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/me/feed" ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:Description ;
+            stn-ops:paramName "message" ;
+            stn-ops:required true ;
+        ] .
+
+<#postPublicMessageToGroup>
+    a stn-ops:PostPublicMessageToGroup ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/:groupid/feed" ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:GroupID ;
+            stn-ops:paramName ":groupid" ;
+            stn-ops:required true ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:Description ;
+            stn-ops:paramName "message" ;
+            stn-ops:required true ;
+        ] .
+
+<#deletePublicMessage>
+    a stn-ops:DeletePublicMessage ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "DELETE" ;
+            http:requestURI "/:id" ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:MessageID ;
+            stn-ops:paramName ":id" ;
+            stn-ops:required true ;
+        ] .
+
+<#getFeed>
+    a stn-ops:GetFeed ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/:id/home" ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:UserID ;
+            stn-ops:paramName ":id" ;
+            stn-ops:required true ;
+        ] .
+
+<#getUserFeed>
+    a stn-ops:GetUserFeed ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/:id/feed" ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:UserID ;
+            stn-ops:paramName ":id" ;
+            stn-ops:required true ;
+        ] .
+
+<#getGroupFeed>
+    a stn-ops:GetGroupFeed ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/:id/feed" ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:GroupID ;
+            stn-ops:paramName ":id" ;
+            stn-ops:required true ;
+        ] .
