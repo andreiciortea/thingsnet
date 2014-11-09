@@ -70,7 +70,7 @@ object DemoClientApplication extends Controller {
   def runFacebookRequest(method: String, uri: String, jsonData: String): (Int, String, String) = {
     val CONSUMER_KEY = "125590717457632"
     val CONSUMER_SECRET = "f8683b4e4799a259613887371261b4dd"
-    val TOKEN = "CAAByOV4ZA5OABAKqkZCPpsYMAK16CYEiz875RxfzB7qUdpgcozcyVlm3j5dtmLLsMCZC4p4zthOR9n0yYcNQv8X2rnDyA7ZCNFID9joURE8MBbY8oBfgz9EGzewZCbyi1Lp2fAVva1u0Ta0ZAhpbO71TMNqKtMHwjpKZABfBm9qaOaDspCr7M7Y6tEPbw5gatRd9GYrZAhgKJRNX3lsOFPxZC"
+    val TOKEN = "CAAByOV4ZA5OABAAK3hnoLIqQMU9J9pYZCZB3iQV40expBa0ZBx7cjVYKF6o9qHa5oXswzRskGEJ3efHQS5U86T1zexlrKlOSxNcmysmhdEZBhjFQPCGL15cxonNsxy8lVDqfuV6Hkt8qsTO1dN43Ut4K1YVZB5mkVX1idNb9DZCFIpbNmXshgBlF0kH1IXAcFktW2zdxjHMvNyPpPEGqOxQ"
 //    val TOKEN_SECRET = "Hozhj7arvyvGBuKHLVqU1jBCp2V1CQMVaHfKzYGfzZo"
 
     val service = new ServiceBuilder()

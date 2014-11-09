@@ -25,7 +25,7 @@
     stn-ops:implementedAs
         [ a stn-http:STNRequest ;
             http:methodName "POST" ;
-            http:requestURI "/users/create" ;
+            http:requestURI "/users" ;
             http:headers (
                 [ a http:RequestHeader ;
                     http:fieldName "Content-Type" ;

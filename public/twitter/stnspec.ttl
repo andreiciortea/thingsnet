@@ -26,7 +26,7 @@
             http:requestURI "/account/verify_credentials.json" ;
         ] ;
     stn-ops:hasOutput
-        [ a stn-http:JSONObject ;
+        [ a stn-http:JSONRepresentation ;
             stn-ops:representationOf stn:UserAccount ;
             stn-ops:contains
                 [ a stn-ops:UserID ;
@@ -58,7 +58,7 @@
             stn-ops:required true ;
         ] ;
     stn-ops:hasOutput
-        [ a stn-http:JSONObject ;
+        [ a stn-http:JSONRepresentation ;
             stn-ops:representationOf stn:UserAccount ;
             stn-ops:contains
                 [ a stn-ops:UserID ;
@@ -90,7 +90,7 @@
             stn-ops:required true ;
         ] ;
     stn-ops:hasOutput
-        [ a stn-http:JSONObject ;
+        [ a stn-http:JSONRepresentation ;
             stn-ops:representationOf stn:UserAccount ;
             stn-http:entityRelativeURI "" ;
             stn-ops:contains
@@ -120,7 +120,7 @@
             stn-ops:required true ;
         ] ;
     stn-ops:hasOutput
-        [ a stn-http:JSONObject ;
+        [ a stn-http:JSONRepresentation ;
             stn-ops:representationOf stn:UserAccount ;
             stn-ops:contains
                 [ a stn-ops:UserID ;
@@ -201,6 +201,15 @@
         [ a stn-ops:Description ;
             stn-ops:paramName "status" ;
             stn-ops:required true ;
+        ] ;
+    stn-ops:hasOutput
+        [ a stn-http:JSONRepresentation ;
+            stn-ops:representationOf stn:Message ;
+            stn-ops:contains
+                [ a stn-ops:MessageID ;
+                    stn-ops:path "id" ;
+                    stn-ops:reflects stn:id ;
+                ] ;
         ] .
 
 <#deleteMessage>

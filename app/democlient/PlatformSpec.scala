@@ -138,6 +138,7 @@ class PlatformSpecParser(ttlSpec: String) extends RDFModule with SparqlGraphModu
       )
     
     val rowsQ2 = sparqlEngine.executeSelect(SelectQuery(requiredParamsQuery), bindings).getOrFail().toIterable.toList
+    
     val params = rowsQ2 map {
       row => ParameterSpec(row("paramClass") getOrElse sys.error("") toString(),
                 row("paramName").flatMap(_.as[String]) getOrElse sys.error(""),
@@ -160,7 +161,7 @@ class PlatformSpecParser(ttlSpec: String) extends RDFModule with SparqlGraphModu
                         |SELECT ?subjectClass ?subjectIdKey ?jsonPath ?reflectedProp
                         |WHERE {
                         |  ?opUri :hasOutput [
-                        |      a stn-http:JSONObject ;
+                        |      a stn-http:JSONRepresentation ;
                         |       :representationOf ?subjectClass ;
                         |       :contains
                         |           [ :path ?subjectIdKey ;
