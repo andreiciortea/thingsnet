@@ -6,8 +6,8 @@
 GET     /                           controllers.Application.index
 GET     /spec                       controllers.Application.spec
 
+POST    /users                      controllers.Application.createUserAccount
 GET     /users/:id                  controllers.Application.getUserAccount(id: String)
-POST    /users/create               controllers.Application.createUserAccount
 POST    /users/delete               controllers.Application.deleteUserAccount
 
 POST    /connections/create         controllers.Application.createConnection
@@ -22,7 +22,8 @@ POST    /messages/delete            controllers.Application.deleteMessage
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 # Test client
-GET     /wwwclient                  democlient.WWWClient.index
+#GET     /wwwclient                  democlient.WWWClient.index
+GET     /browser                    controllers.Assets.at(path="/public", file="stnbrowser.html")
 GET     /wwwclient/stn-spec         democlient.WWWClient.getPlatformSpec(uri: String ?= "")
 
 GET     /client                     democlient.DemoClientApplication.demoClient

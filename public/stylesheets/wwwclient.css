@@ -1,14 +1,32 @@
+body {
+    /* background-color: #E0FFE0; */
+    background-color: #d0f0f6;
+}
+
+h1 {
+    text-align: center;
+}
+
 .main {
     width: 1190px;
     margin-left: auto;
     margin-right: auto;
+    background-image: url("/assets/images/owls-branch.png");
+    background-repeat: no-repeat;
+    background-position: top right;
+    background-size: 250px 200px;
+}
+
+.content {
+    margin-top: 30px;
+    /*background-color: #4DB84D;*/
+    background-color: #5d9ab2;
+    overflow:auto;
 }
 
 .list {
     width: 750px;
-    margin-top: 30px;
     padding: 10px;
-    background-color: lightgreen;
     float:left;
 }
 
@@ -50,7 +68,6 @@
     width: 400px;
     margin-top: 30px;
     padding: 10px;
-    background-color: lightgreen;
     float: right;
 }
 
@@ -71,8 +88,22 @@ label {
     font-weight: bold;
 }
 
+#display {
+    margin-top: 20px;
+    overflow:auto;
+}
+
+h4 {
+    margin-bottom: 10px;
+}
+
+.output-left {
+    float: left;
+    padding-right: 5px;
+}
+
 #raw-output, #ttl-output {
-    width: 593px;
+    width: 592px;
     outline: none;
     resize: none;
     clear: both;

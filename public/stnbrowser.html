@@ -2,12 +2,13 @@
     <head>
         <link rel="stylesheet" type="text/css" href="/assets/stylesheets/wwwclient.css">
         <script src="/assets/javascripts/jquery-1.11.1.min.js"></script>
+        <script src="/assets/javascripts/json-turtle.js"></script>
         
         <title>STN Browser</title>
     </head>
     
     <body>
-        <div class="main" >
+        <div class="main">
 
             <h1>STN Browser</h1>
             
@@ -15,56 +16,69 @@
             <div><strong>Owner's WebID</strong>: <input id="client_owner" type="text" size="50" value="http://www.andreiciortea.ro/#me" /></div>
             <div><strong>Displayed Name</strong>: <input id="client_displayedName" type="text" size="50" value="STN Client" /></div>
             <div><strong>Description</strong>: <input id="client_description" type="text" size="50" value = "I am a demo client for the WoT 2014 workshop." /></div>
-        
-            <div class="list">
             
-                <div class="list-header">
-                    <div class="list-left">Name:</div>
-                    <div class="list-center">URI:</div>
-                    <div>Available operations:</div>
-                </div>
-                
-                <div id="stnlist" class="list-content">
-                
-                </div>
-                
-                <div class="list-footer">
-                    <label for="stndescdoc">STN description document URL:</label>
-                    <input id="stndescdoc" size="50"></input>
-                    <button id="addstn">Add STN!</button>
-                </div>
-                
-            </div>
+            <div class="content">
             
-            <div class="details">
-                <div class="list-header">Operation details:</div>
+                <div class="list">
                 
-                <div id="op-stn-index" style="display: none;"></div>
-                <div id="op-index" style="display: none;"></div>
-                
-                <div><label class="details-left">Operation: </label><div id="op-uri" class="details-right"></div></div>
-                <div style="clear: both;"></div>
-                <div><label class="details-left">Class: </label><div id="op-class" class="details-right"></div></div>
-                <div style="clear: both;"></div>
-                <div><label class="details-left">Base URL: </label><div id="op-base-url" class="details-right"></div></div>
-                <div style="clear: both;"></div>
-                <div><label class="details-left">Method: </label><div id="op-method" class="details-right"></div></div>
-                <div style="clear: both;"></div>
-                <div><label class="details-left">Request URI: </label><div id="op-request-uri" class="details-right"></div></div>
-                <div style="clear: both;"></div>
-                <div>
-                    <label>Parameters:</label>
-                    <div id="op-params"></div>
+                    <div class="list-header">
+                        <div class="list-left">Name:</div>
+                        <div class="list-center">URI:</div>
+                        <div>Available operations:</div>
+                    </div>
+                    
+                    <div id="stnlist" class="list-content">
+                    
+                    </div>
+                    
+                    <div class="list-footer">
+                        <label for="stndescdoc">STN description document URL:</label>
+                        <input id="stndescdoc" size="50"></input>
+                        <button id="addstn">Add STN!</button>
+                    </div>
+                    
                 </div>
                 
-                <div class="details-footer">
-                    <button id="runop">Run operation!</button>
+                <div class="details">
+                    <div class="list-header">Operation details:</div>
+                    
+                    <div id="op-stn-index" style="display: none;"></div>
+                    <div id="op-index" style="display: none;"></div>
+                    
+                    <div><label class="details-left">Operation: </label><div id="op-uri" class="details-right"></div></div>
+                    <div style="clear: both;"></div>
+                    <div><label class="details-left">Class: </label><div id="op-class" class="details-right"></div></div>
+                    <div style="clear: both;"></div>
+                    <div><label class="details-left">Base URL: </label><div id="op-base-url" class="details-right"></div></div>
+                    <div style="clear: both;"></div>
+                    <div><label class="details-left">Method: </label><div id="op-method" class="details-right"></div></div>
+                    <div style="clear: both;"></div>
+                    <div><label class="details-left">Request URI: </label><div id="op-request-uri" class="details-right"></div></div>
+                    <div style="clear: both;"></div>
+                    <div>
+                        <label>Parameters:</label>
+                        <div id="op-params"></div>
+                    </div>
+                    
+                    <div class="details-footer">
+                        <button id="runop">Run operation!</button>
+                    </div>
                 </div>
+                
             </div>
 
-            <div id="debug" style="clear: both;">
-                <textarea id="raw-output" readonly="readonly" rows="25"></textarea>
-                <textarea id="ttl-output" readonly="readonly" rows="25"></textarea>
+            <div id="display">
+                <div class="output-left">
+                    <h4>Raw output:</h4>
+                    <textarea id="raw-output" readonly="readonly" rows="25"></textarea>
+                </div>
+                <div class="output-right">
+                    <h4>Semantic description:</h4>
+                    <textarea id="ttl-output" readonly="readonly" rows="25"></textarea>
+                </div>
+            </div>
+            
+            <div id="debug">
             </div>
             
         </div>
@@ -178,17 +192,94 @@
                 
                 // TODO: write this in Turtle
                 
-                var subject = "[" + jsonData[op['out']['id']] + "]";
-                var out = subject + " a " + op['out']['cls'] + "\n";
+/*              var jsonobj = {
+                                  "@prefix": "<http://xmlns.com/foaf/0.1/>",
+                                  "@prefix:ex": "<http://example.org/>",
+                                  "@prefix:rdfs": "<http://www.w3.org/2000/01/rdf-schema#>",
+                                  "@about": "<http://example.org>",
+                                  "nick": "masaka",
+                                  "weblog": "<http://www.kanzaki.com/memo/>",
+                                  "knows": [
+                                    {
+                                      "nick": "danbri",
+                                      "weblog": "<http://danbri.org/words/>"
+                                    },
+                                    {
+                                      "ex:nick": "libby",
+                                      "weblog": "<http://planb.nicecupoftea.org/>"
+                                    },
+                                    {
+                                      "nick": "jibberjim",
+                                      "weblog": "<http://jibbering.com/blog/>"
+                                    }
+                                  ]
+                                };*/
+                
+                function trimPrefix(uri) {
+                    if (uri.indexOf("http://purl.org/stn/core#") > -1) {
+                        return ["@prefix", "<http://purl.org/stn/core#>", ":" + uri.substring(uri.indexOf("#") + 1, uri.length)];
+                    } else if (uri.indexOf("http://purl.org/stn/operations#") > -1) {
+                        return ["@prefix:stn-ops", "<http://purl.org/stn/operations#>", "stn-ops:" + uri.substring(uri.indexOf("#") + 1, uri.length)]; 
+                    } else if (uri.indexOf("http://purl.org/stn/http#") > -1) {
+                        return ["@prefix:stn-ops", "<http://purl.org/stn/http#>", "stn-http:" + uri.substring(uri.indexOf("#") + 1, uri.length)]; 
+                    } else if (uri.indexOf("http://www.w3.org/2011/http#") > -1) {
+                        return ["@prefix:stn-ops", "<http://www.w3.org/2011/http#>", "stn-http:" + uri.substring(uri.indexOf("#") + 1, uri.length)]; 
+                    }
+                    
+                    return null;
+                }
+                
+                var jsonObject = {};
+
+                var subject = "<" + jsonData[op['out']['id']] + ">";
+                var prefArray = trimPrefix(subject);
+                if (prefArray != null) {
+                    jsonObject[prefArray[0]] = prefArray[1];
+                    jsonObject["@about"] = prefArray[2];
+                } else {
+                    jsonObject["@about"] = subject;
+                }
+                
+                var cls = op['out']['cls'];
+                var prefArray = trimPrefix(cls);
+                if (prefArray != null) {
+                    jsonObject[prefArray[0]] = prefArray[1];
+                    jsonObject["a"] = prefArray[2];
+                } else {
+                    jsonObject["a"] = cls;
+                }
+                
+                //var out = subject + " a " + op['out']['cls'];
                 
                 $.each(op['out']['fields'], function(i, field) {
-                    var jsonPath = field['jsonPath'];
                     var eqProp = field['prop'];
-                    out += subject + " " + eqProp + " " + jsonData[jsonPath] + "\n";
+                    var value = jsonData[field['jsonPath']];
+                    
+//                    out += " ;\n          " + eqProp + " " + jsonData[jsonPath];
+
+                    prefArray = trimPrefix(eqProp);
+                    
+                    if (prefArray != null) {
+                        jsonObject[prefArray[0]] = prefArray[1];
+                        eqProp = prefArray[2];
+                    }
+                    
+                    prefArray = trimPrefix(value);
+                    if (prefArray != null) {
+                        jsonObject[prefArray[0]] = prefArray[1];
+                        value = prefArray[2];
+                    }
+                    
+                    jsonObject[eqProp] = value;
                 });
                 
-                return out;
+                /*out += " .";
                 
+                if (param['name'].charAt(0) == ':' && uri.indexOf(param['name']) > -1) {
+                    uri = uri.replace(new RegExp(param['name'], 'g'), $("#param-" + i).val());
+                }*/
+                
+                return (new JsonTurtle).parsej(jsonObject,"\n",'');
             }
             
             function fetchAddSTN(stnDescURI) {
@@ -201,7 +292,7 @@
             $(document).ready(function() {
               fetchAddSTN("http://localhost:9000/assets/stnspec.ttl");
               fetchAddSTN("http://localhost:9000/assets/twitter/stnspec.ttl");
-            
+              
               $("#addstn").click(function() {
                 fetchAddSTN( $("#stndescdoc").val() );
               });

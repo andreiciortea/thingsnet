@@ -14,10 +14,6 @@ import play.api.libs.functional.syntax._
 
 object WWWClient extends Controller {
 
-  def index = Action {
-    Ok(html.wwwclient())
-  }
-  
   def getPlatformSpec(uri: String) = Action.async {
     WS.url(java.net.URLDecoder.decode(uri, "UTF-8")).get().map {
       response => {
