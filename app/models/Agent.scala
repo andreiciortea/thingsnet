@@ -4,14 +4,18 @@ import scala.util._
 
 import org.w3.banana._
 import org.w3.banana.binder._
+import org.w3.banana.diesel._
 
-import repos.RDFRepositoryFactory.RDFResourceBinder
+import repos.RDFRepositoryFactory.RDFResourceDependencies
 
 
 sealed class Agent(uri: String) extends Resource {
   
   def getContainer = ""
-  def getURI = ""
+  
+  def getURI = uri
+  
+  def toGraph = Agent.agentBinder.toPG(this)
 }
 
 case class Person(uri: String) extends Agent(uri)
@@ -19,80 +23,43 @@ case class Person(uri: String) extends Agent(uri)
 case class SmartThing(uri: String) extends Agent(uri)
 
 
-// TODO: Refactor binders.
-trait RDFAgentBinder extends RDFResourceBinder {
+
+object Agent extends RDFResourceDependencies {
   
+  def apply(uri: String) = new Agent(uri)
+  
+  import Ops._
   val stn = STNPrefix[Rdf]
   
   implicit val from: FromURI[Rdf, Rdf#URI] = new FromURI[Rdf, Rdf#URI] {
     def fromURI(uri: Rdf#URI) = {
       FromURI.URIFromURI[Rdf].fromURI(uri)
     }
-  }  
-}
-
-
-object AgentBinder extends RDFAgentBinder {
-  import Ops._
-  import RecordBinder._
-
-  val clazz = stn.Agent
-  implicit val classUris = classUrisFor[Agent](clazz)
-
+  }
+  
   implicit val agentBinder: PGBinder[Rdf, Agent] = new PGBinder[Rdf, Agent] {
     
     def toPG(agent: Agent): PointedGraph[Rdf] = {
-      PointedGraph[Rdf](URI(agent.getURI), Graph.empty)
+      val pointed = PointedGraph[Rdf](URI(agent.getURI), Graph.empty)
+      agent match {
+        case Person(_) => pointed.a(stn.Person)
+        case SmartThing(_) => pointed.a(stn.SmartThing)
+        case _ => pointed.a(stn.Agent)
+      }
     }
     
     def fromPG(pointed: PointedGraph[Rdf]): Try[Agent] = {
       FromNode.FromURIFromNode[Rdf, Rdf#URI].fromNode(pointed.pointer) map {
-        uri => new Agent( fromUri(uri) )
+        uri => {
+          if (pointed.pointer.isA(stn.Agent)) {
+            new Agent( fromUri(uri) )
+          } else if (pointed.pointer.isA(stn.Person)) {
+            new Person( fromUri(uri) )
+          } else if (pointed.pointer.isA(stn.SmartThing)) {
+            new SmartThing( fromUri(uri) )
+          } else throw new ClassCastException
+        }
       }
     }
-  } withClasses classUris
-}
-
-
-object PersonBinder extends RDFAgentBinder {
-  import Ops._
-  import RecordBinder._
-
-  val clazz = stn.Person
-  implicit val classUris = classUrisFor[Person](clazz)
-
-  implicit val personBinder: PGBinder[Rdf, Person] = new PGBinder[Rdf, Person] {
-    
-    def toPG(person: Person): PointedGraph[Rdf] = {
-      PointedGraph[Rdf](URI(person.uri), Graph.empty)
-    }
-    
-    def fromPG(pointed: PointedGraph[Rdf]): Try[Person] = {
-      FromNode.FromURIFromNode[Rdf, Rdf#URI].fromNode(pointed.pointer) map {
-        uri => Person( fromUri(uri) )
-      }
-    }
-  } withClasses classUris
-}
-
-
-object SmartThingBinder extends RDFAgentBinder {
-  import Ops._
-  import RecordBinder._
-
-  val clazz = stn.SmartThing
-  implicit val classUris = classUrisFor[SmartThing](clazz)
-
-  implicit val smartThingsBinder: PGBinder[Rdf, SmartThing] = new PGBinder[Rdf, SmartThing] {
-    
-    def toPG(smartThing: SmartThing): PointedGraph[Rdf] = {
-      PointedGraph[Rdf](URI(smartThing.uri), Graph.empty)
-    }
-    
-    def fromPG(pointed: PointedGraph[Rdf]): Try[SmartThing] = {
-      FromNode.FromURIFromNode[Rdf, Rdf#URI].fromNode(pointed.pointer) map {
-        uri => SmartThing( fromUri(uri) )
-      }
-    }
-  } withClasses classUris
+  }
 }

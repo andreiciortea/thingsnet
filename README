@@ -1,18 +1,4 @@
-This is your new Play application
-=================================
+ThingsNet
+=========
 
-This file will be packaged with your application, when using `activator dist`.
-
-Some sample requestes:
-
-curl --include
-    --request POST
-    --header "Content-type: application/json"
-    --data '{"holderUri":"http://www.andreiciortea.ro#me", "displayedName":"andreiciortea"}'
-    http://127.0.0.1:9000/users/create
-
-curl --include
-    --request POST
-    --header "Content-type: application/json"
-    --data '{"accountUri":"http://www.thingsnet.com/users/andreiciortea"}'
-    http://127.0.0.1:9000/users/delete
+A prototype STN platform built with Scala, Play and banana-rdf.

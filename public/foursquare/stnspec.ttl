@@ -1,0 +1,58 @@
+@base <http://www.foursquare.com/> .
+@prefix stn: <http://purl.org/stn/core#> .
+@prefix stn-ops: <http://purl.org/stn/operations#> .
+@prefix stn-http: <http://purl.org/stn/http#> .
+@prefix http: <http://www.w3.org/2011/http#> .
+
+<#platform>
+    a stn:Platform ;
+    stn:name "Foursquare" ;
+    stn-http:baseURL <https://api.foursquare.com/v2> ;
+    stn-ops:supports <#getAccount> ,
+        <#getConnections> ,
+        <#checkin> .
+
+<#getAccount>
+    a stn-ops:GetUserAccount ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/users/:id" ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:UserID ;
+            stn-ops:paramName ":id" ;
+            stn-ops:required true ;
+        ] .
+
+<#getConnections>
+    a stn-ops:GetConnections ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/users/:id/friends" ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:UserID ;
+            stn-ops:paramName ":id" ;
+            stn-ops:required true ;
+        ] .
+
+<#checkin>
+    a stn-ops:CheckIn;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/checkins/add" ;
+            http:headers (
+                [ a http:RequestHeader ;
+                    http:fieldName "Content-Type" ;
+                    http:fieldValue "application/json" ;
+                ]
+            ) ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:SpatialThingID ;
+            stn-ops:paramName "venueId" ;
+            stn-ops:required true ;
+        ] .

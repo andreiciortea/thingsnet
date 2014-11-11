@@ -1,0 +1,315 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="/assets/stylesheets/wwwclient.css">
+        <script src="/assets/javascripts/jquery-1.11.1.min.js"></script>
+        <script src="/assets/javascripts/json-turtle.js"></script>
+        
+        <title>STN Browser</title>
+    </head>
+    
+    <body>
+        <div class="main">
+
+            <h1>STN Browser</h1>
+            
+            <div><strong>Client WebID</strong>: <input id="client_webid" type="text" size="50" value="http://www.example.com/#thing" /></div>
+            <div><strong>Owner's WebID</strong>: <input id="client_owner" type="text" size="50" value="http://www.andreiciortea.ro/#me" /></div>
+            <div><strong>Displayed Name</strong>: <input id="client_displayedName" type="text" size="50" value="STN Client" /></div>
+            <div><strong>Description</strong>: <input id="client_description" type="text" size="50" value = "I am a demo client for the WoT 2014 workshop." /></div>
+            
+            <div class="content">
+            
+                <div class="list">
+                
+                    <div class="list-header">
+                        <div class="list-left">Name:</div>
+                        <div class="list-center">URI:</div>
+                        <div>Available operations:</div>
+                    </div>
+                    
+                    <div id="stnlist" class="list-content">
+                    
+                    </div>
+                    
+                    <div class="list-footer">
+                        <label for="stndescdoc">STN description document URL:</label>
+                        <input id="stndescdoc" size="50"></input>
+                        <button id="addstn">Add STN!</button>
+                    </div>
+                    
+                </div>
+                
+                <div class="details">
+                    <div class="list-header">Operation details:</div>
+                    
+                    <div id="op-stn-index" style="display: none;"></div>
+                    <div id="op-index" style="display: none;"></div>
+                    
+                    <div><label class="details-left">Operation: </label><div id="op-uri" class="details-right"></div></div>
+                    <div style="clear: both;"></div>
+                    <div><label class="details-left">Class: </label><div id="op-class" class="details-right"></div></div>
+                    <div style="clear: both;"></div>
+                    <div><label class="details-left">Base URL: </label><div id="op-base-url" class="details-right"></div></div>
+                    <div style="clear: both;"></div>
+                    <div><label class="details-left">Method: </label><div id="op-method" class="details-right"></div></div>
+                    <div style="clear: both;"></div>
+                    <div><label class="details-left">Request URI: </label><div id="op-request-uri" class="details-right"></div></div>
+                    <div style="clear: both;"></div>
+                    <div>
+                        <label>Parameters:</label>
+                        <div id="op-params"></div>
+                    </div>
+                    
+                    <div class="details-footer">
+                        <button id="runop">Run operation!</button>
+                    </div>
+                </div>
+                
+            </div>
+
+            <div id="display">
+                <div class="output-left">
+                    <h4>Raw output:</h4>
+                    <textarea id="raw-output" readonly="readonly" rows="25"></textarea>
+                </div>
+                <div class="output-right">
+                    <h4>Semantic description:</h4>
+                    <textarea id="ttl-output" readonly="readonly" rows="25"></textarea>
+                </div>
+            </div>
+            
+            <div id="debug">
+            </div>
+            
+        </div>
+
+        <script>
+            var STN = [];
+            var stnIndex = 0;
+
+            // Generates the select options from a JSON array of operations.            
+            function inflateOpOptions(jsonData) {
+                var options = "";
+                $.each(jsonData, function(index, op) {
+                  options += '<option value="' + index + '">' + op['cls'] + '</option>';
+                });
+                
+                return options;
+            }
+            
+            // Adds an STN from a JSON spec.
+            function addSTN(jsonData) {
+                // Add JSON data to STN index.
+                STN[stnIndex ++] = jsonData;
+                
+                // Add STN to the list of platforms.
+                return '<div class="list-row">' +
+                    '<div class="list-left">' + jsonData['name'] + '</div>' +
+                    '<div class="list-center">' + jsonData['uri'] + '</div>' +
+                    '<select id="' + (stnIndex - 1) + '" class="list-right" onchange="showOpDetails(' + (stnIndex-1) + ')">' +
+                        '<option selected disabled>Select Command</option>' +
+                        inflateOpOptions(jsonData['operations']) +
+                    '</select>' +
+                '</div>' ;
+            }
+            
+            // Display the details of a selected operation.
+            function showOpDetails(index) {
+                opIndex = $("#" + index).val();
+                op = STN[index]['operations'][opIndex]
+                
+                $("#op-stn-index").text( index );
+                $("#op-index").text( opIndex );
+                $("#op-uri").text( op['id'] );
+                $("#op-class").text( op['cls'] );
+                $("#op-base-url").text( STN[index]['baseUrl'] );
+                $("#op-method").text( op['method'] );
+                $("#op-request-uri").text( op['requestUri'] );
+
+                var kb = { "http://purl.org/stn/operations#MyWebID": $('#client_webid').val(),
+                        "http://purl.org/stn/operations#MyOwnerID": $('#client_owner').val(),
+                        "http://purl.org/stn/operations#MyDisplayedName": $('#client_displayedName').val(),
+                        "http://purl.org/stn/operations#MyDescription": $('#client_description').val()
+                    }
+                
+                var paramStr = "<div>";
+                $.each(op['params'], function(i, param) {
+                    paramStr += '<div><div>' + param["cls"] + ' (required)</div>';
+                    paramStr += '<div>Name: ' + param["name"] + '</div>';
+                    paramStr += 'Value: <input id="param-' + i + '" value="' + ((kb[param["cls"]] == undefined) ? "" : kb[param["cls"]]) + '" size="40" />';
+                    paramStr += '</div>';
+                });
+                paramStr += "</div>";
+                
+                $("#op-params").html( paramStr );
+            }
+            
+            // Checks an operation URI for inline parameters.
+            function parseOpURI(uri, params) {
+                if (uri.indexOf(':') > -1) {
+                    $.each(params, function(i, param) {
+                        if (param['name'].charAt(0) == ':' && uri.indexOf(param['name']) > -1) {
+                            uri = uri.replace(new RegExp(param['name'], 'g'), $("#param-" + i).val());
+                        }
+                    });
+                }
+                
+                return uri;
+            }
+            
+            // Wraps up all data necessary for running an operation.
+            function getOpData() {
+                var data = {};
+                
+                index = $("#op-stn-index").text();
+                opIndex = $("#op-index").text();
+                op = STN[index]['operations'][opIndex];
+                
+                data['mywebid'] = $("#client_webid").val();
+                data['method'] = $("#op-method").text();
+                data['requestUri'] = parseOpURI($("#op-base-url").text() + $("#op-request-uri").text(), op['params']);
+                data['jsonData'] = packOpParams(op['params']);
+                
+                return data;
+            }
+            
+            // Returns a json string with all params.
+            function packOpParams(params) {
+                var data = {};
+                $.each(params, function(i, param) {
+                    if (param["name"].charAt(0) != ':') {
+                        data[param["name"]] = $("#param-" + i).val();
+                    }
+                });
+                
+                return JSON.stringify(data);
+            }
+            
+            function extractSemanticData(jsonData) {
+                index = $("#op-stn-index").text();
+                opIndex = $("#op-index").text();
+                op = STN[index]['operations'][opIndex];
+                
+                // TODO: write this in Turtle
+                
+/*              var jsonobj = {
+                                  "@prefix": "<http://xmlns.com/foaf/0.1/>",
+                                  "@prefix:ex": "<http://example.org/>",
+                                  "@prefix:rdfs": "<http://www.w3.org/2000/01/rdf-schema#>",
+                                  "@about": "<http://example.org>",
+                                  "nick": "masaka",
+                                  "weblog": "<http://www.kanzaki.com/memo/>",
+                                  "knows": [
+                                    {
+                                      "nick": "danbri",
+                                      "weblog": "<http://danbri.org/words/>"
+                                    },
+                                    {
+                                      "ex:nick": "libby",
+                                      "weblog": "<http://planb.nicecupoftea.org/>"
+                                    },
+                                    {
+                                      "nick": "jibberjim",
+                                      "weblog": "<http://jibbering.com/blog/>"
+                                    }
+                                  ]
+                                };*/
+                
+                function trimPrefix(uri) {
+                    if (uri.indexOf("http://purl.org/stn/core#") > -1) {
+                        return ["@prefix", "<http://purl.org/stn/core#>", ":" + uri.substring(uri.indexOf("#") + 1, uri.length)];
+                    } else if (uri.indexOf("http://purl.org/stn/operations#") > -1) {
+                        return ["@prefix:stn-ops", "<http://purl.org/stn/operations#>", "stn-ops:" + uri.substring(uri.indexOf("#") + 1, uri.length)]; 
+                    } else if (uri.indexOf("http://purl.org/stn/http#") > -1) {
+                        return ["@prefix:stn-ops", "<http://purl.org/stn/http#>", "stn-http:" + uri.substring(uri.indexOf("#") + 1, uri.length)]; 
+                    } else if (uri.indexOf("http://www.w3.org/2011/http#") > -1) {
+                        return ["@prefix:stn-ops", "<http://www.w3.org/2011/http#>", "stn-http:" + uri.substring(uri.indexOf("#") + 1, uri.length)]; 
+                    }
+                    
+                    return null;
+                }
+                
+                var jsonObject = {};
+
+                var subject = "<" + jsonData[op['out']['id']] + ">";
+                var prefArray = trimPrefix(subject);
+                if (prefArray != null) {
+                    jsonObject[prefArray[0]] = prefArray[1];
+                    jsonObject["@about"] = prefArray[2];
+                } else {
+                    jsonObject["@about"] = subject;
+                }
+                
+                var cls = op['out']['cls'];
+                var prefArray = trimPrefix(cls);
+                if (prefArray != null) {
+                    jsonObject[prefArray[0]] = prefArray[1];
+                    jsonObject["a"] = prefArray[2];
+                } else {
+                    jsonObject["a"] = cls;
+                }
+                
+                //var out = subject + " a " + op['out']['cls'];
+                
+                $.each(op['out']['fields'], function(i, field) {
+                    var eqProp = field['prop'];
+                    var value = jsonData[field['jsonPath']];
+                    
+//                    out += " ;\n          " + eqProp + " " + jsonData[jsonPath];
+
+                    prefArray = trimPrefix(eqProp);
+                    
+                    if (prefArray != null) {
+                        jsonObject[prefArray[0]] = prefArray[1];
+                        eqProp = prefArray[2];
+                    }
+                    
+                    prefArray = trimPrefix(value);
+                    if (prefArray != null) {
+                        jsonObject[prefArray[0]] = prefArray[1];
+                        value = prefArray[2];
+                    }
+                    
+                    jsonObject[eqProp] = value;
+                });
+                
+                /*out += " .";
+                
+                if (param['name'].charAt(0) == ':' && uri.indexOf(param['name']) > -1) {
+                    uri = uri.replace(new RegExp(param['name'], 'g'), $("#param-" + i).val());
+                }*/
+                
+                return (new JsonTurtle).parsej(jsonObject,"\n",'');
+            }
+            
+            function fetchAddSTN(stnDescURI) {
+                $.get("/wwwclient/stn-spec", { uri: encodeURIComponent(stnDescURI) }, function(data, status) {
+                    $("#debug").append( JSON.stringify(data) );
+                    $("#stnlist").append(addSTN(data));
+                });
+            }
+            
+            $(document).ready(function() {
+              fetchAddSTN("http://localhost:9000/assets/stnspec.ttl");
+              fetchAddSTN("http://localhost:9000/assets/twitter/stnspec.ttl");
+              
+              $("#addstn").click(function() {
+                fetchAddSTN( $("#stndescdoc").val() );
+              });
+              
+              $("#runop").click(function() {
+                $.post("/client/run", getOpData(), function(data, status) {
+                    //$("#debug").text( data );
+                    //$("#raw-output").text( data );
+                    $("#raw-output").text( data );
+                    $("#ttl-output").text( extractSemanticData( JSON.parse(data) ) );
+                });
+                
+                //var testData = { screen_name: "andrei", name: "Andrei C.", description: "A test account." };
+              });
+            });
+            
+        </script>
+        
+    </body>
+</html>

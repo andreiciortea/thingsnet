@@ -1,0 +1,110 @@
+body {
+    /* background-color: #E0FFE0; */
+    background-color: #d0f0f6;
+}
+
+h1 {
+    text-align: center;
+}
+
+.main {
+    width: 1190px;
+    margin-left: auto;
+    margin-right: auto;
+    background-image: url("/assets/images/owls-branch.png");
+    background-repeat: no-repeat;
+    background-position: top right;
+    background-size: 250px 200px;
+}
+
+.content {
+    margin-top: 30px;
+    /*background-color: #4DB84D;*/
+    background-color: #5d9ab2;
+    overflow:auto;
+}
+
+.list {
+    width: 750px;
+    padding: 10px;
+    float:left;
+}
+
+.list-header {
+    padding-bottom: 8px;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.list-row {
+    padding: 5px 0px 5px 0px;
+}
+
+.list-left {
+    width: 150px;
+    float: left;
+}
+
+.list-center {
+    width: 300px;
+    float: left;
+}
+
+.list-right {
+    width: 300px;
+    clear: left;
+}
+
+.list-footer {
+    margin-top: 20px;
+    clear: both;
+}
+
+.left {
+    float: left;
+}
+
+.details {
+    width: 400px;
+    margin-top: 30px;
+    padding: 10px;
+    float: right;
+}
+
+.details-left {
+    padding-right: 8px;
+    font-weight: bold;
+    float: left;
+}
+
+.details-right {
+}
+
+.details-footer {
+    padding-top: 10px;
+}
+
+label {
+    font-weight: bold;
+}
+
+#display {
+    margin-top: 20px;
+    overflow:auto;
+}
+
+h4 {
+    margin-bottom: 10px;
+}
+
+.output-left {
+    float: left;
+    padding-right: 5px;
+}
+
+#raw-output, #ttl-output {
+    width: 592px;
+    outline: none;
+    resize: none;
+    clear: both;
+}

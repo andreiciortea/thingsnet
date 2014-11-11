@@ -4,10 +4,28 @@
 
 # Home page
 GET     /                           controllers.Application.index
+GET     /spec                       controllers.Application.spec
 
+POST    /users                      controllers.Application.createUserAccount
 GET     /users/:id                  controllers.Application.getUserAccount(id: String)
-POST    /users/create               controllers.Application.createUserAccount
 POST    /users/delete               controllers.Application.deleteUserAccount
+
+POST    /connections/create         controllers.Application.createConnection
+POST    /connections/delete         controllers.Application.deleteConnection
+
+POST    /messages/list              controllers.Application.getMessages
+GET     /messages/:id               controllers.Application.getMessageById(id: String)
+POST    /messages/create            controllers.Application.createMessage
+POST    /messages/delete            controllers.Application.deleteMessage
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
+
+# Test client
+#GET     /wwwclient                  democlient.WWWClient.index
+GET     /browser                    controllers.Assets.at(path="/public", file="stnbrowser.html")
+GET     /wwwclient/stn-spec         democlient.WWWClient.getPlatformSpec(uri: String ?= "")
+
+GET     /client                     democlient.DemoClientApplication.demoClient
+POST    /client                     democlient.DemoClientApplication.getSTNSpec
+POST    /client/run                 democlient.DemoClientApplication.runOperation

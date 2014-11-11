@@ -1,31 +1,45 @@
 package services
 
-import org.w3.banana._
-import org.w3.banana.jena._
-
+import models.Patch
 import models.Resource
-import models.{UserAccount, UserAccountBinder}
+import models.STNPrefix
 import repos.RDFRepositoryFactory
+
+import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 
 object ResourceService {
   
   val repo = RDFRepositoryFactory.makeRDFRepository
+  import repo._
   
-  def createResource(account: Resource) = {
-    account match {
-      case a: UserAccount => {
-          repo.createRDFResource(a.getURI, UserAccountBinder.userAccountBinder.toPG(a))
-        }
-      case _ => throw new ClassCastException
-    }
+  def createResource(resource: Resource) = {
+    repo.createRDFResource(resource.getURI, resource.toGraph)
   }
   
   def getResource(uri: String) = {
     repo.getRDFResource(uri)
   }
   
+  def patchResource(uri: String, p: Patch[Rdf]) = {
+    repo.patchRDFResource(uri, p.removed, p.added)
+  }
+  
   def deleteResource(uri: String) = {
     repo.deleteRDFResource(uri)
+  }
+  
+  
+  def getSTNSpec = repo.getSTNSpec
+  
+  def ask(query: (String, Map[String, Rdf#URI])) = repo.runAskQuery(query)
+  
+  def queryForResults(query: (String, Map[String, Rdf#URI])) = {
+    repo.runSelectQuery(query)
+  }
+  
+  def queryForGraphs(query: (String, Map[String, Rdf#URI])) = {
+    repo.runConstructQuery(query)
   }
 }

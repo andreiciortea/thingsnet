@@ -1,0 +1,180 @@
+@base <http://www.thingsnet.com/> .
+@prefix stn: <http://purl.org/stn/core#> .
+@prefix stn-ops: <http://purl.org/stn/operations#> .
+@prefix stn-http: <http://purl.org/stn/http#> .
+@prefix http: <http://www.w3.org/2011/http#> .
+
+<#platform>
+    a stn:Platform ;
+    stn:name "ThingsNet" ;
+    stn-http:baseURL <http://localhost:9000> ;
+    stn-http:supportsAuth stn-http:WebID ;
+    stn-ops:supports <#createAccount> ,
+        <#getAccount> ,
+        <#deleteAccount> ,
+        <#createConnection> ,
+        <#getConnections> ,
+        <#deleteConnection> ,
+        <#sendMessage> ,
+        <#getMessage> ,
+        <#getMessages> ,
+        <#deleteMessage> .
+
+<#createAccount>
+    a stn-ops:CreateUserAccount ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/users" ;
+            http:headers (
+                [ a http:RequestHeader ;
+                    http:fieldName "Content-Type" ;
+                    http:fieldValue "application/json" ;
+                ]
+            ) ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:MyDisplayedName ;
+            stn-ops:paramName "displayedName" ;
+            stn-ops:required true ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:MyDescription ;
+            stn-ops:paramName "description" ;
+        ] ;
+    stn-ops:hasOutput
+        [ a stn:UserAccount ] .
+
+<#getAccount>
+    a stn-ops:GetUserAccount ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI ":accountUri" ;
+            stn-ops:requiresAuth false ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:UserID ;
+            stn-ops:paramName "accountUri" ;
+            stn-ops:required true ;
+            stn-ops:inline true ;
+        ] ;
+    stn-ops:hasOutput
+        [ a stn:UserAccount ] .
+
+<#deleteAccount>
+    a stn-ops:DeleteUserAccount ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/users/delete" ;
+        ] .
+
+<#createConnection>
+    a stn-ops:CreateConnectionTo;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/connections/create" ;
+            http:headers (
+                [ a http:RequestHeader ;
+                    http:fieldName "Content-Type" ;
+                    http:fieldValue "application/json" ;
+                ]
+            ) ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:UserID ;
+            stn-ops:paramName "accountUri" ;
+            stn-ops:required true ;
+        ] .
+
+<#deleteConnection>
+    a stn-ops:DeleteConnectionTo ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/connections/delete" ;
+            http:headers (
+                [ a http:RequestHeader ;
+                    http:fieldName "Content-Type" ;
+                    http:fieldValue "application/json" ;
+                ]
+            ) ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:UserID ;
+            stn-ops:paramName "accountUri" ;
+            stn-ops:required true ;
+        ] .
+
+<#sendMessage>
+    a stn-ops:SendPrivateMessage;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/messages/create" ;
+            http:headers (
+                [ a http:RequestHeader ;
+                    http:fieldName "Content-Type" ;
+                    http:fieldValue "application/json" ;
+                ]
+            ) ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:UserID ;
+            stn-ops:paramName "receiver" ;
+            stn-ops:required true ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:Description ;
+            stn-ops:paramName "body" ;
+            stn-ops:required true ;
+        ] ;
+   stn-ops:hasOutput
+        [ a stn:Message ] .
+
+<#deleteMessage>
+    a stn-ops:DeletePrivateMessage ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/messages/delete" ;
+            http:headers (
+                [ a http:RequestHeader ;
+                    http:fieldName "Content-Type" ;
+                    http:fieldValue "application/json" ;
+                ]
+            ) ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:EntityID ;
+            stn-ops:paramName "messageUri" ;
+            stn-ops:required true;
+        ] .
+
+<#getMessage>
+    a stn-ops:GetMessage ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI ":messageUri" ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:EntityID ;
+            stn-ops:paramName "messageUri" ;
+            stn-ops:required true ;
+            stn-ops:inline true ;
+        ] ;
+    stn-ops:hasOutput
+        [ a stn:Message ] .
+
+<#getMessages>
+    a stn-ops:GetMessages ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/messages/list" ;
+        ] ;
+    stn-ops:hasOutputCollection
+        [ a stn:Message ] .

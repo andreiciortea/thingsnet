@@ -1,0 +1,145 @@
+@(stnForm: Form[String], opForm: Form[(String, String, String, String)], platform: Option[democlient.PlatformSpec] = None, spec: String = "")
+
+@import helper._
+@import play.api.libs.json.Json
+
+<html>
+    <head>
+        <title>STN Demo Client</title>
+        
+        <script src="/assets/javascripts/jquery-1.11.1.min.js"></script>
+    </head>
+    
+    <body>
+        <h1>WoT 2014 Demo Client</h1>
+        <div><strong>Client WebID</strong>: <input id="client_webid" type="text" size="50" value="http://www.example.com/#thing" /></div>
+        <div><strong>Owner's WebID</strong>: <input id="client_owner" type="text" size="50" value="http://www.andreiciortea.ro/#me" /></div>
+        <div><strong>Displayed Name</strong>: <input id="client_displayedName" type="text" size="50" value="STN Client" /></div>
+        <div><strong>Description</strong>: <input id="client_description" type="text" size="50" value = "I am a demo client for the WoT 2014 workshop." /></div>
+        
+        <h2>STN Platform:</h2>
+        @form(action = democlient.routes.DemoClientApplication.getSTNSpec()) {
+          @inputText(stnForm("uri"), '_label -> "Description document URL:", 'size -> 50)
+          <input type="submit" value="Get spec!" />
+        }
+        
+        @if(platform != None) {
+          <p><strong>STN Platform Details:</strong></p>
+          <p>Platform: @platform.get.uri</p>
+          <p>Base URL: @platform.get.baseUrl</p>
+        
+          @if(!platform.get.operations.isEmpty) {
+            @form(action = democlient.routes.DemoClientApplication.runOperation, 'id -> "opForm") {
+              @select(opForm("opSelect"), 
+                  ("", "<Select operation>") :: platform.get.operations.zipWithIndex.map{ case (opSpec, index) => (index.toString, opSpec.cls) },
+                  '_label -> "Available operations:",
+                  'onchange -> "showOperationDetails()"
+                )
+              
+              <dl>
+                <dt>Additional params:</dt>
+                <dd><textarea id="addParams" rows="10" cols="40"></textarea></dd>
+              </dl>
+              
+              <input type="submit" value="Run operation!" />
+            }
+            
+            <p><strong>Operation details:</strong></p>
+            <p id="opUri" />
+            <p id="opMethod" />
+            <p id="opRequestUri" />
+            <p id="opParams" />
+          }
+        }
+        
+        <!-- <p>@spec</p> -->
+
+
+    <script>
+        var STN = {"myWebId": "http://purl.org/stn/operations#MyWebID",
+                "myOwnerId": "http://purl.org/stn/operations#MyOwnerID",
+                "myDisplayedName": "http://purl.org/stn/operations#MyDisplayedName",
+                "myDescription": "http://purl.org/stn/operations#MyDescription"};
+    </script>
+
+    @if(platform != None) {    
+      <script>
+        $('#opForm').submit(function() {
+          var op = getSelectedOperation();
+          var params = {};
+          
+          if ($('#addParams').val()) {
+            $.extend(params, JSON.parse($('#addParams').val()));
+          }
+          
+          var requestUri = '@platform.get.baseUrl' + op["requestUri"];
+          // TOOD: expand request URI for inline params
+          // expandRequestUri(requestUri, op["params"]);
+
+          var KB = { "http://purl.org/stn/operations#MyWebID": $('#client_webid').val(),
+                    "http://purl.org/stn/operations#MyOwnerID": $('#client_owner').val(),
+                    "http://purl.org/stn/operations#MyDisplayedName": $('#client_displayedName').val(),
+                    "http://purl.org/stn/operations#MyDescription": $('#client_description').val()
+                    }
+
+          $.extend(params, packJsonParams(op["params"]));
+          
+          var clientParams = [
+            { name: "mywebid", value: KB[STN.myWebId] },
+            { name: "method", value: op["method"] },
+            { name: "requestUri", value: requestUri },
+            { name: "jsonData", value: JSON.stringify(params) }
+          ];
+          
+          function packJsonParams(params) {
+           var jsonData = {};
+            
+            for (i = 0; i < params.length; i ++) {
+              if (!(KB[params[i].cls] == undefined)) {
+                jsonData[params[i].name] = KB[params[i].cls];
+              }
+            }
+            
+            return jsonData;
+          }
+          
+          $.each(clientParams, function(i, param) {
+            $('<input />').attr('type', 'hidden')
+                .attr('name', param.name)
+                .attr('value', param.value)
+                .appendTo('#opForm');
+          });
+          
+          return true;
+        });
+        
+        function getSelectedOperation() {
+          var opIndex = document.getElementById("opSelect").value;
+          var opArray = @Html(Json.stringify(Json.toJson(platform.get.operations)));
+          return opArray[opIndex];
+        }
+        
+        function showOperationDetails() {
+          var op = getSelectedOperation();
+        
+          document.getElementById("opUri").innerHTML = "Operation: " + op["id"];
+          document.getElementById("opMethod").innerHTML = "Method: " + op["method"];
+          document.getElementById("opRequestUri").innerHTML = "Request URI: " + op["requestUri"];
+          
+          var params = op["params"];
+          var paramContent = "<p>Required params:</p><table>";
+        
+          for (i = 0; i < params.length; i ++) {
+            paramContent += "<tr><td>" + params[i]["cls"] + "</td><td>" + params[i]["name"] + "</td></tr>"
+          }
+        
+          paramContent += "</table>";
+        
+          document.getElementById("opParams").innerHTML = paramContent;
+        }
+        
+      </script>
+    }
+    
+    </body>
+</html>
