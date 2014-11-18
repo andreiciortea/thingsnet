@@ -8,6 +8,8 @@
     a stn:Platform ;
     stn:name "Facebook" ;
     stn-http:baseURL <https://graph.facebook.com/v2.2> ;
+    stn-http:supportsAuth stn-http:OAuth ;
+    stn-http:representationFormat stn-http:JSON ;
     stn-ops:supports <#getAccount> ,
         <#getConnections> ,
         <#getGroup> ,
@@ -61,6 +63,20 @@
         [ a stn-ops:UserID ;
             stn-ops:paramName ":id" ;
             stn-ops:required true ;
+        ] ;
+    stn-ops:hasOutputCollection
+        [ a stn-http:JSONRepresentation ;
+            stn-ops:representationOf stn:UserAccount ;
+            stn-ops:contains
+                [ a stn-ops:UserID ;
+                    stn-ops:path "id" ;
+                    stn-ops:reflects stn:id ;
+                ] ;
+            stn-ops:contains
+                [ a stn-ops:DisplayedName ;
+                    stn-ops:path "name" ;
+                    stn-ops:reflects stn:name ;
+                ] ;
         ] .
 
 <#getGroup>
@@ -74,6 +90,25 @@
         [ a stn-ops:GroupID ;
             stn-ops:paramName ":id" ;
             stn-ops:required true ;
+        ] ;
+    stn-ops:hasOutput
+        [ a stn-http:JSONRepresentation ;
+            stn-ops:representationOf stn:Group ;
+            stn-ops:contains
+                [ a stn-ops:GroupID ;
+                    stn-ops:path "id" ;
+                    stn-ops:reflects stn:id ;
+                ] ;
+            stn-ops:contains
+                [ a stn-ops:DisplayedName ;
+                    stn-ops:path "name" ;
+                    stn-ops:reflects stn:name ;
+                ] ;
+            stn-ops:contains
+                [ a stn-ops:Description ;
+                    stn-ops:path "description" ;
+                    stn-ops:reflects stn:description ;
+                ] ;
         ] .
 
 <#getGroupMembers>
@@ -87,6 +122,20 @@
         [ a stn-ops:GroupID ;
             stn-ops:paramName ":id" ;
             stn-ops:required true ;
+        ] ;
+    stn-ops:hasOutputCollection
+        [ a stn-http:JSONRepresentation ;
+            stn-ops:representationOf stn:UserAccount ;
+            stn-ops:contains
+                [ a stn-ops:UserID ;
+                    stn-ops:path "id" ;
+                    stn-ops:reflects stn:id ;
+                ] ;
+            stn-ops:contains
+                [ a stn-ops:DisplayedName ;
+                    stn-ops:path "name" ;
+                    stn-ops:reflects stn:name ;
+                ] ;
         ] .
 
 <#getGroupsOfUser>
@@ -100,6 +149,25 @@
         [ a stn-ops:UserID ;
             stn-ops:paramName ":id" ;
             stn-ops:required true ;
+        ] ;
+    stn-ops:hasOutputCollection
+        [ a stn-http:JSONRepresentation ;
+            stn-ops:representationOf stn:Group ;
+            stn-ops:contains
+                [ a stn-ops:GroupID ;
+                    stn-ops:path "id" ;
+                    stn-ops:reflects stn:id ;
+                ] ;
+            stn-ops:contains
+                [ a stn-ops:DisplayedName ;
+                    stn-ops:path "name" ;
+                    stn-ops:reflects stn:name ;
+                ] ;
+            stn-ops:contains
+                [ a stn-ops:Description ;
+                    stn-ops:path "description" ;
+                    stn-ops:reflects stn:description ;
+                ] ;
         ] .
 
 <#getMessage>
@@ -113,6 +181,15 @@
         [ a stn-ops:MessageID ;
             stn-ops:paramName ":id" ;
             stn-ops:required true ;
+        ] ;
+    stn-ops:hasOutput
+        [ a stn-http:JSONRepresentation ;
+            stn-ops:representationOf stn:Message ;
+            stn-ops:contains
+                [ a stn-ops:MessageID ;
+                    stn-ops:path "id" ;
+                    stn-ops:reflects stn:id ;
+                ] ;
         ] .
 
 <#getReceivedMessages>
@@ -126,6 +203,15 @@
         [ a stn-ops:UserID ;
             stn-ops:paramName ":id" ;
             stn-ops:required true ;
+        ] ;
+    stn-ops:hasOutputCollection
+        [ a stn-http:JSONRepresentation ;
+            stn-ops:representationOf stn:Message ;
+            stn-ops:contains
+                [ a stn-ops:MessageID ;
+                    stn-ops:path "id" ;
+                    stn-ops:reflects stn:id ;
+                ] ;
         ] .
 
 <#getSentMessages>
@@ -139,6 +225,15 @@
         [ a stn-ops:UserID ;
             stn-ops:paramName ":id" ;
             stn-ops:required true ;
+        ] ;
+    stn-ops:hasOutputCollection
+        [ a stn-http:JSONRepresentation ;
+            stn-ops:representationOf stn:Message ;
+            stn-ops:contains
+                [ a stn-ops:MessageID ;
+                    stn-ops:path "id" ;
+                    stn-ops:reflects stn:id ;
+                ] ;
         ] .
 
 <#postPublicMessage>
