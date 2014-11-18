@@ -9,6 +9,7 @@
     stn:name "ThingsNet" ;
     stn-http:baseURL <http://localhost:9000> ;
     stn-http:supportsAuth stn-http:WebID ;
+    stn-http:representationFormat stn-http:Turtle ;
     stn-ops:supports <#createAccount> ,
         <#getAccount> ,
         <#deleteAccount> ,
@@ -26,12 +27,6 @@
         [ a stn-http:STNRequest ;
             http:methodName "POST" ;
             http:requestURI "/users" ;
-            http:headers (
-                [ a http:RequestHeader ;
-                    http:fieldName "Content-Type" ;
-                    http:fieldValue "application/json" ;
-                ]
-            ) ;
         ] ;
     stn-ops:hasInput
         [ a stn-ops:MyDisplayedName ;
@@ -43,7 +38,9 @@
             stn-ops:paramName "description" ;
         ] ;
     stn-ops:hasOutput
-        [ a stn:UserAccount ] .
+        [ a stn:TurtleRepresentation ;
+            stn-ops:representationOf stn:UserAccount ;
+        ] .
 
 <#getAccount>
     a stn-ops:GetUserAccount ;
@@ -60,7 +57,9 @@
             stn-ops:inline true ;
         ] ;
     stn-ops:hasOutput
-        [ a stn:UserAccount ] .
+        [ a stn:TurtleRepresentation ;
+            stn-ops:representationOf stn:UserAccount ;
+        ] .
 
 <#deleteAccount>
     a stn-ops:DeleteUserAccount ;
@@ -76,17 +75,15 @@
         [ a stn-http:STNRequest ;
             http:methodName "POST" ;
             http:requestURI "/connections/create" ;
-            http:headers (
-                [ a http:RequestHeader ;
-                    http:fieldName "Content-Type" ;
-                    http:fieldValue "application/json" ;
-                ]
-            ) ;
         ] ;
     stn-ops:hasInput
         [ a stn-ops:UserID ;
             stn-ops:paramName "accountUri" ;
             stn-ops:required true ;
+        ] ;
+    stn-ops:hasOutput
+        [ a stn:TurtleRepresentation ;
+            stn-ops:representationOf stn:UserAccount ;
         ] .
 
 <#deleteConnection>
@@ -95,17 +92,15 @@
         [ a stn-http:STNRequest ;
             http:methodName "POST" ;
             http:requestURI "/connections/delete" ;
-            http:headers (
-                [ a http:RequestHeader ;
-                    http:fieldName "Content-Type" ;
-                    http:fieldValue "application/json" ;
-                ]
-            ) ;
         ] ;
     stn-ops:hasInput
         [ a stn-ops:UserID ;
             stn-ops:paramName "accountUri" ;
             stn-ops:required true ;
+        ] ;
+    stn-ops:hasOutput
+        [ a stn:TurtleRepresentation ;
+            stn-ops:representationOf stn:UserAccount ;
         ] .
 
 <#sendMessage>
@@ -114,12 +109,6 @@
         [ a stn-http:STNRequest ;
             http:methodName "POST" ;
             http:requestURI "/messages/create" ;
-            http:headers (
-                [ a http:RequestHeader ;
-                    http:fieldName "Content-Type" ;
-                    http:fieldValue "application/json" ;
-                ]
-            ) ;
         ] ;
     stn-ops:hasInput
         [ a stn-ops:UserID ;
@@ -131,8 +120,10 @@
             stn-ops:paramName "body" ;
             stn-ops:required true ;
         ] ;
-   stn-ops:hasOutput
-        [ a stn:Message ] .
+    stn-ops:hasOutput
+        [ a stn:TurtleRepresentation ;
+            stn-ops:representationOf stn:Message ;
+        ] .
 
 <#deleteMessage>
     a stn-ops:DeletePrivateMessage ;
@@ -140,12 +131,6 @@
         [ a stn-http:STNRequest ;
             http:methodName "POST" ;
             http:requestURI "/messages/delete" ;
-            http:headers (
-                [ a http:RequestHeader ;
-                    http:fieldName "Content-Type" ;
-                    http:fieldValue "application/json" ;
-                ]
-            ) ;
         ] ;
     stn-ops:hasInput
         [ a stn-ops:EntityID ;
@@ -167,7 +152,9 @@
             stn-ops:inline true ;
         ] ;
     stn-ops:hasOutput
-        [ a stn:Message ] .
+        [ a stn:TurtleRepresentation ;
+            stn-ops:representationOf stn:Message ;
+        ] .
 
 <#getMessages>
     a stn-ops:GetMessages ;
@@ -177,4 +164,6 @@
             http:requestURI "/messages/list" ;
         ] ;
     stn-ops:hasOutputCollection
-        [ a stn:Message ] .
+        [ a stn:TurtleRepresentation ;
+            stn-ops:representationOf stn:Message ;
+        ] .
