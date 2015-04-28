@@ -72,6 +72,18 @@ object Application extends Controller {
     }
   }
   
+  def getUserAccountByWebID(userWebID: String) = Action.async {
+    getAccountByWebID(userWebID).flatMap {
+      accountUri => {
+        ResourceService.getResource(accountUri).map{ s =>
+          Ok(s.get).withHeaders( (CONTENT_TYPE, "text/turtle") )
+        }
+      }
+    }.recover {
+      case e: Exception => BadRequest(e.getMessage)
+    }
+  }
+  
   // TODO: proper results parsing
   def getAccountByWebID(webId: String): Future[String] = {
       ResourceService.queryForResults(UserAccount.queryAccountByHolder(webId)).map {

@@ -7,6 +7,7 @@ GET     /                           controllers.Application.index
 GET     /spec                       controllers.Application.spec
 
 POST    /users                      controllers.Application.createUserAccount
+GET     /users                      controllers.Application.getUserAccountByWebID(webid: String)
 GET     /users/:id                  controllers.Application.getUserAccount(id: String)
 POST    /users/delete               controllers.Application.deleteUserAccount
 
