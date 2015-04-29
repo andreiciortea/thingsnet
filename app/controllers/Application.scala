@@ -32,6 +32,7 @@ object Application extends Controller {
 
   
   // TODO: review returned HTTP status codes
+  // TODO: refactor body parsing
   
   /**
    *   User Account handlers.
@@ -43,29 +44,46 @@ object Application extends Controller {
       (__ \ 'displayedName).read[String] and
       (__ \ 'description).readNullable[String]) tupled
     
-    Action(parse.json) { request =>
-      request.body.validate[(String, String, Option[String])].map {
-        case (mywebid, displayedName, description) => {
-          
-          val account = UserAccount(SmartThing(mywebid), new URI(NodeService.getPlatformURI), displayedName, description)
-          
-          if (!ResourceService.ask(UserAccount.queryHolderExists(mywebid))) {
-            ResourceService.createResource(account)
-            Created(account.toTurtle).withHeaders( (CONTENT_TYPE, "text/turtle") )
-          } else {
-            Forbidden("There already exists an account held by " + mywebid + ".\n")
+    Action(parse.tolerantText) { request =>
+      
+      // Parse JSON payload
+      if (request.contentType.get == "application/json" || request.contentType.get == "text/json") {
+
+        Json.parse(request.body).validate[(String, String, Option[String])].map {
+          case (mywebid, displayedName, description) => {
+            
+            val account = UserAccount(SmartThing(mywebid, None, None), new URI(NodeService.getPlatformURI), displayedName, description)
+            
+            if (!ResourceService.ask(UserAccount.queryHolderExists(mywebid))) {
+              ResourceService.createResource(account)
+              Created(account.toTurtle).withHeaders( (CONTENT_TYPE, "text/turtle") )
+            } else {
+              Forbidden("There already exists an account held by " + mywebid + ".\n")
+            }
+            
           }
-          
-        }
-      }.recoverTotal {
-        // TODO: refactor this for all requests
-        e => {
-          if (JsError.toFlatJson(e).toString().contains("mywebid")) {
-            Unauthorized
-          } else {
-            BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
+        }.recoverTotal {
+          // TODO: refactor this for all requests
+          e => {
+            if (JsError.toFlatJson(e).toString().contains("mywebid")) {
+              Unauthorized
+            } else {
+              BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
+            }
           }
         }
+      
+      } else if (request.contentType.get == "text/turtle") {
+        // Parse Turtle payload
+        val account = UserAccount.parseTurtleString(request.body, request.headers.get("X-WebID"))
+        
+        println("Creating resource")
+        ResourceService.createResource(account)
+        println("Created resource, sending response")
+        Created(account.toTurtle).withHeaders( (CONTENT_TYPE, "text/turtle") )
+//        Ok(account.toTurtle)
+      } else {
+        BadRequest("Unkown content type")
       }
     }
   }

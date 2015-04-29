@@ -2,6 +2,7 @@ package models
 
 import org.w3.banana._
 import org.w3.banana.binder._
+import org.w3.banana.diesel._
 
 import scala.util._
 
@@ -53,6 +54,57 @@ object UserAccount extends RDFResourceDependencies {
     pgbWithId[UserAccount](t => Ops.URI(t.getURI))
       .apply(holder, platform, displayedName, description, connections)(UserAccount.apply, UserAccount.unapply) withClasses classUris
   
+  
+  import scala.concurrent.ExecutionContext.Implicits.global
+  
+  // TODO: proper validation of Turtle string
+  def parseTurtleString(ttlStr: String, requestWebId: Option[String]): UserAccount = {
+    val graph = TurtleReader.read(ttlStr, "") getOrElse sys.error("Couldn't read Turtle payload.")
+    val sparqlEngine = SparqlGraph(graph)
+    
+    val query = """
+                |prefix : <http://purl.org/stn/core#>
+                |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                |
+                |SELECT ?owner ?displayedName ?clz ?description
+                |WHERE { 
+                |  <> rdf:type :UserAccount .
+                |  <> :name ?displayedName .
+                |  <> :heldBy [ :ownedBy ?owner ] .
+                |  OPTIONAL { <> :heldBy [ a ?clz ] } .
+                |  OPTIONAL { <> :description ?description }
+                |}""".stripMargin
+    
+    
+    import SparqlOps._
+    
+    val row = sparqlEngine.executeSelect(SelectQuery(query)).getOrFail().toIterable.toList(0)
+    
+    val owner = Some(row("owner") getOrElse sys.error("") toString())
+    
+    val displayedName = row("displayedName").flatMap(_.as[String]) getOrElse sys.error("") toString()
+    
+    val clz =
+      if (row.contains("clz")) {
+        Some(row("clz") getOrElse sys.error("") toString())
+      } else {
+        None
+      }
+    
+    val description =
+      if (row.contains("description")) {
+        Some(row("description").flatMap(_.as[String]) getOrElse sys.error("") toString()) 
+      } else {
+        None 
+      }
+    
+    if (requestWebId.isEmpty) {
+      // TODO gen webid
+      UserAccount(SmartThing("http://www.example.com/#thing", clz, owner), new URI(NodeService.getPlatformURI), displayedName, description)
+    } else {
+      UserAccount(SmartThing(requestWebId.get, clz, owner), new URI(NodeService.getPlatformURI), displayedName, description)
+    }
+  }
   
   def queryAccountExists(accountUri: String) = {
     val query = """

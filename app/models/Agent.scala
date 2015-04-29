@@ -20,7 +20,7 @@ sealed class Agent(uri: String) extends Resource {
 
 case class Person(uri: String) extends Agent(uri)
 
-case class SmartThing(uri: String) extends Agent(uri)
+case class SmartThing(uri: String, clz: Option[String], owner: Option[String]) extends Agent(uri)
 
 
 
@@ -43,7 +43,16 @@ object Agent extends RDFResourceDependencies {
       val pointed = PointedGraph[Rdf](URI(agent.getURI), Graph.empty)
       agent match {
         case Person(_) => pointed.a(stn.Person)
-        case SmartThing(_) => pointed.a(stn.SmartThing)
+        case SmartThing(_,clz,owner) => {
+          val pg = if (clz.isEmpty) pointed.a(stn.SmartThing) else pointed.a(makeUri(clz.get))
+          if (owner.isEmpty) {
+            pg 
+          } else {
+            PointedGraph(pg.pointer,
+                pg.graph union Graph(  Triple(pg.pointer, stn.ownedBy, makeUri(owner.get))  )
+            )
+          }
+        }
         case _ => pointed.a(stn.Agent)
       }
     }
@@ -56,7 +65,7 @@ object Agent extends RDFResourceDependencies {
           } else if (pointed.pointer.isA(stn.Person)) {
             new Person( fromUri(uri) )
           } else if (pointed.pointer.isA(stn.SmartThing)) {
-            new SmartThing( fromUri(uri) )
+            new SmartThing( fromUri(uri), Some(pointed.pointer.getName), Some(pointed.pointer.getName) ) // TOOD: wtf?!
           } else throw new ClassCastException
         }
       }
