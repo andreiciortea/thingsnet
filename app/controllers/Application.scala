@@ -56,7 +56,14 @@ object Application extends Controller {
           
         }
       }.recoverTotal {
-        e => BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
+        // TODO: refactor this for all requests
+        e => {
+          if (JsError.toFlatJson(e).toString().contains("mywebid")) {
+            Unauthorized
+          } else {
+            BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
+          }
+        }
       }
     }
   }
@@ -85,7 +92,9 @@ object Application extends Controller {
   }
   
   // TODO: proper results parsing
+  // Helper function, not an HTTP request handler.
   def getAccountByWebID(webId: String): Future[String] = {
+      println("Checking account for " + webId)
       ResourceService.queryForResults(UserAccount.queryAccountByHolder(webId)).map {
         resultsJson => {
           val results = (Json.parse(resultsJson) \\ "value")
@@ -116,7 +125,7 @@ object Application extends Controller {
         }
       }.recoverTotal {
         e => future {
-          BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
+          Unauthorized
         }
       }
     }
@@ -130,27 +139,45 @@ object Application extends Controller {
   def createConnection = {
     implicit val connectionReads = (
       (__ \ 'mywebid).read[String] and
-      (__ \ 'accountUri).read[String]) tupled
+      (__ \ 'targetUri).read[String]) tupled
     
     Action.async(parse.json) { request =>
       request.body.validate[(String, String)].map {
-        case (mywebid, accountUri) => {
-          getAccountByWebID(mywebid).map {
+        
+        case (mywebid, targetUri) => {
+          getAccountByWebID(mywebid).flatMap {
             myAccountUri => {
-              if (ResourceService.ask(UserAccount.queryAccountExists(accountUri))) {
-                ResourceService.patchResource(myAccountUri, UserAccount.addConnection(myAccountUri, accountUri))
-                Created
-              } else {
-                BadRequest("The target of the connection is not a registered account.\n")
+              
+//              if (ResourceService.ask(UserAccount.queryAccountExists(targetUri))) {
+//              } else {
+//                  BadRequest("The target of the connection is not a registered account.\n")
+//              }
+              
+              getAccountByWebID(targetUri).map {
+                targetAccountUri => {
+                  ResourceService.patchResource(myAccountUri, UserAccount.addConnection(myAccountUri, targetAccountUri))
+                  Created
+                }
+              }.recover {
+                // TODO: do some validation before adding a connection to the provided URI.
+                case e: Exception => {
+                  ResourceService.patchResource(myAccountUri, UserAccount.addConnection(myAccountUri, targetUri))
+                  Created
+                }
               }
             }
           }.recover {
-            case e: Exception => BadRequest(e.getMessage)
+            case e: Exception => Forbidden(e.getMessage)
           }
         }
+      
       }.recoverTotal {
         e => future {
-          BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
+          if (JsError.toFlatJson(e).toString().contains("mywebid")) {
+            Unauthorized
+          } else {
+            BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
+          }
         }
       }
     }
@@ -159,26 +186,44 @@ object Application extends Controller {
   def deleteConnection = {
     implicit val connectionReads = (
       (__ \ 'mywebid).read[String] and
-      (__ \ 'accountUri).read[String]) tupled
+      (__ \ 'targetUri).read[String]) tupled
     
     Action.async(parse.json) { request =>
       request.body.validate[(String, String)].map {
-        case (mywebid, accountUri) => {
-          getAccountByWebID(mywebid).map {
-            myAccountUri =>
-              if (ResourceService.ask(UserAccount.queryConnectionExists(myAccountUri, accountUri))) {
-                ResourceService.patchResource(myAccountUri, UserAccount.removeConnection(myAccountUri, accountUri))
-                Ok
+        case (mywebid, targetUri) => {
+          getAccountByWebID(mywebid).flatMap {
+            myAccountUri => {
+              
+              // TODO: refactor this
+              if (ResourceService.ask(UserAccount.queryConnectionExists(myAccountUri, targetUri))) {
+                ResourceService.patchResource(myAccountUri, UserAccount.removeConnection(myAccountUri, targetUri))
+                future { Ok }
               } else {
-                NotFound
+                getAccountByWebID(targetUri).map {
+                  targetAccountUri => 
+                    if (ResourceService.ask(UserAccount.queryConnectionExists(myAccountUri, targetAccountUri))) {
+                      ResourceService.patchResource(myAccountUri, UserAccount.removeConnection(myAccountUri, targetAccountUri))
+                      Ok
+                    } else {
+                      NotFound
+                    }
+                }.recover {
+                  case e: Exception => NotFound
+                }
               }
+              
+            }
           }.recover {
             case e: Exception => BadRequest(e.getMessage)
           }
         }
       }.recoverTotal {
         e => future {
-          BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
+          if (JsError.toFlatJson(e).toString().contains("mywebid")) {
+            Unauthorized
+          } else {
+            BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
+          }
         }
       }
     }
