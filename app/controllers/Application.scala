@@ -29,7 +29,9 @@ object Application extends Controller {
   def spec = Action {
     Ok(ResourceService.getSTNSpec)
   }
+
   
+  // TODO: review returned HTTP status codes
   
   /**
    *   User Account handlers.
@@ -45,7 +47,7 @@ object Application extends Controller {
       request.body.validate[(String, String, Option[String])].map {
         case (mywebid, displayedName, description) => {
           
-          val account = UserAccount(SmartThing(mywebid), displayedName, description)
+          val account = UserAccount(SmartThing(mywebid), new URI(NodeService.getPlatformURI), displayedName, description)
           
           if (!ResourceService.ask(UserAccount.queryHolderExists(mywebid))) {
             ResourceService.createResource(account)

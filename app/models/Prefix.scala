@@ -14,8 +14,11 @@ class STNPrefix[Rdf <: RDF](ops: RDFOps[Rdf]) extends PrefixBuilder("stn", "http
   
   val UserAccount = apply("UserAccount")
   val Message = apply("Message")
+  
+  val STNPlatform = apply("STNPlatform")
    
   val heldBy = apply("heldBy")
+  val hostedBy = apply("hostedBy")
   val connectedTo = apply("connectedTo")
   val hasSender = apply("hasSender")
   val hasReceiver = apply("hasReceiver")

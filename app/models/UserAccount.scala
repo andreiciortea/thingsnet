@@ -19,7 +19,7 @@ class TNURIBinder[Rdf <: RDF]()(implicit ops: RDFOps[Rdf]) extends URIBinder[Rdf
 }
 
 
-case class UserAccount(holder: Agent, displayedName: String, description: Option[String], connections: Set[URI] = Set.empty) extends Resource {
+case class UserAccount(holder: Agent, platform: URI, displayedName: String, description: Option[String], connections: Set[URI] = Set.empty) extends Resource {
 
   def getContainer = "/users"
   
@@ -46,11 +46,12 @@ object UserAccount extends RDFResourceDependencies {
   val description = property[Option[String]](stn.description)
   
   implicit val uriBinder = new TNURIBinder[Rdf]
+  val platform = property[URI](stn.hostedBy)
   val connections = set[URI](stn.connectedTo)
   
   implicit val userAccountBinder = 
     pgbWithId[UserAccount](t => Ops.URI(t.getURI))
-      .apply(holder, displayedName, description, connections)(UserAccount.apply, UserAccount.unapply) withClasses classUris
+      .apply(holder, platform, displayedName, description, connections)(UserAccount.apply, UserAccount.unapply) withClasses classUris
   
   
   def queryAccountExists(accountUri: String) = {
