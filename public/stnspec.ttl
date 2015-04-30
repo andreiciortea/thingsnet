@@ -9,9 +9,11 @@
     stn:name "ThingsNet" ;
     stn-http:baseURL <http://localhost:9000> ;
     stn-http:supportsAuth stn-http:WebID ;
-    stn-http:representationFormat stn-http:Turtle ;
+    stn-ops:consumes stn-http:Turtle ;
+    stn-ops:produces stn-http:Turtle ;
     stn-ops:supports <#createAccount> ,
         <#getAccount> ,
+        <#getAccountForAgent> ,
         <#deleteAccount> ,
         <#createConnection> ,
         <#getConnections> ,
@@ -21,24 +23,44 @@
         <#getMessages> ,
         <#deleteMessage> .
 
+
+#
+# Account operations
+#
+
+<#thingsnetAccount>
+    a stn:UserAccount ;
+    stn:name
+        [ stn-ops:DisplayedName ;
+            stn-ops:required true;
+        ] ;
+    stn:heldBy
+        [ a stn-ops:SocialThing ;
+            stn:ownedBy stn-ops:Owner ;
+            stn-ops:hasClass stn-ops:SocialThingClass ;
+            stn-ops:required true ;
+        ] ;
+    stn:description
+        [ stn-ops:Description ;
+            stn-ops:required false ;
+        ] .
+
 <#createAccount>
     a stn-ops:CreateUserAccount ;
     stn-ops:implementedAs
         [ a stn-http:STNRequest ;
             http:methodName "POST" ;
             http:requestURI "/users" ;
+            stn-http:requiresAuth false ;
         ] ;
     stn-ops:hasInput
-        [ a stn-ops:MyDisplayedName ;
-            stn-ops:paramName "displayedName" ;
-            stn-ops:required true ;
-        ] ;
-    stn-ops:hasInput
-        [ a stn-ops:MyDescription ;
-            stn-ops:paramName "description" ;
+        [ a stn-http:TurtleRepresentation ;
+            stn-ops:representationOf <#thingsnetAccount> ;
+            stn-ops:required true;
+            stn-http:paramIn stn-http:Body;
         ] ;
     stn-ops:hasOutput
-        [ a stn:TurtleRepresentation ;
+        [ a stn-http:TurtleRepresentation ;
             stn-ops:representationOf stn:UserAccount ;
         ] .
 
@@ -48,13 +70,32 @@
         [ a stn-http:STNRequest ;
             http:methodName "GET" ;
             http:requestURI ":accountUri" ;
-            stn-ops:requiresAuth false ;
+            stn-http:requiresAuth true ;
         ] ;
     stn-ops:hasInput
-        [ a stn-ops:UserID ;
-            stn-ops:paramName "accountUri" ;
+        [ a stn-ops:UserAccountURI ;
             stn-ops:required true ;
-            stn-ops:inline true ;
+            stn-ops:paramName "accountUri" ;
+            stn-http:paramIn stn-http:Path ;
+        ] ;
+    stn-ops:hasOutput
+        [ a stn:TurtleRepresentation ;
+            stn-ops:representationOf stn:UserAccount ;
+        ] .
+
+<#getAccountForAgent>
+    a stn-ops:GetUserAccountForAgent ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/users" ;
+            stn-http:requiresAuth true ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:AgentURI ;
+            stn-ops:paramName "userWebID" ;
+            stn-http:paramIn stn-http:Query ;
+            stn-ops:required true ;
         ] ;
     stn-ops:hasOutput
         [ a stn:TurtleRepresentation ;
@@ -65,8 +106,21 @@
     a stn-ops:DeleteUserAccount ;
     stn-ops:implementedAs
         [ a stn-http:STNRequest ;
-            http:methodName "POST" ;
-            http:requestURI "/users/delete" ;
+            http:methodName "DELETE" ;
+            http:requestURI "/users" ;
+            stn-http:requiresAuth true ;
+        ] .
+
+
+#
+# Connection operations
+#
+
+<#conectionPatch>
+    a stn:UserAccount ;
+    stn:connectedTo
+        [ a stn-ops:EntityURI ;
+            stn-ops:required true ;
         ] .
 
 <#createConnection>
@@ -74,12 +128,14 @@
     stn-ops:implementedAs
         [ a stn-http:STNRequest ;
             http:methodName "POST" ;
-            http:requestURI "/connections/create" ;
+            http:requestURI "/connections" ;
+            stn-http:requiresAuth true ;
         ] ;
     stn-ops:hasInput
-        [ a stn-ops:UserID ;
-            stn-ops:paramName "accountUri" ;
-            stn-ops:required true ;
+        [ a stn-http:TurtleRepresentation ;
+            stn-ops:representationOf <#conectionPatch> ;
+            stn-ops:required true;
+            stn-http:paramIn stn-http:Body;
         ] ;
     stn-ops:hasOutput
         [ a stn:TurtleRepresentation ;
@@ -90,17 +146,47 @@
     a stn-ops:DeleteConnectionTo ;
     stn-ops:implementedAs
         [ a stn-http:STNRequest ;
-            http:methodName "POST" ;
-            http:requestURI "/connections/delete" ;
+            http:methodName "DELETE" ;
+            http:requestURI "/connections" ;
+            stn-http:requiresAuth true ;
         ] ;
     stn-ops:hasInput
-        [ a stn-ops:UserID ;
-            stn-ops:paramName "accountUri" ;
-            stn-ops:required true ;
+        [ a stn-http:TurtleRepresentation ;
+            stn-ops:representationOf <#conectionPatch> ;
+            stn-ops:required true;
+            stn-http:paramIn stn-http:Body;
         ] ;
     stn-ops:hasOutput
         [ a stn:TurtleRepresentation ;
             stn-ops:representationOf stn:UserAccount ;
+        ] .
+
+
+#
+# Message operations
+#
+
+<#thingsnetMessage>
+    a stn:Message ;
+    stn:hasSender
+        [ a stn-ops:UserAccountURI ;
+            stn-ops:required false ;
+        ] ;
+    stn:hasReceiver
+        [ a stn-ops:UserAccountURI ;
+            stn-ops:required true ;
+        ] ;
+    stn:replyTo
+        [ a stn-ops:MessageURI ;
+            stn-ops:required false ;
+        ] ;
+    stn:hasSubject
+        [ a xsd:String ;
+            stn-ops:required false ;
+        ] ;
+    stn:hasBody
+        [ a xsd:String ;
+            stn-ops:required false ;
         ] .
 
 <#sendMessage>
@@ -108,17 +194,14 @@
     stn-ops:implementedAs
         [ a stn-http:STNRequest ;
             http:methodName "POST" ;
-            http:requestURI "/messages/create" ;
+            http:requestURI "/messages" ;
+            stn-http:requiresAuth true ;
         ] ;
     stn-ops:hasInput
-        [ a stn-ops:UserID ;
-            stn-ops:paramName "receiver" ;
-            stn-ops:required true ;
-        ] ;
-    stn-ops:hasInput
-        [ a stn-ops:Description ;
-            stn-ops:paramName "body" ;
-            stn-ops:required true ;
+        [ a stn-http:TurtleRepresentation ;
+            stn-ops:representationOf <#thingsnetMessage> ;
+            stn-ops:required true;
+            stn-http:paramIn stn-http:Body;
         ] ;
     stn-ops:hasOutput
         [ a stn:TurtleRepresentation ;
@@ -129,13 +212,15 @@
     a stn-ops:DeletePrivateMessage ;
     stn-ops:implementedAs
         [ a stn-http:STNRequest ;
-            http:methodName "POST" ;
-            http:requestURI "/messages/delete" ;
+            http:methodName "DELETE" ;
+            http:requestURI ":messageUri" ;
+            stn-http:requiresAuth true ;
         ] ;
     stn-ops:hasInput
-        [ a stn-ops:EntityID ;
+        [ a stn-ops:MessageURI ;
             stn-ops:paramName "messageUri" ;
             stn-ops:required true;
+            stn-http:paramIn stn-http:Path ;
         ] .
 
 <#getMessage>
@@ -144,12 +229,13 @@
         [ a stn-http:STNRequest ;
             http:methodName "GET" ;
             http:requestURI ":messageUri" ;
+            stn-http:requiresAuth true ;
         ] ;
     stn-ops:hasInput
-        [ a stn-ops:EntityID ;
+        [ a stn-ops:MessageURI ;
             stn-ops:paramName "messageUri" ;
-            stn-ops:required true ;
-            stn-ops:inline true ;
+            stn-ops:required true;
+            stn-http:paramIn stn-http:Path ;
         ] ;
     stn-ops:hasOutput
         [ a stn:TurtleRepresentation ;
@@ -160,10 +246,11 @@
     a stn-ops:GetMessages ;
     stn-ops:implementedAs
         [ a stn-http:STNRequest ;
-            http:methodName "POST" ;
-            http:requestURI "/messages/list" ;
+            http:methodName "GET" ;
+            http:requestURI "/messages" ;
         ] ;
-    stn-ops:hasOutputCollection
+    stn-ops:hasOutputCollectionOf
         [ a stn:TurtleRepresentation ;
-            stn-ops:representationOf stn:Message ;
+            stn-ops:representationOf <#thingsnetMessage> ;
         ] .
+# check this out
