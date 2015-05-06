@@ -17,12 +17,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 
 case class HTTPRequest(cls: String, method: String, requestUri: String, 
-    auth: Boolean, requiredInput: List[InputParameter], input: List[InputParameter])
+    requiresAuth: Boolean, requiredInput: List[InputParameter], input: List[InputParameter])
 
 
 case class Platform(uri: String, cls: String, name: String, baseUrl: String, auth: List[String], 
-    consumes: List[String], produces: List[String], opUris: Map[String, Operation])
-    
+    consumes: List[String], produces: List[String], operations: Map[String, Operation])
+
 object Platform extends RDFModule with SparqlGraphModule with JenaModule {
   
   import Ops._
@@ -133,7 +133,7 @@ object Operation extends RDFModule with SparqlGraphModule with JenaModule {
 }
 
 
-case class InputParameter(cls: String, in: String, required: Boolean)
+case class InputParameter(cls: String, in: String, isRequired: Boolean)
 
 object InputParameter extends RDFModule with SparqlGraphModule with JenaModule {
   
@@ -166,22 +166,19 @@ object InputParameter extends RDFModule with SparqlGraphModule with JenaModule {
 }
 
 
-object STNParser {
-  val prefixes = """
-                |prefix stn: <http://purl.org/stn/core#>
-                |prefix stn-ops: <http://purl.org/stn/operations#>
-                |prefix stn-http: <http://purl.org/stn/http#>
-                |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                |prefix http: <http://www.w3.org/2011/http#>
-                """.stripMargin
-}
-
-class STNParser(specURL: String) extends RDFModule with SparqlGraphModule with JenaModule {
+object STNParser extends RDFModule with SparqlGraphModule with JenaModule {
 
   import Ops._
   import SparqlOps._
-  
 
+  def prefixes = """
+              |prefix stn: <http://purl.org/stn/core#>
+              |prefix stn-ops: <http://purl.org/stn/operations#>
+              |prefix stn-http: <http://purl.org/stn/http#>
+              |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+              |prefix http: <http://www.w3.org/2011/http#>
+              """.stripMargin
+  
   def fetchSTNDescDoc(specURL: String) = {
     WS.url(java.net.URLDecoder.decode(specURL, "UTF-8")).get().map {
       response => {
@@ -190,12 +187,12 @@ class STNParser(specURL: String) extends RDFModule with SparqlGraphModule with J
     } 
   }
   
-  val fSpec = fetchSTNDescDoc(specURL)
-  
-  val fPlatform = fSpec map {
-    spec => {
-      val graph = TurtleReader.read(spec, "") getOrElse sys.error("Couldn't read the STN spec.")
-      Platform.extract(SparqlGraph(graph))
+  def getPlatform(specUrl: String) = {
+    fetchSTNDescDoc(specUrl) map {
+      spec => {
+        val graph = TurtleReader.read(spec, "") getOrElse sys.error("Couldn't read the STN spec.")
+        Platform.extract(SparqlGraph(graph))
+      }
     }
   }
   
