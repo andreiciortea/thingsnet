@@ -26,7 +26,7 @@ case class UserAccount(holder: Agent, platform: URI, displayedName: String, desc
   
   def getURI: String = 
     NodeService.genResourceURI(container = getContainer, id = uuid)
-
+  
   def toGraph = UserAccount.userAccountBinder.toPG(this)
 }
 

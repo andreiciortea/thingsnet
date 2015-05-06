@@ -1,0 +1,75 @@
+package utils
+
+import org.w3.banana._
+import org.w3.banana.binder._
+import org.w3.banana.diesel._
+import org.w3.banana.jena._
+
+trait Resource
+extends RDFModule
+with RDFOpsModule
+with TurtleWriterModule
+with JenaModule
+
+
+// TOOD: a more versatile template engine
+abstract class TurtleTemplate {
+
+  import models.STNPrefix
+  import models.STNOpsPrefix
+  import models.STNHttpPrefix
+
+  // TODO
+  def prefixes = """
+            |@prefix stn: <http://purl.org/stn/core#> .
+            |@prefix stn-ops: <http://purl.org/stn/operations#> .
+            |@prefix stn-http: <http://purl.org/stn/http#> .
+            |@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+            |@prefix http: <http://www.w3.org/2011/http#> .
+            """.stripMargin
+  
+  def getTemplate: List[String]
+  
+  def tag(s: String) = "__" + s + "__"
+  
+  def addParams(template: String, params: List[(String, String)]): String = {
+    if (params.isEmpty) {
+      template
+    } else {
+      val head::tail = params
+      addParams(template.replaceAll(tag(head._1), head._2), tail)
+    }
+  }
+  
+  def buildTurtle(template: List[String], 
+      params: List[(String, String)], result: List[String]): String = {
+    
+    if (template.isEmpty) {
+      result.mkString("\n")
+    } else {
+      val head::tail = template
+      val headWithParams = addParams(head, params)
+      
+      if (headWithParams.contains("__")) {
+        buildTurtle(tail, params, result)
+      } else {
+        buildTurtle(tail, params, result :+ headWithParams)
+      }
+    }
+  }
+  
+  def toTurtle(params: List[(String, String)]): String = {
+//    prefixes + buildTurtle(getTemplate, params, List())
+    buildTurtle(getTemplate, params, List("<> a <http://purl.org/stn/core#UserAccount> ."))
+  }
+}
+
+object UserAccountTemplate extends TurtleTemplate {
+  
+  // TODO add short link feature
+  def getTemplate = List("<> <http://purl.org/stn/core#heldBy> <__http://purl.org/stn/operations#AgentURI__> .",
+      "<> <http://purl.org/stn/core#name> \"__http://purl.org/stn/operations#DisplayedName__\" .",
+      "<> <http://purl.org/stn/core#description> <__http://purl.org/stn/operations#Description__> .",
+      "<__http://purl.org/stn/operations#AgentURI__> a <__http://purl.org/stn/operations#SocialThingClass__> .",
+      "<__http://purl.org/stn/operations#AgentURI__> <http://purl.org/stn/core#ownedBy> <__http://purl.org/stn/operations#SocialThingOwner__> .")
+}

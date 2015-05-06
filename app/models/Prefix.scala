@@ -28,3 +28,50 @@ class STNPrefix[Rdf <: RDF](ops: RDFOps[Rdf]) extends PrefixBuilder("stn", "http
   val name = apply("name")
   val description = apply("description")
 }
+
+
+object STNOpsPrefix {
+  def apply[Rdf <: RDF](implicit ops: RDFOps[Rdf]) = new STNOpsPrefix(ops)
+}
+
+class STNOpsPrefix[Rdf <: RDF](ops: RDFOps[Rdf]) extends PrefixBuilder("stn-ops", "http://purl.org/stn/operations#")(ops) {
+
+  // Operations
+  val CreateUserAccount = apply("CreateUserAccount")
+  
+  // Parameters
+  val AgentURI = apply("AgentURI")
+  val DisplayedName = apply("DisplayedName")
+  val SocialThingOwner = apply("SocialThingOwner")
+  val SocialThingClass = apply("SocialThingClass")
+  
+  // Properties
+  val supports = apply("supports")
+}
+
+
+object STNHttpPrefix {
+  def apply[Rdf <: RDF](implicit ops: RDFOps[Rdf]) = new STNHttpPrefix(ops)
+}
+
+class STNHttpPrefix[Rdf <: RDF](ops: RDFOps[Rdf]) extends PrefixBuilder("stn-http", "http://purl.org/stn/http#")(ops) {
+
+  // Requests
+  val STNRequest = apply("STNRequest")
+  val AuthSTNRequest = apply("AuthSTNRequest")
+  
+  // Representations
+  val Turtle = apply("Turtle")
+  val TurtleRepresentation = apply("TurtleRepresentation")
+  val JSON = apply("JSON")
+  val JSONRepresentation = apply("JSONRepresentation")
+  
+  // Auth standards
+  val OAuth = apply("OAuth")
+  val WebID = apply("WebID")
+  
+  // Properties
+  val supportsAuth = apply("supportsAuth")
+  val consumes = apply("consumes")
+  val produces = apply("produces")
+}
