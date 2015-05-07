@@ -97,6 +97,10 @@
         [ a stn-http:AuthSTNRequest ;
             http:methodName "DELETE" ;
             http:requestURI "/users" ;
+        ] ;
+    stn-ops:hasOutput
+        [ a stn:TurtleRepresentation ;
+            stn-ops:representationOf [ a stn:UserAccount ] ;
         ] .
 
 
@@ -136,7 +140,7 @@
         ] ;
     stn-ops:hasOutput
         [ a stn:TurtleRepresentation ;
-            stn-ops:representationOf [ a stn:UserAccount ] ;
+            stn-ops:collectionOf [ a stn:UserAccount ] ;
         ] .
 
 <#getInConnections>
@@ -153,7 +157,7 @@
         ] ;
     stn-ops:hasOutput
         [ a stn:TurtleRepresentation ;
-            stn-ops:representationOf [ a stn:UserAccount ] ;
+            stn-ops:collectionOf [ a stn:UserAccount ] ;
         ] .
 
 <#deleteConnection>
@@ -164,7 +168,7 @@
             http:requestURI "/connections" ;
         ] ;
     stn-ops:hasRequiredInput
-        [ a stn-ops:EntityURI ;
+        [ a stn-ops:AgentURI ;
             stn-http:paramKey "targetUri" ;
             stn-http:paramIn stn-http:Body ;
         ] ;

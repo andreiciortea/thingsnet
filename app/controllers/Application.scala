@@ -58,102 +58,6 @@ object Application extends Controller {
   }
   
   
-  /**
-   *   Connection handlers.
-   */
-  
-  def createConnection = {
-    implicit val connectionReads = (
-      (__ \ 'mywebid).read[String] and
-      (__ \ 'targetUri).read[String]) tupled
-    
-    Action.async(parse.json) { request =>
-      request.body.validate[(String, String)].map {
-        
-        case (mywebid, targetUri) => {
-          UserAccountController.getAccountForAgent(mywebid).flatMap {
-            myAccountUri => {
-              
-//              if (ResourceService.ask(UserAccount.queryAccountExists(targetUri))) {
-//              } else {
-//                  BadRequest("The target of the connection is not a registered account.\n")
-//              }
-              
-              UserAccountController.getAccountForAgent(targetUri).map {
-                targetAccountUri => {
-                  ResourceService.patchResource(myAccountUri.get, UserAccount.addConnection(myAccountUri.get, targetAccountUri.get))
-                  Created
-                }
-              }.recover {
-                // TODO: do some validation before adding a connection to the provided URI.
-                case e: Exception => {
-                  ResourceService.patchResource(myAccountUri.get, UserAccount.addConnection(myAccountUri.get, targetUri))
-                  Created
-                }
-              }
-            }
-          }.recover {
-            case e: Exception => Forbidden(e.getMessage)
-          }
-        }
-      
-      }.recoverTotal {
-        e => future {
-          if (JsError.toFlatJson(e).toString().contains("mywebid")) {
-            Unauthorized
-          } else {
-            BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
-          }
-        }
-      }
-    }
-  }
-  
-  def deleteConnection = {
-    implicit val connectionReads = (
-      (__ \ 'mywebid).read[String] and
-      (__ \ 'targetUri).read[String]) tupled
-    
-    Action.async(parse.json) { request =>
-      request.body.validate[(String, String)].map {
-        case (mywebid, targetUri) => {
-          UserAccountController.getAccountForAgent(mywebid).flatMap {
-            myAccountUri => {
-              
-              // TODO: refactor this
-              if (ResourceService.ask(UserAccount.queryConnectionExists(myAccountUri.get, targetUri))) {
-                ResourceService.patchResource(myAccountUri.get, UserAccount.removeConnection(myAccountUri.get, targetUri))
-                future { Ok }
-              } else {
-                UserAccountController.getAccountForAgent(targetUri).map {
-                  targetAccountUri => 
-                    if (ResourceService.ask(UserAccount.queryConnectionExists(myAccountUri.get, targetAccountUri.get))) {
-                      ResourceService.patchResource(myAccountUri.get, UserAccount.removeConnection(myAccountUri.get, targetAccountUri.get))
-                      Ok
-                    } else {
-                      NotFound
-                    }
-                }.recover {
-                  case e: Exception => NotFound
-                }
-              }
-              
-            }
-          }.recover {
-            case e: Exception => BadRequest(e.getMessage)
-          }
-        }
-      }.recoverTotal {
-        e => future {
-          if (JsError.toFlatJson(e).toString().contains("mywebid")) {
-            Unauthorized
-          } else {
-            BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
-          }
-        }
-      }
-    }
-  }
   
   /**
    *   Message handlers.
@@ -170,7 +74,7 @@ object Application extends Controller {
     Action.async(parse.json) { request =>
       request.body.validate[(String, String, Option[String], Option[String], Option[String])].map {
         case (mywebid, receiver, replyTo, subject, body) => {
-          UserAccountController.getAccountForAgent(mywebid).map {
+          UserAccountController.getUserAccountUriForAgent(mywebid).map {
             myAccountUri => {  
               val optReplyTo: Option[URI] = if (replyTo.isEmpty) None else Some(new URI(replyTo.get))
               
@@ -204,7 +108,7 @@ object Application extends Controller {
       request.body.validate[String].map {
         case (mywebid) => {
           println("got request")
-          UserAccountController.getAccountForAgent(mywebid).flatMap {
+          UserAccountController.getUserAccountUriForAgent(mywebid).flatMap {
             myAccountUri =>
               ResourceService.queryForGraphs(Message.queryMessagesForUser(myAccountUri.get)) map {
                 s =>

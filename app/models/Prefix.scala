@@ -38,9 +38,13 @@ class STNOpsPrefix[Rdf <: RDF](ops: RDFOps[Rdf]) extends PrefixBuilder("stn-ops"
 
   // Operations
   val CreateUserAccount = apply("CreateUserAccount")
+  val GetUserAccount = apply("GetUserAccount")
+  val DeleteUserAccount = apply("DeleteUserAccount")
+  val WhoIsAgent = apply("WhoIsAgent")
   
   // Parameters
   val AgentURI = apply("AgentURI")
+  val UserAccountURI = apply("UserAccountURI")
   val DisplayedName = apply("DisplayedName")
   val SocialThingOwner = apply("SocialThingOwner")
   val SocialThingClass = apply("SocialThingClass")
@@ -69,6 +73,10 @@ class STNHttpPrefix[Rdf <: RDF](ops: RDFOps[Rdf]) extends PrefixBuilder("stn-htt
   // Auth standards
   val OAuth = apply("OAuth")
   val WebID = apply("WebID")
+
+  val Body = apply("Body")
+  val Path = apply("Path")
+  val Query = apply("Query")
   
   // Properties
   val supportsAuth = apply("supportsAuth")

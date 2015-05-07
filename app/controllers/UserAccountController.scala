@@ -18,7 +18,7 @@ object UserAccountController extends Controller {
   /**
    *  Queries the repo to return the account of a given agent URI (if any).
    */
-  def getAccountForAgent(agentUri: String): Future[Option[String]] = {
+  def getUserAccountUriForAgent(agentUri: String): Future[Option[String]] = {
       ResourceService.queryForResults(UserAccount.queryAccountByHolder(agentUri)).map {
         resultsJson => {
           val results = (Json.parse(resultsJson) \\ "value")
@@ -32,9 +32,8 @@ object UserAccountController extends Controller {
   }
   
   /**
-   * Create a user account (JSON and Turtle).
+   * Create a user account form JSON.
    */
-  
   def createUserAccountFromJSON(webId: String, payload: String) = {
     implicit val createUserAccountReads = (
       (__ \ 'socialThingClass).read[String] and
@@ -43,27 +42,30 @@ object UserAccountController extends Controller {
       (__ \ 'description).readNullable[String]) tupled
     
     Json.parse(payload).validate[(String, String, String, Option[String])].map {
-          case (socialThingClass, socialThingOwner, displayedName, description) => {
-            
-            import java.net.URI
-            val account = UserAccount(SmartThing(webId, socialThingClass, socialThingOwner), 
-                new URI(NodeService.getPlatformURI), displayedName, description)
-            
-            if (!ResourceService.ask(UserAccount.queryHolderExists(webId))) {
-              ResourceService.createResource(account)
-              Created(account.toTurtle).withHeaders( (CONTENT_TYPE, "text/turtle") )
-            } else {
-              Forbidden("There already exists an account held by " + webId + ".\n")
-            }
-            
-          }
-        }.recoverTotal {
-          e => {
-            BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
-          }
+      case (socialThingClass, socialThingOwner, displayedName, description) => {
+        
+        import java.net.URI
+        val account = UserAccount(SmartThing(webId, socialThingClass, socialThingOwner), 
+            new URI(NodeService.getPlatformURI), displayedName, description)
+        
+        if (!ResourceService.ask(UserAccount.queryHolderExists(webId))) {
+          ResourceService.createResource(account)
+          Created(account.toTurtle).withHeaders( (CONTENT_TYPE, "text/turtle") )
+        } else {
+          Forbidden("There already exists an account held by " + webId + ".\n")
         }
+        
+      }
+    }.recoverTotal {
+      e => {
+        BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
+      }
+    }
   }
   
+  /**
+   * Create a user account form Turtle.
+   */
   def createUserAccountFromTurtle(webId: Option[String], payload: String) = {
     // TODO: if the requesting agent did not send a WebID, one should be generated
     val account = UserAccount.parseTurtleString(payload, webId)
@@ -71,6 +73,9 @@ object UserAccountController extends Controller {
     Created(account.toTurtle).withHeaders( (CONTENT_TYPE, "text/turtle") )
   }
   
+  /**
+   * Create a user account.
+   */
   def createUserAccount = {
     Action(parse.tolerantText) { request =>
       
@@ -118,7 +123,7 @@ object UserAccountController extends Controller {
   def getUserAccountForAgent(agentUri: String) = Action.async { request =>
     if (Validator.isValidUri(agentUri)) {
       // Retrieve account by agent URI
-      getAccountForAgent(agentUri).flatMap {
+      getUserAccountUriForAgent(agentUri).flatMap {
         accountUri => {
           if (accountUri.isEmpty) {
             // No account has been found for this agent URI
@@ -145,13 +150,17 @@ object UserAccountController extends Controller {
       if (webId.isEmpty) {
         Future { Unauthorized }
       } else {
-        getAccountForAgent(webId.get) map {
+        getUserAccountUriForAgent(webId.get) flatMap {
           accountUri => {
             if (accountUri.isEmpty) {
-              NotFound
+              Future { NotFound }
             } else {
-              ResourceService.deleteResource(accountUri.get)
-              Ok
+              ResourceService.getResource(accountUri.get).map {
+                account => {
+                  ResourceService.deleteResource(accountUri.get)
+                  Ok(account.get)
+                }
+              }
             }
           }
         }

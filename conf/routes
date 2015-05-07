@@ -14,8 +14,8 @@ GET     /users                      controllers.UserAccountController.getUserAcc
 GET     /users/:id                  controllers.UserAccountController.getUserAccount(id: String)
 DELETE  /users                      controllers.UserAccountController.deleteUserAccount
 
-POST    /connections                controllers.Application.createConnection
-POST    /connections/delete         controllers.Application.deleteConnection
+POST    /connections                controllers.ConnectionsController.createConnection
+DELETE  /connections                controllers.ConnectionsController.deleteConnection(agentUri: String ?= "")
 
 POST    /messages/list              controllers.Application.getMessages
 GET     /messages/:id               controllers.Application.getMessageById(id: String)
