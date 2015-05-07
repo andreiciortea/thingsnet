@@ -185,28 +185,4 @@ object ConnectionsController extends Controller {
     }
   }
   
-  def getInConnections(accountUri: String) = {
-    Action.async { request =>
-      val webId = request.headers.get(NodeService.HEADER_WebID)
-      
-      if (webId.isEmpty) {
-        Future { Unauthorized }
-      } else {
-        // Validation not working properly for this URI
-//        if (!Validator.isValidUri(accountUri)) {
-//          Future { BadRequest }
-//        } else {
-          if (!ResourceService.ask(UserAccount.queryAccountExists(accountUri))) {
-            Future { NotFound }
-          } else {
-            ResourceService
-              .constructGraphs(UserAccount.queryGetConnections(None, Some(accountUri))) map {
-                result => Ok(result).withHeaders(("Content-Type", "text/turtle"))
-            }
-          }
-//        }
-      }
-    }
-  }
-  
 }
