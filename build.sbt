@@ -12,5 +12,6 @@ libraryDependencies ++= Seq(
   anorm,
   cache,
   ws,
-  "org.apache.jena" % "jena-tdb" % "1.0.1"
+  "org.apache.jena" % "jena-tdb" % "1.0.1",
+  "commons-validator" % "commons-validator" % "1.4.1"
 )

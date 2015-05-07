@@ -1,0 +1,133 @@
+@base <http://www.dweet.io/> .
+@prefix stn: <http://purl.org/stn/core#> .
+@prefix stn-ops: <http://purl.org/stn/operations#> .
+@prefix stn-http: <http://purl.org/stn/http#> .
+@prefix http: <http://www.w3.org/2011/http#> .
+
+<#platform>
+    a stn:Platform ;
+    stn:name "dweet.io" ;
+    stn-http:baseURL <https://dweet.io> ;
+    stn-ops:consumes stn-http:JSON ;
+    stn-ops:produces stn-http:JSON ;
+    stn-ops:supports <#postDweet> ,
+        <#readDweet> .
+
+
+<#dweet>
+    a stn:DataObject ;
+    stn:createdBy _:accountId ;
+    stn:dataFromat stn-http:JSON ;
+    stn:data _:data .
+
+<#dweetJSON>
+    a stn-http:JSONRepresentation ;
+    stn-ops:representationOf <#dweet> ;
+    stn-ops:contains
+        [ a stn-ops:UserAccountID ;
+            stn-ops:key "thing" ;
+            stn-ops:value _:accountId ;
+        ] ;
+    stn-ops:contains
+        [ a stn-ops:RawData ;
+            stn-ops:key "content" ;
+            stn-ops:value _:data ;
+        ] .
+
+<#createAccount>
+    a stn-ops:PostDataToUserAccountFeed ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/dweet/for/:accountId" ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-http:UUID ;
+            stn-ops:key ":accountId"
+            stn-ops:required true ;
+            stn-http:paramIn stn-http:Path;
+        ] ;
+    stn-ops:hasOutput
+        [ a stn-http:JSONRepresentation ;
+            stn-ops:representationOf
+                [ a stn:UserAccount
+                    stn:id _:accountId ;
+                ] ;
+            stn-http:JSONPath "with" ;
+            stn-ops:contains
+                [ a stn-ops:UserAccountID ;
+                    stn-ops:key "thing" ;
+                    stn-ops:value _:accountId ;
+                ] ;
+        ] .
+
+<#postDweet>
+    a stn-ops:PostDataToUserAccountFeed ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/dweet/for/:accountId" ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-http:UserAccountID ;
+            stn-ops:key ":accountId"
+            stn-ops:required true ;
+            stn-http:paramIn stn-http:Path;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-http:JSONRepresentation ;
+            stn-ops:representationOf [ a stn:DataObject ] ;
+            stn-ops:required true ;
+            stn-http:paramIn stn-http:Body;
+        ] ;
+    stn-ops:hasOutput
+        [ a stn-http:JSONRepresentation ;
+            stn-http:JSONPath "with" ;
+            stn-ops:representationOf <#dweet> ;
+            stn-ops:contains
+                [ a stn-ops:UserAccountID ;
+                    stn-ops:key "thing" ;
+                    stn-ops:value _:author ;
+                ] ;
+            stn-ops:contains
+                [ a stn-ops:RawData ;
+                    stn-ops:key "content" ;
+                    stn-ops:value _:data ;
+                ] ;
+        ] .
+
+<#getLastDweet>
+    a stn-ops:GetOneFromUserAccountFeed;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/get/latest/dweet/for/:accountId" ;
+        ] ;
+    stn-ops:hasOutput
+        [ a stn-http:JSONRepresentation ;
+            stn-http:JSONPath "with" ;
+            stn-ops:representationOf <#dweet> ;
+            stn-ops:contains
+                [ a stn-ops:UserAccountID ;
+                    stn-ops:key "thing" ;
+                    stn-ops:value _:author ;
+                ] ;
+            stn-ops:contains
+                [ a stn-ops:RawData ;
+                    stn-ops:key "content" ;
+                    stn-ops:value _:data ;
+                ] ;
+        ] .
+
+<#getDweets>
+    a stn-ops:GetUserAccountFeed;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/get/dweets/for/:accountId" ;
+        ] ;
+    stn-ops:hasOutput
+        [ a stn-http:JSONArray ;
+            stn-http:JSONPath "with" ;
+            stn-ops:arrayOf <#dweetJSON> ;
+        ] .

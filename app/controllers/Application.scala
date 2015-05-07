@@ -16,8 +16,11 @@ import models.{Agent, Person, SmartThing}
 import models.UserAccount
 import models.Message
 import services.{NodeService, ResourceService}
+import utils.Validator
 
+import org.apache.commons.validator.routines.UrlValidator
 import java.net.URI
+import java.net.URLDecoder
 
 
 object Application extends Controller {
@@ -34,120 +37,23 @@ object Application extends Controller {
   // TODO: review returned HTTP status codes
   // TODO: refactor body parsing
   
-  /**
-   *   User Account handlers.
-   */
   
-  def createUserAccount = {
-    implicit val createUserAccountReads = (
-      (__ \ 'mywebid).read[String] and
-      (__ \ 'displayedName).read[String] and
-      (__ \ 'description).readNullable[String]) tupled
+  def parserTest = Action {
+    import utils.Parser
     
-    Action(parse.tolerantText) { request =>
-      
-      // Parse JSON payload
-      if (request.contentType.get == "application/json" || request.contentType.get == "text/json") {
+    Ok(Parser.parse).withHeaders(("Content-Type", "text/turtle"))
+  }
+  
+  
+  def socialTV = Action.async {
+    import democlient.SocialTV
 
-        Json.parse(request.body).validate[(String, String, Option[String])].map {
-          case (mywebid, displayedName, description) => {
-            
-            val account = UserAccount(SmartThing(mywebid, None, None), new URI(NodeService.getPlatformURI), displayedName, description)
-            
-            if (!ResourceService.ask(UserAccount.queryHolderExists(mywebid))) {
-              ResourceService.createResource(account)
-              Created(account.toTurtle).withHeaders( (CONTENT_TYPE, "text/turtle") )
-            } else {
-              Forbidden("There already exists an account held by " + mywebid + ".\n")
-            }
-            
-          }
-        }.recoverTotal {
-          // TODO: refactor this for all requests
-          e => {
-            if (JsError.toFlatJson(e).toString().contains("mywebid")) {
-              Unauthorized
-            } else {
-              BadRequest("Detected error:" + JsError.toFlatJson(e) + ".\n")
-            }
-          }
-        }
-      
-      } else if (request.contentType.get == "text/turtle") {
-        // Parse Turtle payload
-        val account = UserAccount.parseTurtleString(request.body, request.headers.get("X-WebID"))
-        
-        println("Creating resource")
-        ResourceService.createResource(account)
-        println("Created resource, sending response")
-        Created(account.toTurtle).withHeaders( (CONTENT_TYPE, "text/turtle") )
-//        Ok(account.toTurtle)
-      } else {
-        BadRequest("Unkown content type")
-      }
-    }
-  }
-  
-  def getUserAccount(id: String) = Action.async {
-    val futureGraphString = ResourceService.getResource(NodeService.genResourceURI(container = "/users", id = id))
-    futureGraphString.map{ s =>
-      if (!s.isEmpty) {
-          Ok(s.get).withHeaders( (CONTENT_TYPE, "text/turtle") )
-      } else {
-        NotFound
-      }
-    }
-  }
-  
-  def getUserAccountByWebID(userWebID: String) = Action.async {
-    getAccountByWebID(userWebID).flatMap {
-      accountUri => {
-        ResourceService.getResource(accountUri).map{ s =>
-          Ok(s.get).withHeaders( (CONTENT_TYPE, "text/turtle") )
-        }
-      }
-    }.recover {
-      case e: Exception => BadRequest(e.getMessage)
-    }
-  }
-  
-  // TODO: proper results parsing
-  // Helper function, not an HTTP request handler.
-  def getAccountByWebID(webId: String): Future[String] = {
-      println("Checking account for " + webId)
-      ResourceService.queryForResults(UserAccount.queryAccountByHolder(webId)).map {
-        resultsJson => {
-          val results = (Json.parse(resultsJson) \\ "value")
-            if (results.isEmpty) {
-              throw new Exception("No account registered for this WebID.")
-          } else {
-            results(0).as[String]
-          }
-        }
-      }
-  }
-  
-  def deleteUserAccount = {
-    implicit val deleteUserAccountReads = (
-      (__ \ 'mywebid).read[String])
+//    SocialTV.run map {
+//      output => Ok(output)
+//    }
     
-    Action.async(parse.json) { request =>
-      request.body.validate[String].map {
-        case (mywebid) => {
-          getAccountByWebID(mywebid).map {
-            accountUri => {
-              ResourceService.deleteResource(accountUri)
-              Ok
-            }
-          }.recover {
-            case e: Exception => BadRequest(e.getMessage)
-          }
-        }
-      }.recoverTotal {
-        e => future {
-          Unauthorized
-        }
-      }
+    SocialTV.run map {
+      response => Ok(response)
     }
   }
   
@@ -165,7 +71,7 @@ object Application extends Controller {
       request.body.validate[(String, String)].map {
         
         case (mywebid, targetUri) => {
-          getAccountByWebID(mywebid).flatMap {
+          UserAccountController.getAccountForAgent(mywebid).flatMap {
             myAccountUri => {
               
 //              if (ResourceService.ask(UserAccount.queryAccountExists(targetUri))) {
@@ -173,15 +79,15 @@ object Application extends Controller {
 //                  BadRequest("The target of the connection is not a registered account.\n")
 //              }
               
-              getAccountByWebID(targetUri).map {
+              UserAccountController.getAccountForAgent(targetUri).map {
                 targetAccountUri => {
-                  ResourceService.patchResource(myAccountUri, UserAccount.addConnection(myAccountUri, targetAccountUri))
+                  ResourceService.patchResource(myAccountUri.get, UserAccount.addConnection(myAccountUri.get, targetAccountUri.get))
                   Created
                 }
               }.recover {
                 // TODO: do some validation before adding a connection to the provided URI.
                 case e: Exception => {
-                  ResourceService.patchResource(myAccountUri, UserAccount.addConnection(myAccountUri, targetUri))
+                  ResourceService.patchResource(myAccountUri.get, UserAccount.addConnection(myAccountUri.get, targetUri))
                   Created
                 }
               }
@@ -211,18 +117,18 @@ object Application extends Controller {
     Action.async(parse.json) { request =>
       request.body.validate[(String, String)].map {
         case (mywebid, targetUri) => {
-          getAccountByWebID(mywebid).flatMap {
+          UserAccountController.getAccountForAgent(mywebid).flatMap {
             myAccountUri => {
               
               // TODO: refactor this
-              if (ResourceService.ask(UserAccount.queryConnectionExists(myAccountUri, targetUri))) {
-                ResourceService.patchResource(myAccountUri, UserAccount.removeConnection(myAccountUri, targetUri))
+              if (ResourceService.ask(UserAccount.queryConnectionExists(myAccountUri.get, targetUri))) {
+                ResourceService.patchResource(myAccountUri.get, UserAccount.removeConnection(myAccountUri.get, targetUri))
                 future { Ok }
               } else {
-                getAccountByWebID(targetUri).map {
+                UserAccountController.getAccountForAgent(targetUri).map {
                   targetAccountUri => 
-                    if (ResourceService.ask(UserAccount.queryConnectionExists(myAccountUri, targetAccountUri))) {
-                      ResourceService.patchResource(myAccountUri, UserAccount.removeConnection(myAccountUri, targetAccountUri))
+                    if (ResourceService.ask(UserAccount.queryConnectionExists(myAccountUri.get, targetAccountUri.get))) {
+                      ResourceService.patchResource(myAccountUri.get, UserAccount.removeConnection(myAccountUri.get, targetAccountUri.get))
                       Ok
                     } else {
                       NotFound
@@ -264,11 +170,11 @@ object Application extends Controller {
     Action.async(parse.json) { request =>
       request.body.validate[(String, String, Option[String], Option[String], Option[String])].map {
         case (mywebid, receiver, replyTo, subject, body) => {
-          getAccountByWebID(mywebid).map {
+          UserAccountController.getAccountForAgent(mywebid).map {
             myAccountUri => {  
               val optReplyTo: Option[URI] = if (replyTo.isEmpty) None else Some(new URI(replyTo.get))
               
-              val message = Message(new URI(myAccountUri), new URI(receiver), optReplyTo, subject, body)
+              val message = Message(new URI(myAccountUri.get), new URI(receiver), optReplyTo, subject, body)
               
               if (ResourceService.ask(UserAccount.queryAccountExists(receiver))) {
                 ResourceService.createResource(message)
@@ -298,9 +204,9 @@ object Application extends Controller {
       request.body.validate[String].map {
         case (mywebid) => {
           println("got request")
-          getAccountByWebID(mywebid).flatMap {
+          UserAccountController.getAccountForAgent(mywebid).flatMap {
             myAccountUri =>
-              ResourceService.queryForGraphs(Message.queryMessagesForUser(myAccountUri)) map {
+              ResourceService.queryForGraphs(Message.queryMessagesForUser(myAccountUri.get)) map {
                 s =>
                   Ok(s).withHeaders( (CONTENT_TYPE, "text/turtle") )
               }

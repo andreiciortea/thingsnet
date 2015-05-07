@@ -71,7 +71,7 @@ object UserAccount extends RDFResourceDependencies {
                 |  <> rdf:type :UserAccount .
                 |  <> :name ?displayedName .
                 |  <> :heldBy [ :ownedBy ?owner ] .
-                |  OPTIONAL { <> :heldBy [ a ?clz ] } .
+                |  OPTIONAL { <> :heldBy [ a ?clz ] }
                 |  OPTIONAL { <> :description ?description }
                 |}""".stripMargin
     
@@ -80,16 +80,11 @@ object UserAccount extends RDFResourceDependencies {
     
     val row = sparqlEngine.executeSelect(SelectQuery(query)).getOrFail().toIterable.toList(0)
     
-    val owner = Some(row("owner") getOrElse sys.error("") toString())
+    val owner = row("owner") getOrElse sys.error("") toString()
     
     val displayedName = row("displayedName").flatMap(_.as[String]) getOrElse sys.error("") toString()
     
-    val clz =
-      if (row.contains("clz")) {
-        Some(row("clz") getOrElse sys.error("") toString())
-      } else {
-        None
-      }
+    val clz = row("clz") getOrElse sys.error("") toString()
     
     val description =
       if (row.contains("description")) {

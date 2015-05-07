@@ -1,0 +1,85 @@
+@base <http://www.8tracks.com/> .
+@prefix stn: <http://purl.org/stn/core#> .
+@prefix stn-ops: <http://purl.org/stn/operations#> .
+@prefix stn-http: <http://purl.org/stn/http#> .
+@prefix http: <http://www.w3.org/2011/http#> .
+
+<#platform>
+    a stn:Platform ;
+    stn:name "8tracks" ;
+    stn-http:baseURL <https://8tracks.com> ;
+    stn-ops:consumes stn-http:JSON ;
+    stn-ops:produces stn-http:JSON ;
+    stn-ops:supports <#createAccount> ,
+        <#readDweet> .
+
+
+<#8tracksAccount> a stn:UserAccount ;
+    stn:login _:userAccountId ;
+    stn:description _:description ;
+    stn:outgoingConnections _:outgoing .
+
+<#8tracksAccountJSON>
+    a stn-http:JSONRepresentation ;
+    stn-ops:representationOf <#8tracksAccount> ;
+    stn-ops:contains
+        [ a stn-ops:UserAccountID ;
+            stn-ops:key "id" ;
+            stn-ops:value _:userAccountId ;
+        ] ;
+    stn-ops:contains
+        [ a stn-ops:Description ;
+            stn-ops:key "description" ;
+            stn-ops:value _:description ;
+        ] ;
+    stn-ops:contains
+        [ a stn-ops:OutgoingConnections ;
+            stn-ops:key "follows_count" ;
+            stn-ops:value _:outgoing ;
+        ] .
+
+<#createAccount>
+    a stn-ops:CreateUserAccount ;
+    stn-ops:implementedAs
+        [ a stn-http:STNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/users.json" ;
+            http:headers (
+                [ a http:RequestHeader ;
+                    http:fieldName "X-Api-Version" ;
+                    http:fieldValue "3" ;
+                ]
+                [ a http:RequestHeader ;
+                    http:fieldName "X-Api-Key" ;
+                    http:fieldValue [ a stn-ops:DevAPIKey ] ;
+                ]
+            ) ;
+            stn-http:requiresAuth false ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:UserAccountID ;
+            stn-ops:key "user[login]" ;
+            stn-ops:required true ;
+            stn-http:paramIn stn-http:Body ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:UserAccountPassword ;
+            stn-ops:key "user[password]" ;
+            stn-ops:required true ;
+            stn-http:paramIn stn-http:Body ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:EmailAddress ;
+            stn-ops:key "user[email]" ;
+            stn-ops:required true ;
+            stn-http:paramIn stn-http:Body ;
+        ] ;
+    stn-ops:hasInput
+        [ a stn-ops:ToSApproval ;
+            stn-ops:key "user[agree_to_terms]" ;
+            stn-ops:value 1 ;
+            stn-ops:required true ;
+            stn-http:paramIn stn-http:Body;
+        ] ;
+    stn-ops:hasOutput <#8tracksAccount> .
+
