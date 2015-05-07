@@ -57,8 +57,7 @@ object UserAccount extends RDFResourceDependencies {
   
   import scala.concurrent.ExecutionContext.Implicits.global
   
-  // TODO: proper validation of Turtle string
-  def parseTurtleString(ttlStr: String, requestWebId: Option[String]): UserAccount = {
+  def parseTurtleString(ttlStr: String, requestWebId: Option[String]): Option[UserAccount] = {
     val graph = TurtleReader.read(ttlStr, "") getOrElse sys.error("Couldn't read Turtle payload.")
     val sparqlEngine = SparqlGraph(graph)
     
@@ -78,12 +77,13 @@ object UserAccount extends RDFResourceDependencies {
     
     import SparqlOps._
     
-    val row = sparqlEngine.executeSelect(SelectQuery(query)).getOrFail().toIterable.toList(0)
+    val rows = sparqlEngine.executeSelect(SelectQuery(query)).getOrFail().toIterable.toList
+    
+    if (rows.isEmpty) return None
+    val row = rows(0)
     
     val owner = row("owner") getOrElse sys.error("") toString()
-    
     val displayedName = row("displayedName").flatMap(_.as[String]) getOrElse sys.error("") toString()
-    
     val clz = row("clz") getOrElse sys.error("") toString()
     
     val description =
@@ -95,9 +95,9 @@ object UserAccount extends RDFResourceDependencies {
     
     if (requestWebId.isEmpty) {
       // TODO gen webid
-      UserAccount(SmartThing("http://www.example.com/#thing", clz, owner), new URI(NodeService.getPlatformURI), displayedName, description)
+      Some(UserAccount(SmartThing("http://www.example.com/#thing", clz, owner), new URI(NodeService.getPlatformURI), displayedName, description))
     } else {
-      UserAccount(SmartThing(requestWebId.get, clz, owner), new URI(NodeService.getPlatformURI), displayedName, description)
+      Some(UserAccount(SmartThing(requestWebId.get, clz, owner), new URI(NodeService.getPlatformURI), displayedName, description))
     }
   }
   

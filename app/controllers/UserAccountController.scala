@@ -60,8 +60,12 @@ object UserAccountController extends Controller {
   def createUserAccountFromTurtle(webId: Option[String], payload: String) = {
     // TODO: if the requesting agent did not send a WebID, one should be generated
     val account = UserAccount.parseTurtleString(payload, webId)
-    ResourceService.createResource(account)
-    Created(account.toTurtle).withHeaders( (CONTENT_TYPE, "text/turtle") )
+    if (account.isEmpty) {
+      BadRequest
+    } else {
+      ResourceService.createResource(account.get)
+      Created(account.get.toTurtle).withHeaders( (CONTENT_TYPE, "text/turtle") )
+    }
   }
   
   /**

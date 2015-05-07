@@ -158,7 +158,7 @@ object ConnectionsController extends Controller {
    * Get outgoing connections for a given user account.
    */
   
-  def getConnections(accountUri: String) = {
+  def getConnections(direction: String, accountUri: String) = {
     Action.async { request =>
       val webId = request.headers.get(NodeService.HEADER_WebID)
       
@@ -173,7 +173,7 @@ object ConnectionsController extends Controller {
             Future { NotFound }
           } else {
             val query = 
-              if (request.uri.contains("out")) UserAccount.queryGetConnections(Some(accountUri), None)
+              if (direction == "out") UserAccount.queryGetConnections(Some(accountUri), None)
               else UserAccount.queryGetConnections(None, Some(accountUri))
             ResourceService
               .constructGraphs(query) map {
