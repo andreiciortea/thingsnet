@@ -73,18 +73,32 @@ class STNClient(specUrl: String) extends RDFModule with TurtleWriterModule with 
   }
   
   
-  def addParamsInPath(uri: String, params: List[(String, String)]): String = {
+  def addParamsInPath(uri: String, params: List[(InputParameter, String)]): String = {
     if (params.isEmpty) {
       uri
     } else {
-      // TODO
       val head::tail = params
-      addParamsInPath(uri.replaceAll("", ""), tail)
+      println("Param location: " + head._1.in);
+      if (head._1.in == STNHttpPrefix[Rdf].Path.toString() && !head._1.key.isEmpty) {
+        println("Param will be replaced, where key is: " + head._1.key.get);
+        addParamsInPath(uri.replaceAll(head._1.key.get, head._2), tail)
+      } else {
+        addParamsInPath(uri, tail)
+      }
     }
   }
   
-  def addParamsInQuery(holder: WSRequestHolder, params: List[(String, String)]) = {
-    holder
+  
+  def addParamsInQuery(holder: WSRequestHolder, params: List[(InputParameter, String)]): WSRequestHolder = {
+    if (params.isEmpty) holder
+    else {
+      val head::tail = params
+      if (head._1.in == STNHttpPrefix[Rdf].Query.toString() && !head._1.key.isEmpty) {
+        addParamsInQuery(holder.withQueryString((head._1.key.get, head._2)), tail)
+      } else {
+        addParamsInQuery(holder, tail)
+      }
+    }
   }
   
   def getRepresentationFormat(platformConsumes: List[String]): String = {
@@ -99,20 +113,7 @@ class STNClient(specUrl: String) extends RDFModule with TurtleWriterModule with 
     } 
   }
 
-  // TODO construct Turtle payload
-  def addTurtleProps(graph: Rdf#Graph, params: List[(String, String)]): Rdf#Graph = {
-    if (params.isEmpty) return graph
-    
-    val head::tail = params
-    
-    addTurtleProps( (graph union Graph( Triple(URI(""), URI(""), URI("")) )), tail)
-  }
-  
-  def buildTurtlePayload(opClass: String, params: List[(String, String)]): String = {
-//    val graph = Graph(Triple(URI(""), RDFPrefix[Rdf].typ, URI(rdfEntity.get(opClass).get)))
-    
-//    TurtleWriter.asString(addTurtleProps(graph, params), "") getOrElse sys.error("Couldn't serialize the graph.")
-    // TODO
+  def buildTurtlePayload(opClass: String, params: List[(InputParameter, String)]): String = {
     val userAccount = STNPrefix[Rdf].UserAccount.toString()  
     rdfEntity.get(opClass) match {
         case userAccount => UserAccountTemplate.toTurtle(params)
@@ -120,7 +121,9 @@ class STNClient(specUrl: String) extends RDFModule with TurtleWriterModule with 
       }
   }
   
-  def addParamsInBody(platformConsumes: List[String], opClass: String, params: List[(String, String)]) = {
+  def addParamsInBody(platformConsumes: List[String], 
+      opClass: String, params: List[(InputParameter, String)]) = {
+    
       val reprFormat = getRepresentationFormat(platformConsumes)
       
       val Turtle = STNHttpPrefix[Rdf].Turtle.toString()
@@ -133,22 +136,31 @@ class STNClient(specUrl: String) extends RDFModule with TurtleWriterModule with 
       }
   }
   
+  def addBaseUrl(baseUrl: String, relativeUri: String): String = {
+    // Some operations might require the absolute URI of a given resource
+    if (relativeUri.startsWith("http://")) relativeUri
+    else baseUrl + relativeUri
+  }
+  
   
   // TODO
   def runTwitterRequest(op: Operation, params: List[(String, String)]) {}
   // TODO
   def runFacebookRequest(op: Operation, params: List[(String, String)]) {}
   
-  def runWebIDRequest(p: Platform, op: Operation, params: List[(String, String)]): Future[WSResponse] = {
+  def runWebIDRequest(op: Operation, params: List[(InputParameter, String)]): Future[WSResponse] = {
     
     platform flatMap {
       p => {
-        val uri = p.baseUrl + addParamsInPath(op.request.requestUri, params)
+        val uri = addBaseUrl(p.baseUrl, addParamsInPath(op.request.requestUri, params))
         val holder: WSRequestHolder = 
           addParamsInQuery(WS.url(uri), params).withHeaders("X-WebID" -> WebID.CLIENT_WEB_ID)
         
         op.request.method match {
-          case "GET" => holder.get()
+          case "GET" => {
+            println("Sending GET to [" + op.cls + "]: " + holder.queryString)
+            holder.get()
+          }
           case "POST" => {
             platform flatMap {
               p => holder.withHeaders("Content-Type" -> "text/turtle").post(addParamsInBody(p.consumes, op.cls, params))
@@ -175,7 +187,7 @@ class STNClient(specUrl: String) extends RDFModule with TurtleWriterModule with 
 
   // Run the request using the first found supported auth standard
   def runAuthRequest(platformSupportedAuth: List[String], op: Operation, 
-      params: List[(String, String)]): Option[Future[WSResponse]] = {
+      params: List[(InputParameter, String)]): Option[Future[WSResponse]] = {
     
     val auth = getAuthStandard(platformSupportedAuth)
     
@@ -191,9 +203,11 @@ class STNClient(specUrl: String) extends RDFModule with TurtleWriterModule with 
   }
   
   
-  def runOperation(op: Operation, params: List[(String, String)]): Future[WSResponse] = {
+  def runOperation(op: Operation, params: List[(InputParameter, String)]): Future[WSResponse] = {
 //    if (op.request.requiresAuth) {
       // check applicable auth
+    
+    println("Running with params: " + params)
       platform flatMap {
         p => {
           p.uri match {

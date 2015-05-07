@@ -36,23 +36,26 @@ object SocialTV extends RDFModule with JenaModule {
 
   import models.STNOpsPrefix
   
+  // TODO better kb management
   val me = Map("webid" -> "http://api.mymanufacturer.com/tvs/874...260#thing",
-              STNOpsPrefix[Rdf].AgentURI.toString() -> "http://api.mymanufacturer.com/tvs/874260#thing",
+//              STNOpsPrefix[Rdf].AgentURI.toString() -> "http://api.mymanufacturer.com/tvs/874260#thing",
+              STNOpsPrefix[Rdf].AgentURI.toString() -> "http://www.example.com/#thing1",
               STNOpsPrefix[Rdf].SocialThingClass.toString() -> "http://www.example.com#SocialTV",
               STNOpsPrefix[Rdf].SocialThingOwner.toString() -> "http://www.example.com#John",
-              STNOpsPrefix[Rdf].DisplayedName.toString() -> "John's TV"
+              STNOpsPrefix[Rdf].DisplayedName.toString() -> "John's TV",
+              STNOpsPrefix[Rdf].UserAccountURI.toString() -> "http://localhost:9000/users/791dfe04-53cd-4dbd-af0b-ff51d8b85412"
             )
   
   
-  def itCollectParams(list: List[InputParameter], collected: List[(String, String)])
-          : List[(String, String)] = {
+  def itCollectParams(list: List[InputParameter], collected: List[(InputParameter, String)])
+          : List[(InputParameter, String)] = {
     
     if (list.isEmpty) return collected
     
     val head::tail = list
     
     if (me.contains(head.cls)) {
-      itCollectParams(tail, collected :+ (head.cls, me(head.cls)))
+      itCollectParams(tail, collected :+ (head, me(head.cls)))
     } else {
       // TODO if required param, request user input
       itCollectParams(tail, collected)
@@ -68,7 +71,7 @@ object SocialTV extends RDFModule with JenaModule {
       op => {
         if (!op.isEmpty) {
           val params = collectParams(op.get)
-          println("registering with: " + params)
+//          println("registering with: " + params)
           stn.runOperation(op.get, params) map {
             response => response.body
           }
@@ -91,6 +94,9 @@ object SocialTV extends RDFModule with JenaModule {
     }
     
     // Create account
-    runOperation(mystn, STNOpsPrefix[Rdf].CreateUserAccount toString())
+//    runOperation(mystn, STNOpsPrefix[Rdf].CreateUserAccount toString())
+//    runOperation(mystn, STNOpsPrefix[Rdf].GetUserAccount toString())
+    runOperation(mystn, STNOpsPrefix[Rdf].WhoIsAgent toString())
+//    runOperation(mystn, STNOpsPrefix[Rdf].DeleteUserAccount toString())
   }
 }

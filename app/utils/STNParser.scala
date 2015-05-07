@@ -133,7 +133,7 @@ object Operation extends RDFModule with SparqlGraphModule with JenaModule {
 }
 
 
-case class InputParameter(cls: String, in: String, isRequired: Boolean)
+case class InputParameter(cls: String, in: String, isRequired: Boolean, key: Option[String])
 
 object InputParameter extends RDFModule with SparqlGraphModule with JenaModule {
   
@@ -141,14 +141,26 @@ object InputParameter extends RDFModule with SparqlGraphModule with JenaModule {
   import SparqlOps._
   
   def extract(engine: SparqlEngine[Rdf], opUri: String, required: Boolean) = {
-    val query = STNParser.prefixes + """
+    /*val query = STNParser.prefixes + """
                 |SELECT ?paramClass ?in
                 |WHERE {
                 |  ?opUri """.stripMargin +
                 (if (required) "stn-ops:hasRequiredInput" else "stn-ops:hasInput") + """
                 |    [ a ?paramClass ;
-                |        stn-http:paramIn ?in
-                |    ]
+                |        stn-http:paramIn ?in ;
+                |    ] .
+                |}""".stripMargin*/
+
+    val query = STNParser.prefixes + """
+                |SELECT ?paramUri ?paramClass ?in ?paramKey
+                |WHERE {
+                |  ?opUri """.stripMargin +
+                (if (required) "stn-ops:hasRequiredInput" else "stn-ops:hasInput") + 
+                """
+                |    ?paramUri .
+                |  ?paramUri a ?paramClass ;
+                |          stn-http:paramIn ?in .
+                |  OPTIONAL { ?paramUri stn-http:paramKey ?paramKey }
                 |}""".stripMargin
     
     val bindings = Map(
@@ -160,7 +172,10 @@ object InputParameter extends RDFModule with SparqlGraphModule with JenaModule {
     rows map {
       row => InputParameter(row("paramClass") getOrElse sys.error("") toString(),
             row("in") getOrElse sys.error("") toString(),
-            required)
+            required,
+            if (row("paramKey").isSuccess) 
+              Some(row("paramKey").flatMap(_.as[String]).get.toString()) else None
+            )
     }
   }
 }

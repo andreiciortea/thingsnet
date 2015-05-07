@@ -32,17 +32,17 @@ abstract class TurtleTemplate {
   
   def tag(s: String) = "__" + s + "__"
   
-  def addParams(template: String, params: List[(String, String)]): String = {
+  def addParams(template: String, params: List[(InputParameter, String)]): String = {
     if (params.isEmpty) {
       template
     } else {
       val head::tail = params
-      addParams(template.replaceAll(tag(head._1), head._2), tail)
+      addParams(template.replaceAll(tag(head._1.cls), head._2), tail)
     }
   }
   
   def buildTurtle(template: List[String], 
-      params: List[(String, String)], result: List[String]): String = {
+      params: List[(InputParameter, String)], result: List[String]): String = {
     
     if (template.isEmpty) {
       result.mkString("\n")
@@ -58,7 +58,7 @@ abstract class TurtleTemplate {
     }
   }
   
-  def toTurtle(params: List[(String, String)]): String = {
+  def toTurtle(params: List[(InputParameter, String)]): String = {
 //    prefixes + buildTurtle(getTemplate, params, List())
     buildTurtle(getTemplate, params, List("<> a <http://purl.org/stn/core#UserAccount> ."))
   }
