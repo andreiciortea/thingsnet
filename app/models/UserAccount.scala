@@ -162,8 +162,29 @@ object UserAccount extends RDFResourceDependencies {
     
     (query, bindings)
   }
-
-
+  
+  def queryGetConnections(fromUri: Option[String], toUri: Option[String]) = {
+    val query = """
+            |prefix : <http://purl.org/stn/core#>
+            |prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            |
+            |CONSTRUCT {
+            |  ?fromUri :connectedTo ?toUri .
+            |}
+            |WHERE {
+            |  ?fromUri :connectedTo ?toUri .
+            |}""".stripMargin
+                
+    val bindings =
+      if (fromUri.isEmpty) {
+        Map("toUri" -> Ops.URI(toUri.get))
+      } else {
+        Map("fromUri" -> Ops.URI(fromUri.get))
+      }
+    
+    (query, bindings)
+  }
+  
   def addConnection(fromUri: String, toUri: String): Patch[Rdf] = 
     Patch(Graph.empty, Graph(Triple(makeUri(fromUri), stn.connectedTo, makeUri(toUri))))
   

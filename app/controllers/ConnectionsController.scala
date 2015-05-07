@@ -70,7 +70,7 @@ object ConnectionsController extends Controller {
         "<> stn:connectedTo ?targetUri .",
         "targetUri")
   }
-
+  
   def createConnection = {
     Action.async(parse.tolerantText) { request =>
       val webId = request.headers.get(NodeService.HEADER_WebID)
@@ -150,6 +150,61 @@ object ConnectionsController extends Controller {
         } else {
           removeConnection(webId.get, targetUri)
         }
+      }
+    }
+  }
+  
+  /**
+   * Get outgoing connections for a given user account.
+   */
+  
+  def getConnections(accountUri: String) = {
+    Action.async { request =>
+      val webId = request.headers.get(NodeService.HEADER_WebID)
+      
+      if (webId.isEmpty) {
+        Future { Unauthorized }
+      } else {
+        // Validation not working properly for this URI
+//        if (!Validator.isValidUri(accountUri)) {
+//          Future { BadRequest }
+//        } else {
+          if (!ResourceService.ask(UserAccount.queryAccountExists(accountUri))) {
+            Future { NotFound }
+          } else {
+            val query = 
+              if (request.uri.contains("out")) UserAccount.queryGetConnections(Some(accountUri), None)
+              else UserAccount.queryGetConnections(None, Some(accountUri))
+            ResourceService
+              .constructGraphs(query) map {
+                result => Ok(result).withHeaders(("Content-Type", "text/turtle"))
+            }
+          }
+//        }
+      }
+    }
+  }
+  
+  def getInConnections(accountUri: String) = {
+    Action.async { request =>
+      val webId = request.headers.get(NodeService.HEADER_WebID)
+      
+      if (webId.isEmpty) {
+        Future { Unauthorized }
+      } else {
+        // Validation not working properly for this URI
+//        if (!Validator.isValidUri(accountUri)) {
+//          Future { BadRequest }
+//        } else {
+          if (!ResourceService.ask(UserAccount.queryAccountExists(accountUri))) {
+            Future { NotFound }
+          } else {
+            ResourceService
+              .constructGraphs(UserAccount.queryGetConnections(None, Some(accountUri))) map {
+                result => Ok(result).withHeaders(("Content-Type", "text/turtle"))
+            }
+          }
+//        }
       }
     }
   }

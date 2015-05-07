@@ -49,6 +49,33 @@ abstract class RDFRepository extends RDFRepositoryDependencies {
     }
   }
   
+
+  def fetchGraphsInList(store: RDFStore[Rdf], 
+      graph: Rdf#Graph, uriList: List[String]): Future[Rdf#Graph] = {
+    
+    if (uriList.isEmpty) {
+      Future { graph }
+    } else {
+      val head::tail = uriList
+      
+      store.getGraph(URI(head)) flatMap {
+        g => fetchGraphsInList(store, graph union g, tail)
+      }
+    }
+  }
+  
+  def getGraphsInList(uriList: List[String]): Future[Option[String]] = {
+    fetchGraphsInList(makeRDFStore, Graph(), uriList) map {
+      graph =>
+        if (graph.isIsomorphicWith(Graph.empty)) {
+          None
+        } else {
+          Some(TurtleWriter.asString(graph, "") getOrElse sys.error("Couldn't serialize the graph."))
+        }
+    }
+  }
+  
+  
   def patchRDFResource(uri: String, delete: Rdf#Graph, insert: Rdf#Graph) = {
     val store = makeRDFStore
     val op = store.patchGraph(makeUri(uri), delete.toIterable, insert)

@@ -22,6 +22,10 @@ object ResourceService {
     repo.getRDFResource(uri)
   }
   
+  def getResourcesInList(uriList: List[String]) = {
+    repo.getGraphsInList(uriList)
+  }
+  
   def patchResource(uri: String, p: Patch[Rdf]) = {
     repo.patchRDFResource(uri, p.removed, p.added)
   }
@@ -29,6 +33,7 @@ object ResourceService {
   def deleteResource(uri: String) = {
     repo.deleteRDFResource(uri)
   }
+  
   
   
   def getSTNSpec = repo.getSTNSpec
@@ -39,7 +44,29 @@ object ResourceService {
     repo.runSelectQuery(query)
   }
   
-  def queryForGraphs(query: (String, Map[String, Rdf#URI])) = {
+  def constructGraphs(query: (String, Map[String, Rdf#URI])) = {
     repo.runConstructQuery(query)
+  }
+  
+  
+  import play.api.libs.json._
+  
+  def queryForOne(query: (String, Map[String, Rdf#URI])): Future[Option[String]] = {
+    repo.runSelectQuery(query) map {
+      resultsJson => {
+        val results = (Json.parse(resultsJson) \\ "value")
+        if (results.isEmpty) {
+            None
+        } else {
+          results(0).asOpt[String]
+        }
+      }
+    }
+  }
+  
+  def queryForListOfOne(query: (String, Map[String, Rdf#URI])): Future[Seq[String]] = {
+    repo.runSelectQuery(query) map {
+      resultsJson => (Json.parse(resultsJson) \\ "value").flatMap(_.asOpt[String])
+    }
   }
 }

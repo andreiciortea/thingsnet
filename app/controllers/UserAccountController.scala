@@ -19,16 +19,7 @@ object UserAccountController extends Controller {
    *  Queries the repo to return the account of a given agent URI (if any).
    */
   def getUserAccountUriForAgent(agentUri: String): Future[Option[String]] = {
-      ResourceService.queryForResults(UserAccount.queryAccountByHolder(agentUri)).map {
-        resultsJson => {
-          val results = (Json.parse(resultsJson) \\ "value")
-            if (results.isEmpty) {
-              None
-          } else {
-            results(0).asOpt[String]
-          }
-        }
-      }
+    ResourceService.queryForOne(UserAccount.queryAccountByHolder(agentUri))
   }
   
   /**

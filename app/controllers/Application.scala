@@ -110,7 +110,7 @@ object Application extends Controller {
           println("got request")
           UserAccountController.getUserAccountUriForAgent(mywebid).flatMap {
             myAccountUri =>
-              ResourceService.queryForGraphs(Message.queryMessagesForUser(myAccountUri.get)) map {
+              ResourceService.constructGraphs(Message.queryMessagesForUser(myAccountUri.get)) map {
                 s =>
                   Ok(s).withHeaders( (CONTENT_TYPE, "text/turtle") )
               }
