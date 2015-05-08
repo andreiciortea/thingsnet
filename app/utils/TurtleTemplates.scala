@@ -67,9 +67,9 @@ abstract class TurtleTemplate {
 object UserAccountTemplate extends TurtleTemplate {
   
   // TODO add short link feature
-  def getTemplate = List("<> <http://purl.org/stn/core#heldBy> <__http://purl.org/stn/operations#AgentURI__> .",
-      "<> <http://purl.org/stn/core#name> \"__http://purl.org/stn/operations#DisplayedName__\" .",
+  def getTemplate = List("<> <http://purl.org/stn/core#name> \"__http://purl.org/stn/operations#DisplayedName__\" .",
       "<> <http://purl.org/stn/core#description> <__http://purl.org/stn/operations#Description__> .",
-      "<__http://purl.org/stn/operations#AgentURI__> a <__http://purl.org/stn/operations#SocialThingClass__> .",
-      "<__http://purl.org/stn/operations#AgentURI__> <http://purl.org/stn/core#ownedBy> <__http://purl.org/stn/operations#SocialThingOwner__> .")
+      "<> <http://purl.org/stn/core#heldBy> _:something .",
+      "_:something a <__http://purl.org/stn/operations#SocialThingClass__> .",
+      "_:something <http://purl.org/stn/core#ownedBy> <__http://purl.org/stn/operations#SocialThingOwner__> .")
 }

@@ -29,8 +29,6 @@ abstract class RDFRepository extends RDFRepositoryDependencies {
   
   def createRDFResource(uri: String, graph: PointedGraph[Rdf]) {
     val store = makeRDFStore
-    println(uri)
-    println(graph.graph)
     val op = store.appendToGraph(makeUri(uri), graph.graph)
     
     op onSuccess{ case _ => println("Successfully stored triples in store.") }
@@ -118,5 +116,13 @@ abstract class RDFRepository extends RDFRepositoryDependencies {
     val graph: Rdf#Graph = TurtleReader.read(from, base = "") getOrElse sys.error("Couldn't read STN spec")
     
     TurtleWriter.asString(graph, "") getOrElse sys.error("Couldn't serialize the STN spec.")
+  }
+  
+  
+  def injectData(uri: Rdf#URI, graph: Rdf#Graph) = {
+    val store = makeRDFStore
+    val op = store.appendToGraph(uri, graph)
+    
+    op onSuccess{ case _ => println("Successfully stored triples in store.") }
   }
 }

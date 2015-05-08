@@ -11,8 +11,9 @@ object NodeService {
   val HEADER_WebID = "X-WebID"
   
   val BAD_REQUEST_Unknown_content_type = "Unknown content type"
+
   
-  def getPlatformURI = "http://www.thingsnet.com/#platform"
+  def getPlatformURI = baseURI + "/#platform"
   
   def getAsset(relativePath: String) = baseURI + "/assets/" + relativePath
   

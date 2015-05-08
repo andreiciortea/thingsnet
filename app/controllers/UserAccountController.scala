@@ -100,7 +100,8 @@ object UserAccountController extends Controller {
       Future { Unauthorized }
     } else {
       val fAccountTurtle = 
-        ResourceService.getResource(NodeService.genResourceURI(NodeService.userAccountContainer, id))
+//        ResourceService.getResource(NodeService.genResourceURI(NodeService.userAccountContainer, id))
+        ResourceService.getResource("http://" + request.host + request.path)
       
       fAccountTurtle map{ s =>
         if (!s.isEmpty) {

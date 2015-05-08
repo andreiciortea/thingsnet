@@ -1,0 +1,16 @@
+@prefix stn: <http://purl.org/stn/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Bob's social TV's profile
+
+<http://localhost:9002/users/a08066fc-6a16-4994-a013-085326c646d3#thing>
+        a       <http://www.example.com/#SocialTV> ;
+        stn:ownedBy <http://www.example.com/#Bob> .
+
+<http://localhost:9002/users/a08066fc-6a16-4994-a013-085326c646d3>
+        a       stn:UserAccount ;
+        stn:description
+                ( "A TV with a twist!"^^<http://www.w3.org/2001/XMLSchema#string> ) ;
+        stn:heldBy <http://localhost:9002/users/a08066fc-6a16-4994-a013-085326c646d3#thing> ;
+        stn:hostedBy <http://localhost:9002/#platform> ;
+        stn:name "Bob's Social TV"^^xsd:string .

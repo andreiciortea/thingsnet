@@ -18,6 +18,7 @@ class STNPrefix[Rdf <: RDF](ops: RDFOps[Rdf]) extends PrefixBuilder("stn", "http
   val STNPlatform = apply("STNPlatform")
    
   val heldBy = apply("heldBy")
+  val owns = apply("owns")
   val ownedBy = apply("ownedBy")
   val hostedBy = apply("hostedBy")
   val connectedTo = apply("connectedTo")
@@ -41,6 +42,8 @@ class STNOpsPrefix[Rdf <: RDF](ops: RDFOps[Rdf]) extends PrefixBuilder("stn-ops"
   val GetUserAccount = apply("GetUserAccount")
   val DeleteUserAccount = apply("DeleteUserAccount")
   val WhoIsAgent = apply("WhoIsAgent")
+  val GetOutConnections = apply("GetOutConnections")
+  val GetInConnections = apply("GetInConnections")
   
   // Parameters
   val AgentURI = apply("AgentURI")

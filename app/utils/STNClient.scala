@@ -28,7 +28,7 @@ object FacebookCredentials {
 }
 
 object WebID {
-  val CLIENT_WEB_ID = "http://api.mymanufacturer.com/tvs/874...260#thing"
+  val CLIENT_WEB_ID = "http://api.mymanufacturer.com/tvs/874260#thing"
 }
 
 
@@ -218,6 +218,11 @@ class STNClient(specUrl: String) extends RDFModule with TurtleWriterModule with 
         }
       }
 //    }
+  }
+  
+  
+  def fetchURL(uri: String): Future[WSResponse] = {
+    WS.url(uri).withHeaders("X-WebID" -> WebID.CLIENT_WEB_ID).get()
   }
   
   

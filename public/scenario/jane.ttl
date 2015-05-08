@@ -1,0 +1,16 @@
+@prefix stn: <http://purl.org/stn/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Jane's profile
+
+<http://www.example.com/#Jane> a stn:Person ;
+        stn:owns <http://localhost:9001/users/4d78ced5-7ae2-49d4-9fe7-6a7910c44ccd#thing> .
+
+<http://localhost:9001/users/f6359041-4b7d-43b4-aa98-b1a79d11ae8d>
+    a stn:UserAccount ;
+    stn:description ( "Doe. Ms. Jane Doe."^^xsd:string ) ;
+    stn:heldBy <http://www.example.com/#Jane> ;
+    stn:hostedBy <http://localhost:9001/#platform> ;
+    stn:name "Jane Doe"^^xsd:string ;
+    stn:connectedTo <http://localhost:9000/users/e754d7f8-3cfe-440b-9409-ed21f40af8f3> ,
+                        <http://localhost:9002/users/c2e23b27-1a96-44b6-a103-281ca43f8f16> .

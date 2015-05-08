@@ -8,6 +8,8 @@ GET     /spec                       controllers.Application.spec
 
 GET     /parsertest                 controllers.Application.parserTest
 GET     /socialtv                   controllers.Application.socialTV
+GET     /loadscenario               controllers.ScenarioControllers.loadScenario(scenario: String ?= "")
+GET     /unloadscenario             controllers.ScenarioControllers.unloadScenario(scenario: String ?= "")
 
 POST    /users                      controllers.UserAccountController.createUserAccount
 GET     /users                      controllers.UserAccountController.getUserAccountForAgent(agentUri: String ?= "")
