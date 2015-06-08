@@ -1,0 +1,17 @@
+@prefix stn: <http://purl.org/stn/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Mike's profile
+
+<http://localhost:9002/users/82bc7f53-88d8-4b68-a219-42507ac9bd7b#Mike>
+    a stn:Person ;
+    stn:holds <http://localhost:9002/users/82bc7f53-88d8-4b68-a219-42507ac9bd7b> ; 
+    stn:owns <http://localhost:9002/users/6c5a56c1-9182-4e81-b7aa-9ffe0a76c09d#thing> .
+
+<http://localhost:9002/users/82bc7f53-88d8-4b68-a219-42507ac9bd7b>
+    a stn:UserAccount ;
+    stn:description ( "Mike."^^xsd:string ) ;
+    stn:heldBy <http://localhost:9002/users/82bc7f53-88d8-4b68-a219-42507ac9bd7b#Mike> ;
+    stn:hostedBy <http://localhost:9002/assets/stnspecs/thingsnet.ttl#platform> ;
+    stn:name "Mike Doe"^^xsd:string ;
+    stn:connectedTo <http://localhost:9000/users/e754d7f8-3cfe-440b-9409-ed21f40af8f3> .

@@ -17,6 +17,7 @@ import models.UserAccount
 import models.Message
 import services.{NodeService, ResourceService}
 import utils.Validator
+import utils.STNClient
 
 import org.apache.commons.validator.routines.UrlValidator
 import java.net.URI
@@ -45,8 +46,51 @@ object Application extends Controller {
   }
   
   
+  case class OpSpec(stnSpecUrl: String, opClass: String, params: Map[String, String])
+  
+  object OpSpec {
+    implicit val writes: Writes[OpSpec] = Json.writes[OpSpec]
+    implicit val reads: Reads[OpSpec] = Json.reads[OpSpec]
+  }
+  
+  def runSTNOp = Action.async(parse.json) { request =>
+    request.body.validate[OpSpec].map {
+      case op => {
+        val stn = new STNClient(op.stnSpecUrl)
+        
+        println("op is: " + op)
+        
+        stn.runOperation(op.opClass, op.params) map {
+          content => Ok(content)
+        }
+      }
+    }.recoverTotal {
+      e => {
+        println("bad req")
+        Future(BadRequest)
+      }
+    }
+  }
+  
+  def getSTNOp(stnSpecUrl: String, opClass: String) = Action.async {
+    val stn = new STNClient(stnSpecUrl)
+    
+    stn.getOperationDescription(opClass) map {
+      op => 
+        if (op.isEmpty) NotFound
+        else {
+          val reqParamClasses = op.get.request.requiredInput map {
+            param => param.cls
+          }
+          
+          Ok(Json.toJson(reqParamClasses))
+        }
+    }
+  }
+  
+  
   def socialTV = Action.async {
-    import democlient.SocialTV
+    import socialtv.SocialTV
 
 //    SocialTV.run map {
 //      output => Ok(output)

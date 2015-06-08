@@ -73,3 +73,9 @@ object UserAccountTemplate extends TurtleTemplate {
       "_:something a <__http://purl.org/stn/operations#SocialThingClass__> .",
       "_:something <http://purl.org/stn/core#ownedBy> <__http://purl.org/stn/operations#SocialThingOwner__> .")
 }
+
+object ConnectionTemplate extends TurtleTemplate {
+  
+  // TODO add short link feature
+  def getTemplate = List("<> <http://purl.org/stn/core#connectedTo> <__http://purl.org/stn/operations#AgentURI__> .")
+}

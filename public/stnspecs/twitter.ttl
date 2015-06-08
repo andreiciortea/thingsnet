@@ -1,0 +1,239 @@
+@base <http://www.twitter.com/> .
+@prefix stn: <http://purl.org/stn/core#> .
+@prefix stn-ops: <http://purl.org/stn/operations#> .
+@prefix stn-http: <http://purl.org/stn/http#> .
+@prefix http: <http://www.w3.org/2011/http#> .
+
+<#platform>
+    a stn:Platform ;
+    stn:name "Twitter" ;
+    stn-http:baseURL <https://api.twitter.com/1.1> ;
+    stn-http:supportsAuth stn-http:OAuth ;
+    stn-ops:consumes stn-http:JSON ;
+    stn-ops:produces stn-http:JSON ;
+    stn-ops:supports <#getMyAccount> ,
+        <#getAccount> ,
+        <#getFollowers> ,
+        <#getFriends> ,
+        <#follow> ,
+        <#unfollow> ,
+        <#sendDirectMessage> ,
+        <#postTweet> ,
+        <#deleteDirectMessage> ,
+        <#getDirectMessage> ,
+        <#getDirectMessages> .
+
+
+#
+# Account operations
+#
+
+<#twitterAccountJSONMapping>
+    a stn-http:JSONRepresentation ;
+    stn-ops:representationOf [ a stn:UserAccount ] ;
+    stn-ops:contains [
+            a stn-http:Mapping ;
+            stn-http:key "screen_name" ;
+            stn-http:STNTerm stn:id ;
+        ] ;
+    stn-ops:contains [
+            a stn-http:Mapping ;
+            stn-http:key "name" ;
+            stn-http:STNTerm stn:name ;
+        ] ;
+    stn-ops:contains [
+            a stn-http:Mapping ;
+            stn-http:key "description" ;
+            stn-http:STNTerm stn:description ;
+        ] .
+
+<#getMyAccount>
+    a stn-ops:GetMyUserAccount ;
+    stn-ops:implementedAs [
+            a stn-http:AuthSTNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/account/verify_credentials.json" ;
+        ] ;
+    stn-ops:hasOutput <#twitterAccountJSONMapping> .
+
+<#getAccount>
+    a stn-ops:GetUserAccount ;
+    stn-ops:implementedAs [
+            a stn-http:AuthSTNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/users/show.json" ;
+        ] ;
+    stn-ops:hasRequiredInput [
+            a stn-ops:UserAccountID ;
+            stn-http:key "screen_name" ;
+            stn-http:paramIn stn-http:Query;
+        ] ;
+    stn-ops:hasOutput <#twitterAccountJSONMapping> .
+
+
+#
+# Connection operations
+#
+
+<#twitterFriendsJSON>
+    a stn-http:JSONArray ;
+    stn-http:key "users" ;
+    stn-ops:arrayOf <#twitterAccountJSONMapping> .
+
+<#getFollowers>
+    a stn-ops:GetConnectionsTo ;
+    stn-ops:implementedAs [
+            a stn-http:AuthSTNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/followers/list.json" ;
+        ] ;
+    stn-ops:hasRequiredInput [
+            a stn-ops:UserAccountID ;
+            stn-http:key "screen_name" ;
+            stn-http:paramIn stn-http:Query;
+        ] ;
+    stn-ops:hasOutput <#twitterFriendsJSON> .
+    
+<#getFriends>
+    a stn-ops:GetConnectionsFrom ;
+    stn-ops:implementedAs [
+            a stn-http:AuthSTNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/friends/list.json" ;
+        ] ;
+    stn-ops:hasRequiredInput [
+            a stn-ops:UserAccountID ;
+            stn-http:key "screen_name" ;
+            stn-http:paramIn stn-http:Query;
+        ] ;
+    stn-ops:hasOutput <#twitterFriendsJSON> .
+
+<#follow>
+    a stn-ops:CreateConnectionTo;
+    stn-ops:implementedAs [
+            a stn-http:AuthSTNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/friendships/create.json" ;
+        ] ;
+    stn-ops:hasRequiredInput [
+            a stn-ops:UserAccountID ;
+            stn-http:key "screen_name" ;
+            stn-http:paramIn stn-http:Body;
+        ] ;
+    stn-ops:hasOutput <#twitterAccountJSONMapping> .
+
+<#unfollow>
+    a stn-ops:DeleteConnectionTo ;
+    stn-ops:implementedAs [
+            a stn-http:AuthSTNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/friendships/destroy.json" ;
+        ] ;
+    stn-ops:hasRequiredInput [
+            a stn-ops:UserAccountID ;
+            stn-http:key "screen_name" ;
+            stn-http:paramIn stn-http:Body;
+        ] ;
+    stn-ops:hasOutput <#twitterAccountJSONMapping> .
+
+
+#
+# Direct messages and tweets
+#
+
+<#twitterDirectMessageJSONMapping>
+    a stn-http:JSONRepresentation ;
+    stn-ops:representationOf [ a stn:Message ] ;
+    stn-ops:contains [
+            a stn-http:Mapping ;
+            stn-http:key "id_str" ;
+            stn-http:stnTerm stn:id ;
+        ] ;
+    stn-ops:contains [
+            a stn-http:Mapping ;
+            stn-http:key "sender_screen_name" ;
+            stn-http:stnTerm stn:hasSender ;
+        ] ;
+    stn-ops:contains [
+            a stn-http:Mapping ;
+            stn-http:key "receiver_screen_name" ;
+            stn-http:stnTerm stn:hasReceiver ;
+        ] ;
+    stn-ops:contains [
+            a stn-http:Mapping ;
+            stn-http:key "text" ;
+            stn-http:stnTerm stn:hasBody ;
+        ] .
+
+<#sendDirectMessage>
+    a stn-ops:SendPrivateMessage;
+    stn-ops:implementedAs [
+            a stn-http:AuthSTNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/direct_messages/new.json" ;
+        ] ;
+    stn-ops:hasRequiredInput [
+            a stn-ops:UserAccountID ;
+            stn-http:key "screen_name" ;
+            stn-http:paramIn stn-http:Body;
+        ] ;
+    stn-ops:hasRequiredInput [
+            a stn-ops:MessageBody ;
+            stn-http:key "text" ;
+            stn-http:paramIn stn-http:Body;
+        ] ;
+    stn-ops:hasOutput <#twitterDirectMessageJSONMapping> .
+
+<#postTweet>
+    a stn-ops:PostPublicMessage;
+    stn-ops:implementedAs [
+            a stn-http:AuthSTNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/statuses/update.json" ;
+        ] ;
+    stn-ops:hasRequiredInput [
+            a stn-ops:MessageBody ;
+            stn-http:key "status" ;
+            stn-http:paramIn stn-http:Body;
+        ] ;
+    stn-ops:hasOutput <#twitterDirectMessageJSONMapping> .
+
+<#deleteDirectMessage>
+    a stn-ops:DeletePrivateMessage ;
+    stn-ops:implementedAs [
+            a stn-http:AuthSTNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/direct_messages/destroy.json" ;
+        ] ;
+    stn-ops:hasRequiredInput [
+            a stn-ops:EntityID ;
+            stn-http:key "id" ;
+            stn-http:paramIn stn-http:Body;
+        ] ;
+    stn-ops:hasOutput <#twitterDirectMessageJSON> .
+
+<#getDirectMessage>
+    a stn-ops:GetMessage ;
+    stn-ops:implementedAs [
+            a stn-http:AuthSTNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/direct_messages/show.json" ;
+        ] ;
+    stn-ops:hasRequiredInput [
+            a stn-ops:EntityID ;
+            stn-http:key "id" ;
+            stn-http:paramIn stn-http:Query;
+        ] ;
+    stn-ops:hasOutput <#twitterDirectMessageJSON> .
+
+<#getDirectMessages>
+    a stn-ops:GetMessages ;
+    stn-ops:implementedAs [
+            a stn-http:AuthSTNRequest ;
+            http:methodName "GET" ;
+            http:requestURI "/direct_messages.json" ;
+        ] ;
+    stn-ops:hasOutput [
+            a stn-http:JSONArray ;
+            stn-ops:arrayOf <#twitterDirectMessageJSONMapping> ;
+        ] .

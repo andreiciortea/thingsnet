@@ -8,13 +8,13 @@
 
 <http://purl.org/stn/core/operations> rdf:type owl:Ontology ;
                                       
-                                      rdfs:label "STN-Core-Operations"@en ;
+                                      rdfs:label "STN-Operations"@en ;
                                       
                                       rdfs:comment """Socio-technical networks (STNs) are networks of people and social things (i.e. autonomous physical or virtual objects). An STN mirrors the physical world by creating digital counterparts of physical and abstract entities and relating them to one another. In the same time, applications running in the digital world may reflect back into the physical world (e.g. through actuators).
 
 An STN encodes the different relations among people and smart things, such as friendship, ownership, provenance or colocation. An STN may not exist outside of the minds of its members, however, in most cases, an STN is reified within an STN platform.
 
-STN-Core-Operations defines the set of generic operations and parameters that allow agents to participate in any STN platform compatible with STN-Core."""@en ;
+STN-Operations defines the set of generic operations and parameters that allow agents to participate in any STN platform compatible with STN-Core."""@en ;
                                       
                                       owl:imports <http://purl.org/stn/core> .
 
@@ -26,6 +26,16 @@ STN-Core-Operations defines the set of generic operations and parameters that al
 #################################################################
 
 
+###  http://purl.org/stn/core/operations#consumes
+
+:consumes rdf:type owl:ObjectProperty ;
+          
+          rdfs:domain <http://purl.org/stn/core#Platform> ;
+          
+          rdfs:range :RepresentationFormat .
+
+
+
 ###  http://purl.org/stn/core/operations#contains
 
 :contains rdf:type owl:ObjectProperty ;
@@ -33,6 +43,26 @@ STN-Core-Operations defines the set of generic operations and parameters that al
           rdfs:range :KeyValuePair ;
           
           rdfs:domain :Representation .
+
+
+
+###  http://purl.org/stn/core/operations#hasClass
+
+:hasClass rdf:type owl:ObjectProperty ;
+          
+          rdfs:domain <http://purl.org/stn/core#SmartThing> ;
+          
+          rdfs:range :SocialThingClass .
+
+
+
+###  http://purl.org/stn/core/operations#hasFormat
+
+:hasFormat rdf:type owl:ObjectProperty ;
+           
+           rdfs:domain :Representation ;
+           
+           rdfs:range :RepresentationFormat .
 
 
 
@@ -64,6 +94,12 @@ STN-Core-Operations defines the set of generic operations and parameters that al
 
 
 
+###  http://purl.org/stn/core/operations#hasOutputCollectionOf
+
+:hasOutputCollectionOf rdf:type owl:ObjectProperty .
+
+
+
 ###  http://purl.org/stn/core/operations#hasRepresentation
 
 :hasRepresentation rdf:type owl:ObjectProperty ;
@@ -73,6 +109,14 @@ STN-Core-Operations defines the set of generic operations and parameters that al
                    rdfs:domain <http://purl.org/stn/core#DigitalCounterpart> ;
                    
                    rdfs:range :Representation .
+
+
+
+###  http://purl.org/stn/core/operations#hasRequiredInput
+
+:hasRequiredInput rdf:type owl:ObjectProperty ;
+                  
+                  rdfs:label "has required input"@en .
 
 
 
@@ -87,6 +131,14 @@ STN-Core-Operations defines the set of generic operations and parameters that al
                rdfs:range :Implementation ;
                
                rdfs:domain :Operation .
+
+
+
+###  http://purl.org/stn/core/operations#key
+
+:key rdf:type owl:ObjectProperty ;
+     
+     rdfs:domain :KeyValuePair .
 
 
 
@@ -119,6 +171,16 @@ STN-Core-Operations defines the set of generic operations and parameters that al
              rdfs:range <http://purl.org/stn/core#Agent> ;
              
              rdfs:domain :Operation .
+
+
+
+###  http://purl.org/stn/core/operations#produces
+
+:produces rdf:type owl:ObjectProperty ;
+          
+          rdfs:domain <http://purl.org/stn/core#Platform> ;
+          
+          rdfs:range :RepresentationFormat .
 
 
 
@@ -328,6 +390,16 @@ STN-Core-Operations defines the set of generic operations and parameters that al
 
 
 
+###  http://purl.org/stn/core/operations#CreateMessage
+
+:CreateMessage rdf:type owl:Class ;
+               
+               rdfs:label "Create Message"@en ;
+               
+               rdfs:subClassOf :MessageAction .
+
+
+
 ###  http://purl.org/stn/core/operations#CreatePlace
 
 :CreatePlace rdf:type owl:Class ;
@@ -349,6 +421,16 @@ STN-Core-Operations defines the set of generic operations and parameters that al
                    rdfs:subClassOf :UserAccountAction ;
                    
                    rdfs:comment "A kind of action a smart thing may perform in order to create a user account digital artifact. Required parameters: OwnerID, DisplayedName."@en .
+
+
+
+###  http://purl.org/stn/core/operations#DataAction
+
+:DataAction rdf:type owl:Class ;
+            
+            rdfs:label "Data Action"@en ;
+            
+            rdfs:subClassOf :CommunicationAction .
 
 
 
@@ -440,6 +522,16 @@ A delayed action an agent may perform in order to delete a connection to another
 
 
 
+###  http://purl.org/stn/core/operations#DeleteMessage
+
+:DeleteMessage rdf:type owl:Class ;
+               
+               rdfs:label "Delete Message"@en ;
+               
+               rdfs:subClassOf :MessageAction .
+
+
+
 ###  http://purl.org/stn/core/operations#DeletePlace
 
 :DeletePlace rdf:type owl:Class ;
@@ -449,16 +541,6 @@ A delayed action an agent may perform in order to delete a connection to another
              rdfs:subClassOf :SpatialAction ;
              
              owl:deprecated "true"^^xsd:boolean .
-
-
-
-###  http://purl.org/stn/core/operations#DeletePublicMessage
-
-:DeletePublicMessage rdf:type owl:Class ;
-                     
-                     rdfs:label "Delete Public Message"@en ;
-                     
-                     rdfs:subClassOf :CommunicationAction .
 
 
 
@@ -490,8 +572,7 @@ A delayed action an agent may perform in order to delete a connection to another
 
 :DisplayedName rdf:type owl:Class ;
                
-               rdfs:label "Displayed Name"@en ,
-                          "Public Name"@en ;
+               rdfs:label "Displayed Name"@en ;
                
                rdfs:subClassOf :KeyValuePair ;
                
@@ -525,6 +606,16 @@ A delayed action an agent may perform in order to delete a connection to another
 
 
 
+###  http://purl.org/stn/core/operations#GetAggregatedFeed
+
+:GetAggregatedFeed rdf:type owl:Class ;
+                   
+                   rdfs:label "Get Aggregated Feed"@en ;
+                   
+                   rdfs:subClassOf :GetFeed .
+
+
+
 ###  http://purl.org/stn/core/operations#GetConnections
 
 :GetConnections rdf:type owl:Class ;
@@ -532,6 +623,26 @@ A delayed action an agent may perform in order to delete a connection to another
                 rdfs:label "Get Connections"@en ;
                 
                 rdfs:subClassOf :Query .
+
+
+
+###  http://purl.org/stn/core/operations#GetConnectionsFrom
+
+:GetConnectionsFrom rdf:type owl:Class ;
+                    
+                    rdfs:label "Get Connections From"@en ;
+                    
+                    rdfs:subClassOf :GetUserConnections .
+
+
+
+###  http://purl.org/stn/core/operations#GetConnectionsTo
+
+:GetConnectionsTo rdf:type owl:Class ;
+                  
+                  rdfs:label "Get Connections To"@en ;
+                  
+                  rdfs:subClassOf :GetUserConnections .
 
 
 
@@ -629,6 +740,16 @@ A delayed action an agent may perform in order to delete a connection to another
 
 
 
+###  http://purl.org/stn/core/operations#GetUserAccountFeed
+
+:GetUserAccountFeed rdf:type owl:Class ;
+                    
+                    rdfs:label "Get User Account Feed"@en ;
+                    
+                    rdfs:subClassOf :GetFeed .
+
+
+
 ###  http://purl.org/stn/core/operations#GetUserConnections
 
 :GetUserConnections rdf:type owl:Class ;
@@ -638,36 +759,6 @@ A delayed action an agent may perform in order to delete a connection to another
                     rdfs:subClassOf :GetConnections ;
                     
                     rdfs:comment "A kind of query an agent may perform in order to retrieve the connections of a user account digital artifact. Required parameters: UserID."@en .
-
-
-
-###  http://purl.org/stn/core/operations#GetUserFeed
-
-:GetUserFeed rdf:type owl:Class ;
-             
-             rdfs:label "Get User Feed"@en ;
-             
-             rdfs:subClassOf :GetFeed .
-
-
-
-###  http://purl.org/stn/core/operations#GetUserInConnections
-
-:GetUserInConnections rdf:type owl:Class ;
-                      
-                      rdfs:label "Get User In Connections"@en ;
-                      
-                      rdfs:subClassOf :GetUserConnections .
-
-
-
-###  http://purl.org/stn/core/operations#GetUserOutConnections
-
-:GetUserOutConnections rdf:type owl:Class ;
-                       
-                       rdfs:label "Get User Out Connections"@en ;
-                       
-                       rdfs:subClassOf :GetUserConnections .
 
 
 
@@ -743,6 +834,16 @@ A delayed action an agent may perform in order to delete a connection to another
 
 
 
+###  http://purl.org/stn/core/operations#MessageAction
+
+:MessageAction rdf:type owl:Class ;
+               
+               rdfs:label "Message Action"@en ;
+               
+               rdfs:subClassOf :CommunicationAction .
+
+
+
 ###  http://purl.org/stn/core/operations#Operation
 
 :Operation rdf:type owl:Class ;
@@ -773,25 +874,26 @@ A parameter which represents the ID of a smart thing's owner, such as the ID of 
 
 
 
-###  http://purl.org/stn/core/operations#PostPublicMessage
+###  http://purl.org/stn/core/operations#PostMessage
 
-:PostPublicMessage rdf:type owl:Class ;
-                   
-                   rdfs:label "Post Public Message"@en ;
-                   
-                   rdfs:subClassOf :CommunicationAction ;
-                   
-                   rdfs:comment "unstable"@en .
+:PostMessage rdf:type owl:Class ;
+             
+             rdfs:label "Post Message"@en ;
+             
+             rdfs:subClassOf :CreateMessage ;
+             
+             rdfs:comment "Post a message to a feed."@en ,
+                          "unstable"@en .
 
 
 
-###  http://purl.org/stn/core/operations#PostPublicMessageToGroup
+###  http://purl.org/stn/core/operations#PostMessageToGroup
 
-:PostPublicMessageToGroup rdf:type owl:Class ;
-                          
-                          rdfs:label "Post Public Message To Group"@en ;
-                          
-                          rdfs:subClassOf :PostPublicMessage .
+:PostMessageToGroup rdf:type owl:Class ;
+                    
+                    rdfs:label "Post Message To Group"@en ;
+                    
+                    rdfs:subClassOf :PostMessage .
 
 
 
@@ -804,6 +906,48 @@ A parameter which represents the ID of a smart thing's owner, such as the ID of 
        rdfs:subClassOf :Operation ;
        
        rdfs:comment "A query is an operation that only retrieves information from the STG, e.g. retrieving the connections of a user."@en .
+
+
+
+###  http://purl.org/stn/core/operations#RawData
+
+:RawData rdf:type owl:Class ;
+         
+         rdfs:label "Raw Data"@en ;
+         
+         rdfs:subClassOf :Parameter .
+
+
+
+###  http://purl.org/stn/core/operations#ReadDataObject
+
+:ReadDataObject rdf:type owl:Class ;
+                
+                rdfs:label "Read Data Object"@en ;
+                
+                rdfs:subClassOf :DataAction ;
+                
+                owl:disjointWith :WriteDataObject .
+
+
+
+###  http://purl.org/stn/core/operations#ReadKeyValuePair
+
+:ReadKeyValuePair rdf:type owl:Class ;
+                  
+                  rdfs:label "Read Key Value Pair"@en ;
+                  
+                  rdfs:subClassOf :Query .
+
+
+
+###  http://purl.org/stn/core/operations#ReadTriple
+
+:ReadTriple rdf:type owl:Class ;
+            
+            rdfs:label "Read Triple"@en ;
+            
+            rdfs:subClassOf :Query .
 
 
 
@@ -841,6 +985,14 @@ A parameter which represents the ID of a smart thing's owner, such as the ID of 
 
 
 
+###  http://purl.org/stn/core/operations#RepresentationFormat
+
+:RepresentationFormat rdf:type owl:Class ;
+                      
+                      rdfs:label "Representation Format"@en .
+
+
+
 ###  http://purl.org/stn/core/operations#RoleAction
 
 :RoleAction rdf:type owl:Class ;
@@ -853,27 +1005,25 @@ A parameter which represents the ID of a smart thing's owner, such as the ID of 
 
 
 
-###  http://purl.org/stn/core/operations#SendPrivateMessage
+###  http://purl.org/stn/core/operations#SendMessage
 
-:SendPrivateMessage rdf:type owl:Class ;
+:SendMessage rdf:type owl:Class ;
+             
+             rdfs:label "Send Message"@en ;
+             
+             rdfs:subClassOf :CreateMessage ;
+             
+             rdfs:comment "unstable"@en .
+
+
+
+###  http://purl.org/stn/core/operations#SendMessageToGroup
+
+:SendMessageToGroup rdf:type owl:Class ;
                     
-                    rdfs:label "Send Private Message"@en ;
+                    rdfs:label "Send Message to Group"@en ;
                     
-                    rdfs:subClassOf :CommunicationAction ;
-                    
-                    rdfs:comment "unstable"@en .
-
-
-
-###  http://purl.org/stn/core/operations#SendPublicMessage
-
-:SendPublicMessage rdf:type owl:Class ;
-                   
-                   rdfs:label "Send Public Message"@en ;
-                   
-                   rdfs:subClassOf :CommunicationAction ;
-                   
-                   rdfs:comment "unstable"@en .
+                    rdfs:subClassOf :SendMessage .
 
 
 
@@ -883,9 +1033,18 @@ A parameter which represents the ID of a smart thing's owner, such as the ID of 
                      
                      rdfs:label "Share Private Message"@en ;
                      
-                     rdfs:subClassOf :CommunicationAction ;
+                     rdfs:subClassOf :CreateMessage ;
                      
-                     rdfs:comment "unstable"@en .
+                     rdfs:comment "E.g., on Twitter, a direct message is shared, it may be deleted at any time (the recipient does not have a copy)."@en ,
+                                  "unstable"@en .
+
+
+
+###  http://purl.org/stn/core/operations#SocialThingClass
+
+:SocialThingClass rdf:type owl:Class ;
+                  
+                  rdfs:subClassOf :KeyValuePair .
 
 
 
@@ -973,6 +1132,16 @@ A parameter which represents the ID of a smart thing's owner, such as the ID of 
 
 
 
+###  http://purl.org/stn/core/operations#WriteDataObject
+
+:WriteDataObject rdf:type owl:Class ;
+                 
+                 rdfs:label "Write Data Object"@en ;
+                 
+                 rdfs:subClassOf :DataAction .
+
+
+
 
 
 #################################################################
@@ -983,32 +1152,9 @@ A parameter which represents the ID of a smart thing's owner, such as the ID of 
 
 
 [ rdf:type owl:AllDisjointClasses ;
-  owl:members ( :CommunicationAction
-                :ConnectionAction
-                :GroupAction
-                :RoleAction
-                :SpatialAction
-                :UserAccountAction
-              )
-] .
-[ rdf:type owl:AllDisjointClasses ;
-  owl:members ( :CreateUserAccount
-                :DeleteUserAccount
-                :UpdateUserAccount
-              )
-] .
-[ rdf:type owl:AllDisjointClasses ;
-  owl:members ( :CreateGroup
-                :DeleteGroup
-                :JoinGroup
-                :LeaveGroup
-                :UpdateGroup
-              )
-] .
-[ rdf:type owl:AllDisjointClasses ;
-  owl:members ( :Description
-                :DisplayedName
-                :EntityID
+  owl:members ( :Implementation
+                :Operation
+                :Parameter
               )
 ] .
 [ rdf:type owl:AllDisjointClasses ;
@@ -1020,14 +1166,38 @@ A parameter which represents the ID of a smart thing's owner, such as the ID of 
               )
 ] .
 [ rdf:type owl:AllDisjointClasses ;
-  owl:members ( :Implementation
-                :Operation
-                :Parameter
+  owl:members ( :CreateUserAccount
+                :DeleteUserAccount
+                :UpdateUserAccount
+              )
+] .
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :Description
+                :DisplayedName
+                :EntityID
+              )
+] .
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :CommunicationAction
+                :ConnectionAction
+                :DataAction
+                :GroupAction
+                :RoleAction
+                :SpatialAction
+                :UserAccountAction
+              )
+] .
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :CreateGroup
+                :DeleteGroup
+                :JoinGroup
+                :LeaveGroup
+                :UpdateGroup
               )
 ] .
 
 
 
 
-###  Generated by the OWL API (version 3.4.2) http://owlapi.sourceforge.net
+###  Generated by the OWL API (version 3.5.1) http://owlapi.sourceforge.net
 

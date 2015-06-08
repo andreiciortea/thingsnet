@@ -3,14 +3,20 @@
 
 # Bob's social TV's profile
 
-<http://localhost:9002/users/a08066fc-6a16-4994-a013-085326c646d3#thing>
+<http://localhost:9001/users/a08066fc-6a16-4994-a013-085326c646d3#thing>
         a       <http://www.example.com/#SocialTV> ;
-        stn:ownedBy <http://www.example.com/#Bob> .
+        stn:ownedBy <http://localhost:9001/users/c2e23b27-1a96-44b6-a103-281ca43f8f16#Bob> ;
+        stn:holds <http://localhost:9001/users/a08066fc-6a16-4994-a013-085326c646d3> ;
+        stn:holds [
+            a stn:UserAccount ;
+            stn:hostedBy <http://localhost:9000/assets/stnspecs/dweet.ttl#platform> ;
+            stn:id "a08066fc-6a16-4994-a013-085326c646d3" ;
+        ] .
 
-<http://localhost:9002/users/a08066fc-6a16-4994-a013-085326c646d3>
+<http://localhost:9001/users/a08066fc-6a16-4994-a013-085326c646d3>
         a       stn:UserAccount ;
         stn:description
                 ( "A TV with a twist!"^^<http://www.w3.org/2001/XMLSchema#string> ) ;
-        stn:heldBy <http://localhost:9002/users/a08066fc-6a16-4994-a013-085326c646d3#thing> ;
-        stn:hostedBy <http://localhost:9002/#platform> ;
+        stn:heldBy <http://localhost:9001/users/a08066fc-6a16-4994-a013-085326c646d3#thing> ;
+        stn:hostedBy <http://localhost:9001/assets/stnspecs/thingsnet.ttl#platform> ;
         stn:name "Bob's Social TV"^^xsd:string .

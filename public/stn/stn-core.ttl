@@ -14,7 +14,11 @@
 
 An STN encodes the different relations among people and smart things, such as friendship, ownership, provenance or colocation. An STN may exist only within the minds of its members, however, in most cases, an STN is reified within an STN platform.
 
-STN-Core provides the core concepts and properties required for describing STNs. Developers may use STN-Core to describe existing STNs, but also to guide the design of new STNs."""@en .
+STN-Core provides the core concepts and properties required for describing STNs. Developers may use STN-Core to describe existing STNs, but also to guide the design of new STNs.
+
+Other modules of the STN ontology are available at the following locations:
+STN-Operations: http://purl.org/core/operations/spec
+STN-Operations-HTTP: http://purl.org/core/operations/http/spec"""@en .
 
 
 #################################################################
@@ -382,17 +386,17 @@ STN-Core provides the core concepts and properties required for describing STNs.
                        
                        rdfs:comment "unstable"@en ;
                        
-                       rdfs:range [ rdf:type owl:Class ;
-                                    owl:unionOf ( :Agent
-                                                  :UserAccount
-                                                )
-                                  ] ;
-                       
                        rdfs:domain [ rdf:type owl:Class ;
                                      owl:unionOf ( :Agent
                                                    :UserAccount
                                                  )
-                                   ] .
+                                   ] ;
+                       
+                       rdfs:range [ rdf:type owl:Class ;
+                                    owl:unionOf ( :Agent
+                                                  :UserAccount
+                                                )
+                                  ] .
 
 
 
@@ -410,6 +414,12 @@ STN-Core provides the core concepts and properties required for describing STNs.
 :description rdf:type owl:DatatypeProperty ;
              
              rdfs:range xsd:string .
+
+
+
+###  http://purl.org/stn/core#id
+
+:id rdf:type owl:DatatypeProperty .
 
 
 
@@ -446,6 +456,16 @@ STN-Core provides the core concepts and properties required for describing STNs.
 
 
 
+###  http://purl.org/stn/core#AggregatedFeed
+
+:AggregatedFeed rdf:type owl:Class ;
+                
+                rdfs:label "Aggregated Feed"@en ;
+                
+                rdfs:subClassOf :Feed .
+
+
+
 ###  http://purl.org/stn/core#Artifact
 
 :Artifact rdf:type owl:Class ;
@@ -473,6 +493,16 @@ A closed message is a message with a fixed set of receivers. However, depending 
 
 
 
+###  http://purl.org/stn/core#DataObject
+
+:DataObject rdf:type owl:Class ;
+            
+            rdfs:label "Data Object"@en ;
+            
+            rdfs:subClassOf :DigitalCounterpart .
+
+
+
 ###  http://purl.org/stn/core#DigitalCounterpart
 
 :DigitalCounterpart rdf:type owl:Class ;
@@ -490,6 +520,16 @@ An entity may have several digital counterparts, and a digital counterpart may h
 
 
 
+###  http://purl.org/stn/core#Feed
+
+:Feed rdf:type owl:Class ;
+      
+      rdfs:label "Feed"@en ;
+      
+      rdfs:subClassOf :DigitalCounterpart .
+
+
+
 ###  http://purl.org/stn/core#Group
 
 :Group rdf:type owl:Class ;
@@ -502,6 +542,16 @@ An entity may have several digital counterparts, and a digital counterpart may h
                         :Role ;
        
        rdfs:comment "A group is a collection of agents. A group is an abstract entity that may be associated with one or more digital artifacts, i.e. its digital counterparts. For instance, the AI-MAS research team of University \"Politehnica\" of Bucharest may be associated with a Facebook group and a LinkedIn group."@en .
+
+
+
+###  http://purl.org/stn/core#GroupFeed
+
+:GroupFeed rdf:type owl:Class ;
+           
+           rdfs:label "Group Feed"@en ;
+           
+           rdfs:subClassOf :Feed .
 
 
 
@@ -616,6 +666,16 @@ An open message is a message that has an open set of receivers, i.e. the set of 
 
 
 
+###  http://purl.org/stn/core#STNPlatform
+
+:STNPlatform rdf:type owl:Class ;
+             
+             rdfs:label "STN Platform"@en ;
+             
+             rdfs:subClassOf :Platform .
+
+
+
 ###  http://purl.org/stn/core#SharedMessage
 
 :SharedMessage rdf:type owl:Class ;
@@ -662,11 +722,11 @@ A shared message is made available to a (possibly open) set of receivers, yet th
 
 :SmartThing rdf:type owl:Class ;
             
-            rdfs:label "Smart Thing"@en ;
+            rdfs:label "Social Thing"@en ;
             
             rdfs:subClassOf :Agent ;
             
-            rdfs:comment "A smart thing is an agent that most commonly embeds the logics of a given physical or virtual object, although it may also represent a composite application (e.g. one built on top of several other smart things)."@en .
+            rdfs:comment "A social thing is an agent that most commonly embeds the logics of a given physical or virtual object, although it may also represent a composite application (e.g. one built on top of several other smart things)."@en .
 
 
 
@@ -719,6 +779,34 @@ When a message is transmitted, an actual copy of the message is received and own
 
 
 
+###  http://purl.org/stn/core#UserAccountFeed
 
-###  Generated by the OWL API (version 3.4.2) http://owlapi.sourceforge.net
+:UserAccountFeed rdf:type owl:Class ;
+                 
+                 rdfs:label "User Account Feed"@en ;
+                 
+                 rdfs:subClassOf :Feed .
+
+
+
+
+
+#################################################################
+#
+#    General axioms
+#
+#################################################################
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :AggregatedFeed
+                :GroupFeed
+                :UserAccountFeed
+              )
+] .
+
+
+
+
+###  Generated by the OWL API (version 3.5.1) http://owlapi.sourceforge.net
 

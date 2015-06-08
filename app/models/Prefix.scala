@@ -15,6 +15,7 @@ class STNPrefix[Rdf <: RDF](ops: RDFOps[Rdf]) extends PrefixBuilder("stn", "http
   val UserAccount = apply("UserAccount")
   val Message = apply("Message")
   
+  val Platform = apply("Platform")
   val STNPlatform = apply("STNPlatform")
    
   val heldBy = apply("heldBy")
@@ -25,7 +26,8 @@ class STNPrefix[Rdf <: RDF](ops: RDFOps[Rdf]) extends PrefixBuilder("stn", "http
   val hasSender = apply("hasSender")
   val hasReceiver = apply("hasReceiver")
   val replyTo = apply("replyTo")
-   
+  
+  val id = apply("id")
   val name = apply("name")
   val description = apply("description")
 }
@@ -39,15 +41,24 @@ class STNOpsPrefix[Rdf <: RDF](ops: RDFOps[Rdf]) extends PrefixBuilder("stn-ops"
 
   // Operations
   val CreateUserAccount = apply("CreateUserAccount")
+  val GetMyUserAccount = apply("GetMyUserAccount")
   val GetUserAccount = apply("GetUserAccount")
   val DeleteUserAccount = apply("DeleteUserAccount")
   val WhoIsAgent = apply("WhoIsAgent")
+  
+  val CreateConnectionTo = apply("CreateConnectionTo")
+  val DeleteConnectionTo = apply("DeleteConnectionTo")
+  val GetConnectionsTo = apply("GetConnectionsTo")
+  val GetConnectionsFrom = apply("GetConnectionsFrom")
   val GetOutConnections = apply("GetOutConnections")
   val GetInConnections = apply("GetInConnections")
+  
+  val GetUserAccountFeed = apply("GetUserAccountFeed")
   
   // Parameters
   val AgentURI = apply("AgentURI")
   val UserAccountURI = apply("UserAccountURI")
+  val UserAccountID = apply("UserAccountID")
   val DisplayedName = apply("DisplayedName")
   val SocialThingOwner = apply("SocialThingOwner")
   val SocialThingClass = apply("SocialThingClass")
@@ -72,10 +83,12 @@ class STNHttpPrefix[Rdf <: RDF](ops: RDFOps[Rdf]) extends PrefixBuilder("stn-htt
   val TurtleRepresentation = apply("TurtleRepresentation")
   val JSON = apply("JSON")
   val JSONRepresentation = apply("JSONRepresentation")
+  val JSONArray = apply("JSONArray")
   
   // Auth standards
   val OAuth = apply("OAuth")
   val WebID = apply("WebID")
+  val BasicAuth = apply("BasicAuth")
 
   val Body = apply("Body")
   val Path = apply("Path")

@@ -10,28 +10,28 @@
     stn-http:baseURL <https://dweet.io> ;
     stn-ops:consumes stn-http:JSON ;
     stn-ops:produces stn-http:JSON ;
-    stn-ops:supports <#postDweet> ,
-        <#readDweet> .
+    stn-ops:supports <#createAccount> , 
+        <#postDweet> ,
+        <#getDweets> .
 
 
-<#dweet>
-    a stn:DataObject ;
-    stn:createdBy _:accountId ;
-    stn:dataFromat stn-http:JSON ;
-    stn:data _:data .
-
-<#dweetJSON>
+<#dweetJSONMapping>
     a stn-http:JSONRepresentation ;
-    stn-ops:representationOf <#dweet> ;
-    stn-ops:contains
-        [ a stn-ops:UserAccountID ;
-            stn-ops:key "thing" ;
-            stn-ops:value _:accountId ;
+    stn-ops:representationOf [ a stn:DataObject ] ;
+    stn-ops:contains [
+            a stn-http:Mapping ;
+            stn-http:key "created" ;
+            stn-http:STNTerm stn:id ;
         ] ;
-    stn-ops:contains
-        [ a stn-ops:RawData ;
-            stn-ops:key "content" ;
-            stn-ops:value _:data ;
+    stn-ops:contains [
+            a stn-http:Mapping ;
+            stn-http:key "thing" ;
+            stn-http:STNTerm stn:createdBy ;
+        ] ;
+    stn-ops:contains [
+            a stn-http:Mapping ;
+            stn-http:key "content" ;
+            stn-http:STNTerm stn:data ;
         ] .
 
 <#createAccount>
@@ -41,93 +41,59 @@
             http:methodName "GET" ;
             http:requestURI "/dweet/for/:accountId" ;
         ] ;
-    stn-ops:hasInput
-        [ a stn-http:UUID ;
-            stn-ops:key ":accountId"
-            stn-ops:required true ;
-            stn-http:paramIn stn-http:Path;
+    stn-ops:hasRequiredInput
+        [ a stn-http:UserAccountID ;
+            stn-http:key ":accountId" ;
+            stn-http:paramIn stn-http:Path ;
         ] ;
     stn-ops:hasOutput
         [ a stn-http:JSONRepresentation ;
-            stn-ops:representationOf
-                [ a stn:UserAccount
-                    stn:id _:accountId ;
-                ] ;
-            stn-http:JSONPath "with" ;
-            stn-ops:contains
-                [ a stn-ops:UserAccountID ;
-                    stn-ops:key "thing" ;
-                    stn-ops:value _:accountId ;
+            stn-ops:representationOf [ a stn:UserAccount ] ;
+            stn-http:key "with" ;
+            stn-ops:contains [ 
+                    a stn-http:Mapping ;
+                    stn-http:key "thing" ;
+                    stn-http:STNTerm stn:createdBy;
                 ] ;
         ] .
 
 <#postDweet>
     a stn-ops:PostDataToUserAccountFeed ;
-    stn-ops:implementedAs
-        [ a stn-http:STNRequest ;
+    stn-ops:implementedAs [ 
+            a stn-http:STNRequest ;
             http:methodName "POST" ;
             http:requestURI "/dweet/for/:accountId" ;
         ] ;
-    stn-ops:hasInput
-        [ a stn-http:UserAccountID ;
-            stn-ops:key ":accountId"
-            stn-ops:required true ;
-            stn-http:paramIn stn-http:Path;
+    stn-ops:hasRequiredInput [ 
+            a stn-http:UserAccountID ;
+            stn-http:key ":accountId" ;
+            stn-http:paramIn stn-http:Path ;
         ] ;
-    stn-ops:hasInput
-        [ a stn-http:JSONRepresentation ;
+    stn-ops:hasRequiredInput [ 
+            a stn-http:JSONRepresentation ;
             stn-ops:representationOf [ a stn:DataObject ] ;
-            stn-ops:required true ;
             stn-http:paramIn stn-http:Body;
         ] ;
-    stn-ops:hasOutput
-        [ a stn-http:JSONRepresentation ;
-            stn-http:JSONPath "with" ;
-            stn-ops:representationOf <#dweet> ;
-            stn-ops:contains
-                [ a stn-ops:UserAccountID ;
-                    stn-ops:key "thing" ;
-                    stn-ops:value _:author ;
-                ] ;
-            stn-ops:contains
-                [ a stn-ops:RawData ;
-                    stn-ops:key "content" ;
-                    stn-ops:value _:data ;
-                ] ;
-        ] .
-
-<#getLastDweet>
-    a stn-ops:GetOneFromUserAccountFeed;
-    stn-ops:implementedAs
-        [ a stn-http:STNRequest ;
-            http:methodName "GET" ;
-            http:requestURI "/get/latest/dweet/for/:accountId" ;
-        ] ;
-    stn-ops:hasOutput
-        [ a stn-http:JSONRepresentation ;
-            stn-http:JSONPath "with" ;
-            stn-ops:representationOf <#dweet> ;
-            stn-ops:contains
-                [ a stn-ops:UserAccountID ;
-                    stn-ops:key "thing" ;
-                    stn-ops:value _:author ;
-                ] ;
-            stn-ops:contains
-                [ a stn-ops:RawData ;
-                    stn-ops:key "content" ;
-                    stn-ops:value _:data ;
-                ] ;
+    stn-ops:hasOutput [ 
+            a stn-http:JSONRepresentation ;
+            stn-http:key "with" ;
+            stn-ops:representationOf <#dweetJSONMapping> ;
         ] .
 
 <#getDweets>
     a stn-ops:GetUserAccountFeed;
-    stn-ops:implementedAs
-        [ a stn-http:STNRequest ;
+    stn-ops:implementedAs [ 
+            a stn-http:STNRequest ;
             http:methodName "GET" ;
             http:requestURI "/get/dweets/for/:accountId" ;
         ] ;
-    stn-ops:hasOutput
-        [ a stn-http:JSONArray ;
-            stn-http:JSONPath "with" ;
-            stn-ops:arrayOf <#dweetJSON> ;
+    stn-ops:hasRequiredInput [ 
+            a stn-ops:UserAccountID ;
+            stn-http:key ":accountId" ;
+            stn-http:paramIn stn-http:Path ;
+        ] ;
+    stn-ops:hasOutput [ 
+            a stn-http:JSONArray ;
+            stn-http:key "with" ;
+            stn-ops:arrayOf <#dweetJSONMapping> ;
         ] .

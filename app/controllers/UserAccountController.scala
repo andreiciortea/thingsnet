@@ -80,6 +80,7 @@ object UserAccountController extends Controller {
         // TODO accept and generate webid
         Unauthorized
       } else {
+        // TODO: check if the requesting user is not already registered
         if (request.contentType.get == "application/json" || request.contentType.get == "text/json") {
           createUserAccountFromJSON(webId.get, request.body)
         } else if (request.contentType.get == "text/turtle") {

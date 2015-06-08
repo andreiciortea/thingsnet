@@ -1,0 +1,23 @@
+@prefix stn: <http://purl.org/stn/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# John's social TV's profile
+
+<http://localhost:9004/users/682c6631-14b1-4e55-a662-a606ec567117#thing>
+        a       <http://www.example.com/#SocialTV> ;
+        stn:ownedBy <http://localhost:9004/users/9ed8f9cf-abae-4973-9109-68a3e8989686#John> ;
+        stn:holds <http://localhost:9004/users/682c6631-14b1-4e55-a662-a606ec567117> ;
+        stn:holds [
+            a stn:UserAccount ;
+            stn:hostedBy <http://localhost:9000/assets/stnspecs/dweet.ttl#platform> ;
+            stn:id "682c6631-14b1-4e55-a662-a606ec567117" ;
+        ] .
+
+<http://localhost:9004/users/682c6631-14b1-4e55-a662-a606ec567117>
+        a       stn:UserAccount ;
+        stn:description
+                ( "A TV with a twist!"^^<http://www.w3.org/2001/XMLSchema#string> ) ;
+        stn:heldBy <http://localhost:9004/users/682c6631-14b1-4e55-a662-a606ec567117#thing> ;
+        stn:hostedBy <http://localhost:9004/assets/stnspecs/thingsnet.ttl#platform> ;
+        stn:name "John's Social TV"^^xsd:string ;
+        stn:connectedTo <http://localhost:9004/users/9ed8f9cf-abae-4973-9109-68a3e8989686> .

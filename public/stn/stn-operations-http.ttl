@@ -8,16 +8,16 @@
 
 <http://purl.org/stn/core/operations/http> rdf:type owl:Ontology ;
                                            
-                                           rdfs:label "STN-Core-Operations-HTTP"@en ;
+                                           rdfs:label "STN-Operations-HTTP"@en ;
                                            
                                            rdfs:comment """Socio-technical networks (STNs) are networks of people and social things (i.e. autonomous physical or virtual objects). An STN mirrors the physical world by creating digital counterparts of physical and abstract entities and relating them to one another. In the same time, applications running in the digital world may reflect back into the physical world (e.g. through actuators).
 
 An STN encodes the different relations among people and smart things, such as friendship, ownership, provenance or colocation. An STN may not exist outside of the minds of its members, however, in most cases, an STN is reified within an STN platform.
 
-STN-Core-Operations-HTTP provides the concepts and properties required for describing STN operations as HTTP calls."""@en ;
+STN-Operations-HTTP provides the concepts and properties required for performin STN operations as HTTP requests and extracting RDF data from HTTP responses."""@en ;
                                            
-                                           owl:imports <http://www.w3.org/2011/http> ,
-                                                       <https://googledrive.com/host/0B4q2_6YL1LmoQVZ6Zmp5RXpLUWs/stn-core-operations.ttl> .
+                                           owl:imports <http://purl.org/stn/core/operations> ,
+                                                       <http://www.w3.org/2011/http> .
 
 
 #################################################################
@@ -31,25 +31,13 @@ STN-Core-Operations-HTTP provides the concepts and properties required for descr
 
 :baseURL rdf:type owl:AnnotationProperty ;
          
-         rdfs:label "base URL"@en ;
-         
-         rdfs:comment "The base URL for the HTTP services provided by this STN platform."@en ;
-         
          rdfs:domain <http://purl.org/stn/core#Platform> .
 
 
 
 ###  http://purl.org/stn/core/operations/http#implementedAs
 
-:implementedAs rdf:type owl:AnnotationProperty ;
-               
-               rdfs:label "implemented as"@en ;
-               
-               owl:deprecated "true"^^xsd:boolean ;
-               
-               rdfs:comment "An STN HTTP request that implements this operation."@en ;
-               
-               rdfs:domain <http://purl.org/stn/core/operations#Operation> .
+:implementedAs rdf:type owl:AnnotationProperty .
 
 
 
@@ -57,23 +45,13 @@ STN-Core-Operations-HTTP provides the concepts and properties required for descr
 
 :paramName rdf:type owl:AnnotationProperty ;
            
-           rdfs:label "parameter name"@en ;
-           
-           rdfs:comment "A sequence of characters used to identify the parameter of a request within the scope of an STN platform. For instance, when creating a connection, the required UserID parameter might be referred to as \"user_id\" in one platform and \"id\" in another."@en ;
-           
            rdfs:domain <http://www.w3.org/2011/http#Parameter> .
 
 
 
 ###  http://purl.org/stn/core/operations/http#supportsAuth
 
-:supportsAuth rdf:type owl:AnnotationProperty ;
-              
-              rdfs:label "supports authentication"@en ;
-              
-              rdfs:comment "An authN/Z protocol supported by this STN platform."@en ;
-              
-              rdfs:domain <http://purl.org/stn/core#Platform> .
+:supportsAuth rdf:type owl:AnnotationProperty .
 
 
 
@@ -90,11 +68,7 @@ STN-Core-Operations-HTTP provides the concepts and properties required for descr
 
 :implementedAs rdf:type owl:ObjectProperty ;
                
-               rdfs:label "implemented as"@en ;
-               
-               owl:deprecated "true"^^xsd:boolean ;
-               
-               rdfs:comment "An STN HTTP request that implements this operation."@en ;
+               rdfs:domain <http://purl.org/stn/core/operations#Operation> ;
                
                rdfs:range :STNRequest .
 
@@ -104,9 +78,7 @@ STN-Core-Operations-HTTP provides the concepts and properties required for descr
 
 :supportsAuth rdf:type owl:ObjectProperty ;
               
-              rdfs:label "supports authentication"@en ;
-              
-              rdfs:comment "An authN/Z protocol supported by this STN platform."@en ;
+              rdfs:domain <http://purl.org/stn/core#Platform> ;
               
               rdfs:range :AuthProtocol .
 
@@ -121,16 +93,28 @@ STN-Core-Operations-HTTP provides the concepts and properties required for descr
 #################################################################
 
 
+###  http://purl.org/stn/core/operations/http#STNTerm
+
+:STNTerm rdf:type owl:DatatypeProperty ;
+         
+         rdfs:label "STN Term"@en .
+
+
+
 ###  http://purl.org/stn/core/operations/http#baseURL
 
 :baseURL rdf:type owl:DatatypeProperty ,
                   owl:FunctionalProperty ;
          
-         rdfs:label "base URL"@en ;
-         
-         rdfs:comment "The base URL for the HTTP services provided by this STN platform."@en ;
-         
          rdfs:range xsd:anyURI .
+
+
+
+###  http://purl.org/stn/core/operations/http#key
+
+:key rdf:type owl:DatatypeProperty ;
+     
+     rdfs:label "key"@en .
 
 
 
@@ -138,10 +122,6 @@ STN-Core-Operations-HTTP provides the concepts and properties required for descr
 
 :paramName rdf:type owl:DatatypeProperty ,
                     owl:FunctionalProperty ;
-           
-           rdfs:label "parameter name"@en ;
-           
-           rdfs:comment "A sequence of characters used to identify the parameter of a request within the scope of an STN platform. For instance, when creating a connection, the required UserID parameter might be referred to as \"user_id\" in one platform and \"id\" in another."@en ;
            
            rdfs:range xsd:string .
 
@@ -172,6 +152,42 @@ STN-Core-Operations-HTTP provides the concepts and properties required for descr
 
 
 
+###  http://purl.org/stn/core/operations/http#AuthSTNRequest
+
+:AuthSTNRequest rdf:type owl:Class ;
+                
+                rdfs:subClassOf :STNRequest ;
+                
+                rdfs:comment "Authenticated STN Request"@en .
+
+
+
+###  http://purl.org/stn/core/operations/http#JSONRepresentation
+
+:JSONRepresentation rdf:type owl:Class ;
+                    
+                    rdfs:subClassOf <http://purl.org/stn/core/operations#Representation> .
+
+
+
+###  http://purl.org/stn/core/operations/http#Mapping
+
+:Mapping rdf:type owl:Class ;
+         
+         rdfs:label "Mapping"@en .
+
+
+
+###  http://purl.org/stn/core/operations/http#ParamLocation
+
+:ParamLocation rdf:type owl:Class ;
+               
+               rdfs:label "Parameter location"@en ;
+               
+               rdfs:comment "Refers to the location of a parameter in a HTTP request, such as a path, query or body parameter."@en .
+
+
+
 ###  http://purl.org/stn/core/operations/http#STNRequest
 
 :STNRequest rdf:type owl:Class ;
@@ -180,6 +196,14 @@ STN-Core-Operations-HTTP provides the concepts and properties required for descr
                             <http://www.w3.org/2011/http#Request> ;
             
             rdfs:comment "unstable"@en .
+
+
+
+###  http://purl.org/stn/core/operations/http#TurtleRepresentation
+
+:TurtleRepresentation rdf:type owl:Class ;
+                      
+                      rdfs:subClassOf <http://purl.org/stn/core/operations#Representation> .
 
 
 
@@ -196,6 +220,24 @@ STN-Core-Operations-HTTP provides the concepts and properties required for descr
 #    Individuals
 #
 #################################################################
+
+
+###  http://purl.org/stn/core/operations/http#Body
+
+:Body rdf:type :ParamLocation ,
+               owl:NamedIndividual ;
+      
+      rdfs:label "Body"@en .
+
+
+
+###  http://purl.org/stn/core/operations/http#JSON
+
+:JSON rdf:type <http://purl.org/stn/core/operations#RepresentationFormat> ,
+               owl:NamedIndividual ;
+      
+      rdfs:label "JSON"@en .
+
 
 
 ###  http://purl.org/stn/core/operations/http#OAuth2
@@ -216,6 +258,33 @@ STN-Core-Operations-HTTP provides the concepts and properties required for descr
 
 
 
+###  http://purl.org/stn/core/operations/http#Path
+
+:Path rdf:type :ParamLocation ,
+               owl:NamedIndividual ;
+      
+      rdfs:label "Path"@en .
+
+
+
+###  http://purl.org/stn/core/operations/http#Query
+
+:Query rdf:type :ParamLocation ,
+                owl:NamedIndividual ;
+       
+       rdfs:label "Query"@en .
+
+
+
+###  http://purl.org/stn/core/operations/http#Turtle
+
+:Turtle rdf:type <http://purl.org/stn/core/operations#RepresentationFormat> ,
+                 owl:NamedIndividual ;
+        
+        rdfs:label "Turtle"@en .
+
+
+
 ###  http://purl.org/stn/core/operations/http#WebID
 
 :WebID rdf:type :AuthProtocol ,
@@ -226,5 +295,42 @@ STN-Core-Operations-HTTP provides the concepts and properties required for descr
 
 
 
-###  Generated by the OWL API (version 3.4.2) http://owlapi.sourceforge.net
+
+#################################################################
+#
+#    Annotations
+#
+#################################################################
+
+
+:baseURL rdfs:label "base URL"@en ;
+         
+         rdfs:comment "The base URL for the HTTP services provided by this STN platform."@en .
+
+
+
+:paramName rdfs:label "parameter name"@en ;
+           
+           owl:deprecated "true"^^xsd:boolean ;
+           
+           rdfs:comment "A sequence of characters used to identify the parameter of a request within the scope of an STN platform. For instance, when creating a connection, the required UserID parameter might be referred to as \"user_id\" in one platform and \"id\" in another."@en .
+
+
+
+:implementedAs rdfs:label "implemented as"@en ;
+               
+               owl:deprecated "true"^^xsd:boolean ;
+               
+               rdfs:comment "An STN HTTP request that implements this operation."@en .
+
+
+
+:supportsAuth rdfs:label "supports authentication"@en ;
+              
+              rdfs:comment "An authN/Z protocol supported by this STN platform."@en .
+
+
+
+
+###  Generated by the OWL API (version 3.5.1) http://owlapi.sourceforge.net
 

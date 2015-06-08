@@ -10,17 +10,19 @@ object ScenarioControllers extends Controller {
 
   val basePath = "/Users/andreiciortea/Work/workspace/scala/thingsnet/public/scenario/"
   
-  val files = Map("john" -> List(basePath + "john.ttl"),
+  val files = Map("dave" -> List(basePath + "dave.ttl"),
         "jane" -> List(basePath + "jane.ttl", basePath + "janetv.ttl"),
-        "bob" -> List(basePath + "bob.ttl", basePath + "bobtv.ttl"))
+        "mike" -> List(basePath + "mike.ttl", basePath + "miketv.ttl"),
+        "bob" -> List(basePath + "bob.ttl", basePath + "bobtv.ttl"),
+        "john" -> List(basePath + "john.ttl", basePath + "johntv.ttl"))
   
   
-  def loadScenario(scenario: String) = Action {
+  def loadScenario(scenario: String) = Action { request =>
     for (f <- files.get(scenario).get) {
       val source = scala.io.Source.fromFile(f)
       val lines = try source.mkString finally source.close()
       
-      TurtleParser.injectData(lines)
+      TurtleParser.injectData(lines, request.host)
     }
     
     Ok

@@ -8,6 +8,8 @@ GET     /spec                       controllers.Application.spec
 
 GET     /parsertest                 controllers.Application.parserTest
 GET     /socialtv                   controllers.Application.socialTV
+GET     /stnproxy/operations        controllers.Application.getSTNOp(stnSpecUrl: String, opClass: String)
+POST    /stnproxy/operations        controllers.Application.runSTNOp
 GET     /loadscenario               controllers.ScenarioControllers.loadScenario(scenario: String ?= "")
 GET     /unloadscenario             controllers.ScenarioControllers.unloadScenario(scenario: String ?= "")
 
