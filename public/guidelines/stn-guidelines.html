@@ -1,28 +1,396 @@
 <html>
 <head>
-  <title>STN Platform (IoT15 double-blind review version)</title>
-  <meta charset='utf-8'>
-  <script src='http://www.w3.org/Tools/respec/respec-w3c-common' async class='remove'></script>
-  <script class='remove'>
-  var respecConfig = {
-    specStatus: "unofficial",
-    shortName:  "STNP",
-    editors: [
-    {   name:       "<Blind review>"},
-    ],
+    <title>STN Description Documents</title>
+    <meta charset='utf-8'>
+    <script src='https://www.w3.org/Tools/respec/respec-w3c-common' async class='remove'></script>
+    <script class='remove'>
+    var respecConfig = {
+    	    specStatus: "unofficial",
+    	    subtitle: "IoT15 double-blind review",
+    	    shortName:  "STNP",
+    	    editors: [
+                {   name:       "Blind Review"},
+                ],
 //    additionalCopyrightHolders: 'Copyright © ' + new Date().getFullYear() + ", Ghent University - iMinds - Multimedia Lab", 
-    copyrightStart: "2015", 
+            copyrightStart: "2015", 
 //    previousMaturity: "FPWD",
-  };
-  </script>
+            };
+    </script>
 
+    <style type="text/css">
+	    table, th, td {
+	        border: 1px solid black;
+	    }
+    </style>
 </head>
 
 <body>
     <section id='abstract'>
         <p>
-            This document bla bla
+            This document defines a set of guidelines for creating and interpreting STN description documents.
+            Software agents may use such documents to participate in STNs.
         </p>
+    </section>
+    
+    <section>
+        <h2>Terminology</h2>
+        
+        <dl>
+            <dt><dfn title="Agent">Agent</dfn></dt>
+            <dd>An agent is an autonomous entity (most commonly a person, organization, physical object or digital object) that interacts with other agents in the physical-digital space.</dd>
+        </dl>
+        
+        <dl>
+            <dt><dfn title="Digital_Artifact">Digital Artifact</dfn></dt>
+            <dd>A digital artifact is a digital tool used by agents to participate in STNs. A digital artifact may be a digital counterpart of an abstract or physical entity (e.g., a user account, a digital counterpart of a physical place), or it may exist independently (e.g., an online message). Digital artifacts exist in the digital world and are hosted on platforms.</dd>
+        </dl>
+        
+        <dl>
+            <dt><dfn title=STN"">Socio-technical network (STN)</dfn></dt>
+            <dd>An STN is a network of agents and artifacts. An STN is typically hosted by a platform, although it may also be represented in a collection of documents (e.g., similar to a FOAF network).</dd>
+        </dl>
+        
+        <dl>
+            <dt><dfn title="Platform">Platform</dfn></dt>
+            <dd>A platform is a system that provides a collection of features which enable agents to interact with one another. Common features include creating and using user accounts, publishing content etc.</dd>
+        </dl>
+        
+        <dl>
+            <dt><dfn title="STN_Platform">STN Platform</dfn></dt>
+            <dd>An STN platform is a linked data platform that hosts a network-like structure of agents and uses the STN ontology to produce semantic descriptions of itself. Most notably, in an STN platform all digital artifacts are identified via HTTP URIs and their states are represented in RDF.</dd>
+        </dl>
+        
+        <dl>
+            <dt><dfn title="STN_Operation">STN Operations</dfn></dt>
+            <dd>An STN operation is an action that an agent may perform to access, create, modify or delete a digital artifact hosted on a platform.</dd>
+        </dl>
+        
+        <dl>
+            <dt><dfn title="STN_description_document">STN description document</dfn></dt>
+            <dd>An STN description document is an RDF document that uses the STN ontology to provide a semantic description of a platform and the STN operations it supports.</dd>
+        </dl>
+        
+        <dl>
+            <dt><dfn title="STN_Client">STN Client</dfn></dt>
+            <dd>An STN client is any software client that uses the STN ontology and may correctly interpret STN description documents.</dd>
+        </dl>
+        
+        <dl>
+            <dt><dfn title=""></dfn></dt>
+            <dd></dd>
+        </dl>
+        
+        <p>In this document, we use the following prefix bindings:</p>
+        
+        <table>
+            <tr>
+                <td><code>stn:</code></td>
+                <td><code>http://purl.org/core#</code></td>
+            </tr>
+            <tr>
+                <td><code>stn-ops:</code></td>
+                <td><code>http://purl.org/operations#</code></td>
+            </tr>
+            <tr>
+                <td><code>stn-http:</code></td>
+                <td><code>http://purl.org/operations/http#</code></td>
+            </tr>
+        </table>
+    </section>
+    
+    
+    <section id="#common">
+        <h2>Common Digital Artifacts</h2>
+        
+        <p>This section presents a list of <a title="Digital_Artifact">digital artifacts</a> commonly used in STNs. The list is open and may extend over time.</p>
+        
+        <p>For each common digital artifact in this section, a SPARQL-like graph pattern is presented. STN clients and STN platforms can rely on these graph patterns to construct and interpret RDF representations of common digital artifacts.</p>
+
+        <p class="Note">In STN platforms, digital artifacts are identified and manipulated by means of URIs. In other platforms, digital artifacts are typically identified and manipulated by means of platform-specific identifiers (i.e., local identifiers).</p>
+        
+        <section>
+            <h2>User Accounts</h2>
+            
+            <p>A user account is the digital counterpart of an <a title="Agent">agent</a> within the scope of a platform. An agent may hold multiple user accounts, usually on different platforms. The agent acting through the user account is assumed to have been delegated by and acting for the user account's owner. A user account may be anonymous.</p>
+            
+            <p>A user account may be described using terms defined by the STN ontology according to the following graph pattern and associated table (informal representation).</p>
+
+<pre>
+?accountUri a stn:UserAccount ;
+    stn:id ?localId ;
+    stn:name ?name ;
+    stn:description ?description ;
+    stn:heldBy ?holderWebID ;
+    stn:connectedTo ?connectionUriOrId .
+
+?holderWebID a stn:Agent ;
+    stn:ownedBy ?ownerWebID .
+</pre>            
+
+<table>
+    <tr>
+        <th>Variable Name</th>
+        <th>Parameter Class</th>
+    </tr>
+    <tr>
+        <td><code>?accountUri</code></td>
+        <td><code>stn-ops:UserAccountURI</code></td>
+    </tr>
+    <tr>
+        <td><code>?localId</code></td>
+        <td><code>stn-ops:UserAccountID</code></td>
+    </tr>
+    <tr>
+        <td><code>?name</code></td>
+        <td><code>xsd:string</code></td>
+    </tr>
+    <tr>
+        <td><code>?description</code></td>
+        <td><code>xsd:string</code></td>
+    </tr>
+    <tr>
+        <td><code>?holderWebID</code></td>
+        <td><code>stn-ops:AgentURI</code></td>
+    </tr>
+    <tr>
+        <td><code>?connectionUriOrId</code></td>
+        <td>
+            <code>stn-ops:AgentURI</code> or <code>stn-ops:UserAccountURI</code> or <code>stn-ops:UserAccountID</code>
+        </td>
+    </tr>
+    <tr>
+        <td><code>?ownerWebID</code></td>
+        <td><code>stn-ops:AgentURI</code></td>
+    </tr>
+</table>
+
+
+        </section>
+        
+        <section>
+            <h2>Messages</h2>
+            
+            <p>A message is a piece of information transmitted by an <a title="Agent">agent</a>, usually via a user account, to a set of receivers. A message may be sent in reply to another message.</p>
+            
+            <p>A message may be described using terms defined by the STN ontology according to the following graph pattern and associated table (informal representation).</p>
+
+<pre>
+?messageUri a stn:Message ;
+    stn:id ?localId ;
+    stn:replyTo ?parentMessageUriOrId ;
+    stn:hasSender ?senderUriOrId ;
+    stn:hasReceiver ?receiverUriOrId ;
+    stn:hasSubject ?subject ;
+    stn:hasBody ?body .
+</pre>
+
+<table>
+    <tr>
+        <th>Variable Name</th>
+        <th>Parameter Class</th>
+    </tr>
+    <tr>
+        <td><code>?messageUri</code></td>
+        <td><code>stn-ops:MessageURI</code></td>
+    </tr>
+    <tr>
+        <td><code>?localId</code></td>
+        <td><code>stn-ops:MessageID</code></td>
+    </tr>
+    <tr>
+        <td><code>?parentMessageUriOrId</code></td>
+        <td><code>stn-ops:MessageURI</code> or <code>stn-ops:MessageID</code></td>
+    </tr>
+    <tr>
+        <td><code>?senderUriOrId</code></td>
+        <td>
+            <code>stn-ops:AgentURI</code> or <code>stn-ops:UserAccountURI</code> or <code>stn-ops:UserAccountID</code>
+        </td>
+    </tr>
+    <tr>
+        <td><code>?receiverUriOrId</code></td>
+        <td>
+            <code>stn-ops:AgentURI</code> or <code>stn-ops:UserAccountURI</code> or <code>stn-ops:UserAccountID</code>
+        </td>
+    </tr>
+    <tr>
+        <td><code>?subject</code></td>
+        <td><code>xsd:string</code></td>
+    </tr>
+    <tr>
+        <td><code>?body</code></td>
+        <td><code>xsd:string</code></td>
+    </tr>
+</table>
+
+
+        </section>
+    </section>
+    
+    <section>
+        <h2>Creating STN Description Documents</h2>
+        
+        <p>Any <a title="STN_Platform">STN platform</a> should publish a description of itself and the operations it supports in an <a title="STN_description_document">STN description document</a> at the <code>/stn</code> endpoint. STN description documents may also be published for other <a title="Platform">platforms</a>, typically by a third party. All STN description documents must use the STN ontology.</p>
+    
+        <p>A valid STN description document must include exactly one description of a <a title="Platform">platform</a> and exactly one description for each type of <a title="STN_Operation">STN operations</a> it supports. An example of a platform description is illustrated below.</p>
+        
+        <pre class="example">
+@base &lt;http://www.example.com&gt; .
+@prefix stn: &lt;http://purl.org/stn/core#&gt; .
+@prefix stn-ops: &lt;http://purl.org/stn/operations#&gt; .
+@prefix stn-http: &lt;http://purl.org/stn/http#&gt; .
+@prefix http: &lt;http://www.w3.org/2011/http#&gt; .
+
+&lt;#platform&gt;
+    a stn:STNPlatform ;
+    stn:name "ThingsNet" ;
+    stn-http:baseURL &lt;http://localhost:9000&gt; ;
+    stn-http:supportsAuth stn-http:WebID ;
+    stn-ops:consumes stn-http:Turtle ;
+    stn-ops:produces stn-http:Turtle ;
+    stn-ops:supports &lt;#createAccount&gt; ,
+        &lt;#getAccount&gt; ,
+        (...)
+        &lt;#deleteMessage&gt; .
+        </pre>
+
+<p>A platform must always be described as an <code>stn:Platform</code> or any of its subclasses (e.g., <code>stn:STNPlatform</code>), and it must be identified via an HTTP URI, which should use the fragment identifier <code>#platform</code>. The platform's description must include the base URL of its API, supported representation formats and supported STN operations. All supported STN operations must be declared via the <code>stn:supports</code> property. If the platform requires authentication for any of the supported STN operations, it should specify the supported authentication protocols via the <code>stn:supportsAuth</code> property.<p>
+
+<p>An example of an <code>stn-ops:CreateUserAccount</code> operation is illustrated below.</p>
+
+<pre class="example">
+&lt;#createAccount&gt;
+    a stn-ops:CreateUserAccount ;
+    stn-ops:implementedAs [ 
+            a stn-http:AuthSTNRequest ;
+            http:methodName "POST" ;
+            http:requestURI "/users" ;
+        ] ;
+    stn-ops:hasRequiredInput [
+            a stn-ops:SocialThingClass
+        ] ;
+    stn-ops:hasRequiredInput [
+            a stn-ops:Owner
+        ] ;
+    stn-ops:hasRequiredInput [
+            a stn-ops:DisplayedName
+        ] ;
+    stn-ops:hasInput [
+            a stn-ops:Description
+        ] ;
+    stn-ops:hasOutput [ 
+            a stn-http:TurtleRepresentation ;
+            stn-ops:representationOf [ a stn:UserAccount ] ;
+        ] .
+</pre>
+
+<div class="Note">
+<p>An STN operation is always executed by an agent. Depending on the operation, the performing agent may be an implicit input parameter (e.g., when creating a connection or sending a message to another agent).</p>
+<p>All STN operations are typically applied to artifacts and return artifacts or arrays of artifacts.</p>
+</div>
+
+<p>A description of an <a title="STN_Operation">STN operation</a> must include at least one supported implementation, all of the operation's required input parameters and a single output specification. The description may also include optional input parameters. All parameters must be represented as instances of parameter classes defined by the STN-Operations vocabulary and in accordance with the models of common digital artifacts in Section 2.</p>
+
+<p>The output of <a title="STN_Platform">STN platforms</a> is always an RDF representation of a <a title="Digital_Artifact">digital artifact</a> and is created using the STN-Core vocabulary. As such, software agents can directly consume the output of STN platforms. For other platforms, the STN description document should include a mapping between the model of a common digital artifact (cf. Section 2) and the platform's data model for the returned resource.</p>
+
+<p>For instance, following a Twitter user may be described as an <code>stn-ops:CreateConnectionTo</code> operation.</p>
+
+<pre class="example">
+&lt;#follow&gt;
+    a stn-ops:CreateConnectionTo;
+    stn-ops:implementedAs [ 
+            a stn-http:AuthSTNRequest ;
+            http:methodName "POST" ;
+            http:requestURI 
+                "/friendships/create.json" ;
+        ] ;
+    stn-ops:hasRequiredInput [ 
+            a stn-ops:UserAccountID ;
+            stn-ops:paramName "screen_name" ;
+            stn-http:paramIn stn-http:Body;
+        ] ;
+    stn-ops:hasOutput 
+        &lt;#twitterAccountJSONMapping&gt; .
+
+&lt;#twitterAccountJSONMapping&gt;
+    a stn-http:JSONRepresentation ;
+    stn-ops:representationOf [ a stn:UserAccount ] ;
+    stn-ops:contains [ 
+            a stn-http:Mapping ;
+            stn-http:key "screen_name" ;
+            stn-http:STNterm stn:id ;
+        ] ;
+    stn-ops:contains [ 
+            a stn-http:Mapping ;
+            stn-http:key "name" ;
+            stn-http:STNterm stn:name ;
+        ] ;
+    stn-ops:contains [ 
+            a stn-http:Mapping ;
+            stn-http:key "description" ;
+            stn-http:STNterm stn:description ;
+        ] ;
+    stn-ops:contains [ 
+            a stn-http:Mapping ;
+            stn-http:key "friends_count" ;
+            stn-http:STNterm stn:outgoingConnections ;
+            stn-http:datatype xsd:int ;
+        ] ;
+    stn-ops:contains [ 
+            a stn-http:Mapping ;
+            stn-http:key "followers_count" ;
+            stn-http:STNterm stn:incomingConnections ;
+            stn-http:datatype xsd:int ;
+        ] .
+</pre>
+
+    </section>
+    
+    <section>
+        <h2>Interpreting STN Description Documents</h2>
+        
+        <p>Software <a title="Agent">agents</a> may retrieve and parse a valid <a title="STN_description_document">STN description document</a> in order to extract and execute <a title="STN_operation">STN operations</a> supported by the described <a title="Platform">platform</a>. This section discusses HTTP-based implementations of STN operations.</p>
+    
+        <section>
+            <h2>Compatibility</h2>
+            <p>Prior to executing any STN operation, an <a title="STN_Client">STN client</a> should determine if it supports any of the required representation formats. For authenticated requests, the client should also validate that it supports any of the required authentication methods. In the case of rich authentication frameworks, such as OAuth, for which the client has to be manually configured against an authorization server, the client must also check if it specifically supports the described platform.</p>
+            
+            <p>If an STN client does not satisfy the requirements for executing an STN operation, it should not attempt to perform the operation.</p>
+        </section>
+
+        <section>
+            <h2>Collecting parameters</h2>
+            
+            <p>All input parameters must be interpreted by matching them against the model of a digital artifact according to the models in Section 2.</p>
+            
+            <p>If an STN client is not able to collect all input parameters required to execute an STN operation, it must not attempt to perform the operation.</p>
+        </section>
+        
+        <section>
+            <h2>Composing HTTP requests</h2>
+            
+            <p>When composing an STN operation as an HTTP request, an STN client must use the <code>http:methodName</code> property in the description of the operation to determine the appropriate HTTP method to be used. In order to construct the request URI, an STN client must concatenate the object of the <code>http:requestURI</code> property from the operation's description to the object of the <code>stn-http:baseURL</code> property from the platform's description.</p>
+            
+            <p>An STN client must use the <code>stn-ops:paramIn</code> property of an input parameter to determine how an input parameter is to be transmitted to the platform.</p>
+            
+            <p>A parameter located in the <code>stn-http:Path</code> of a request must be added in the request URI by replacing the <code>stn-http:key</code> specified in the description of the parameter with an URL encoded value.</p>
+            
+            <p>A parameter located in the <code>stn-http:Query</code> of a request must be added to the request URI as a query parameter using the <code>stn-http:key</code> specified in the description of the parameter and an URL encoded value.</p>
+            
+            <p>A parameter located in the <code>stn-http:Body</code> of a request must be added in the request payload. If the location parameter is not specified by the description of an STN operation, the STN client must interpret it as an <code>stn-http:Body</code> parameter.</p>
+            
+            <p>When executing an STN operation as an HTTP request sent to an STN platform, the STN client must include all required input parameters in an RDF payload that complies with Section 2. The payload must be in a serialization format supported by the platform.</p>
+                
+            <p>When executing an STN operation as an HTTP request sent to a platform that is not an STN platform, the STN client must include all required input parameters as a set of key/value pairs using one of the supported representation formats and the keys provided by the operation's description.</p>
+        </section>
+        
+        <section>
+            <h2>Interpreting HTTP responses</h2>
+            
+            <p>When using an STN platform, an STN client should interpret all HTTP responses in compliance with the recommendations specified in [[LDP]].</p>
+            
+            <p>When using a platform that is not an STN platform, if the description of the STN operation contains an output specification, the STN client should attempt to extract RDF data from the body of any response with a 200 (OK) or 201 (Created) status code by applying the mapping given in the STN description. This document does not currently address responses using other HTTP status codes.</p>
+        </section>
     </section>
 </body>
 
