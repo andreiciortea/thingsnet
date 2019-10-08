@@ -1,5 +1,4 @@
-ThingsNet
-=========
+# ThingsNet
 
 A prototype STN platform built with Scala, Play and banana-rdf.
 
